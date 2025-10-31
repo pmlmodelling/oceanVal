@@ -247,16 +247,8 @@ The `matchup` function is used to match up model output with observational data 
 ### Surface and gridded observational data 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
-| `gridded` | `str`, `list` | `["chlorophyll", "oxygen"]` | Surface variables to matchup with gridded observational data. Can be: <br>- `list`: List of variables<br>- `dict`: Fine-grained control with "gridded" and "point" keys |
-
-**Available surface variables (NWS only):**
-
-The following surface point variables are available:
-
-`['alkalinity', 'ammonium', 'chlorophyll', 'doc', 'mesozoo', 'nitrate', 'oxygen', 'pco2', 'ph', 'phosphate', 'poc', 'salinity', 'silicate', 'temperature']`
-
-The following gridded variables are available:
-`['ammonium', 'chlorophyll', 'co2flux',  'kd', 'nitrate', 'oxygen', 'pco2', 'phosphate',  'salinity', 'silicate', 'temperature']`
+| `gridded` | `str`, `list` | `["chlorophyll", "oxygen"]` | Surface variables to matchup with gridded observational data. Can be: <br>- `list`: List of variables<br>- |
+| `point` | `str`, `list` | `[]` | Variables to matchup with in-situ observational data. Can be: <br>- `list`: List of variables<br>-  |
 
 ## Processing Configuration
 
