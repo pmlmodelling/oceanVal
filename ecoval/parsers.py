@@ -25,9 +25,6 @@ def generate_mapping(ds):
         "pco2",
         "benbio",
         "alkalinity",
-        "micro",
-        "nano",
-        "pico",
         "kd",
     ]
     ds1 = nc.open_data(ds[0], checks=False)
@@ -144,12 +141,6 @@ def generate_mapping(ds):
                 and "river" not in x.lower()
             ]
 
-        if vv == "micro":
-            the_vars = [
-                x
-                for x in ds_contents.long_name
-                if "chloroph" in x and ("micro" in x or "diatom" in x)
-            ]
 
         if vv == "kd":
             the_vars = [
@@ -157,21 +148,6 @@ def generate_mapping(ds):
                 for x in ds_contents.long_name
                 if "atten" in x.lower() and "coeff" in x.lower()
             ]
-
-        if vv == "nano":
-            the_vars = [
-                x
-                for x in ds_contents.long_name
-                if "chloroph" in x.lower() and "nano" in x
-            ]
-
-        if vv == "pico":
-            the_vars = [
-                x
-                for x in ds_contents.long_name
-                if "chloroph" in x.lower() and "pico" in x
-            ]
-
 
         if vv == "chlorophyll":
             if len(the_vars) > 1:

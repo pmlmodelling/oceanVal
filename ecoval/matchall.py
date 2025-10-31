@@ -225,9 +225,8 @@ def mm_match(
             ds.as_missing(0)
             ds.run()
 
-            if variable != "pft":
-                if len(var_match) > 1:
-                        ds.sum_all()
+            if len(var_match) > 1:
+                    ds.sum_all()
             ff1 = "/tmp/adhoc_dictionary_2.pkl"
             the_dict = {"ersem_variable": ersem_variable}
             with open(ff1, "wb") as f:
@@ -500,11 +499,10 @@ def matchup(
     sim_dir=None,
     start=None,
     end=None,
-    surface="default",
-    bottom=["ph", "oxygen"],
+    gridded = ["chlorophyll", "nitrate"],
+    point = [], 
     lon_lim=None,
     lat_lim=None,
-    pft=False,
     cores=6,
     thickness=None,
     n_dirs_down=2,
@@ -513,7 +511,6 @@ def matchup(
     obs_dir="default",
     everything=False,
     overwrite=True,
-    point_all=[],
     ask=True,
     out_dir="",
     exclude=[],
@@ -535,20 +532,11 @@ def matchup(
     end : int
         End year. Final year of the simulations to matchup.
         This must be supplied
-    surface : str, list or "dict"
-        This defaults to "default", i.e. it will choose all available surface variables, either from gridded or point data.
-        When gridded data is available it will use it, otherwise it will use point_data.
-        For finer grained control, you can pass a dictionary with two keys, "gridded" and "point".
-        The value of each key is a list of variables to matchup.
-        Possible variables are: ["temperature", "salinity", "oxygen", "phosphate", "silicate", "nitrate", "ammonium", "alkalinity", "ph", "chlorophyll", "pco2", "co2flux"]
-        Note: availability of variables depends on the model domain.
-        Point data is only available for the North West European Shelf (NWS).
-    bottom : list
-        List of bottom variables to matchup with observational data.
-        This will only work for the north west European shelf currently.
-        Full list of options for NWS: ["temperature", "salinity", "oxygen", "phosphate", "silicate", "nitrate", "ammonium", "alkalinity", "ph", "chlorophyll"]
-    pft : bool
-        Matchup phytoplankton functional types. Default is False.
+    gridded : str, or list 
+        This defaults to ['chlorophyll', 'nitrate'].
+        This is a list of all gridded surface data to matchup. 
+    point: list
+        List of all point variables to matchup for all depths. Default is [].
     cores : int
         Number of cores to use for parallel extraction and matchups of data.
         Default is 6, or the system cores if less than 6. 
@@ -576,8 +564,6 @@ def matchup(
     everything : bool
         If True, all possible variables at the surface and near-bottom are matched up. Default is False.
         In most cases this is overkill because point data may not tell you much gridded does not.
-    point_all : list
-        List of all point variables to matchup for all depths. Default is [].
     ask : bool
         If True, the user will be asked if they are happy with the matchups. Default is True.
     out_dir : str
@@ -591,6 +577,23 @@ def matchup(
     Data will be stored in the matched directory.
 
     """
+
+    if isinstance(point_time_res, str):
+        point_time_res = [point_time_res]
+    if isinstance(point_time_res, list) is False:
+        raise TypeError("point_time_res must be a list or a string")
+    session_info["point_time_res"] = copy.deepcopy(point_time_res)
+    # check it is str or list
+
+    # make point a list if it's None
+    if point is None:
+        point = []
+    # if gridded is str, make it a list
+    if isinstance(gridded, str):
+        gridded = [gridded]
+    # None too
+    if gridded is None:
+        gridded = []
 
     ignore_invert_check = False
     # go through kwargs
@@ -638,9 +641,6 @@ def matchup(
         session_info["cache"] = False
     
 
-    # check pft is boolean
-    if not isinstance(pft, bool):
-        raise TypeError("pft must be a boolean")
     # check everything
     if not isinstance(everything, bool):
         raise TypeError("everything must be a boolean")
@@ -659,12 +659,12 @@ def matchup(
             exclude = [exclude]
         else:
             raise TypeError("exclude must be a list or a string")
-    # do the same for point_all
-    if not isinstance(point_all, list):
-        if isinstance(point_all, str):
-            point_all = [point_all]
+    # do the same for point
+    if not isinstance(point, list):
+        if isinstance(point, str):
+            point = [point]
         else:
-            raise TypeError("point_all must be a list or a string")
+            raise TypeError("point must be a list or a string")
 
     if thickness is not None:
         if isinstance(thickness, str):
@@ -697,95 +697,16 @@ def matchup(
     session_info["lon_lim"] = lon_lim
     session_info["lat_lim"] = lat_lim
 
-    if isinstance(surface, dict):
-        try:
-            if isinstance(surface["gridded"], str):
-                surface["gridded"] = [surface["gridded"]]
-            if surface["gridded"] is None:
-                surface["gridded"] = []
-        except:
-            pass
-        try:
-            if isinstance(surface["point"], str):
-                surface["point"] = [surface["point"]]
-            if surface["point"] is None:
-                surface["point"] = []
-        except:
-            pass
 
-    if isinstance(bottom, str):
-        bottom = [bottom]
-    # if they are None, make them empty lists
-    if bottom is None:
-        bottom = []
-    # ensure bottom is a list
-    if not isinstance(bottom, list):
-        raise TypeError(f"bottom must be a list or str not a {type(bottom)}")
-
-    if point_all is None:
-        point_all = []
-
-    # do the same for co2 and flux
-    for vv in point_all:
-        if "co2" in vv and "flux" in vv:
-            point_all.remove(vv)
-            point_all.append("co2flux")
-    # surface
-    try:
-        for vv in surface["point"]:
-            if "co2" in vv and "flux" in vv:
-                surface["point"].remove(vv)
-                surface["point"].append("co2flux")
-        # gridded
-        for vv in surface["gridded"]:
-            if "co2" in vv and "flux" in vv:
-                surface["gridded"].remove(vv)
-                surface["gridded"].append("co2flux")
-    except:
-        pass
-
-    # coerce bottom to list if not None
     # make any variables selected lower cases
-    if isinstance(surface, dict):
-        try:
-            for key in surface:
-                surface[key] = [x.lower() for x in surface[key]]
-        except:
-            pass
-    if isinstance(bottom, list):
-        bottom = [x.lower() for x in bottom]
-    if isinstance(point_all, list):
-        point_all = [x.lower() for x in point_all]
-    if isinstance(point_all, str):
-        point_all = [point_all.lower()]
+    if isinstance(point, list):
+        point = [x.lower() for x in point]
+    if isinstance(point, str):
+        point = [point.lower()]
 
     # add point years to session info
 
-    point_time_dict = dict()
-    # add point years to session info
-    if isinstance(point_time_res, dict):
-        point_time_dict = copy.deepcopy(point_time_res)
-    if isinstance(point_time_res, str):
-        point_time_dict = {"default": point_time_res}
-    if isinstance(point_time_res, list):
-        point_time_dict = {"default": point_time_res}
 
-    for key in point_time_dict:
-        point_time_res = point_time_dict[key]
-        if isinstance(point_time_res, list) is False:
-            raise ValueError("point_time_res must be a list")
-        for x in point_time_res:
-            if x not in ["year", "month", "day"]:
-                raise ValueError("values in point_time_res must be year, month or day")
-        if len(point_time_res) == 1:
-            if point_time_res[0] == "day":
-                raise ValueError(
-                    "You cannot supply only day in point_time_res. Please supply year or month as well"
-                )
-    for key in point_time_dict:
-        if key != "default":
-            if key not in valid_vars:
-                raise ValueError(f"{key} is not a valid variable")
 
     if thickness == "z_level":
         session_info["z_level"] = True
@@ -844,121 +765,19 @@ def matchup(
     else:
         obs_dir = session_info["obs_dir"]
 
-    surface_default = False
-    if surface == "default":
-        surface_default = True
-    if isinstance(surface, list):
-        surface_default = True
-
-
-    if everything:
-        pft = True
-
-    if isinstance(surface, dict):
-        # make sure there are no more than 2 keys
-        if len(surface.keys()) > 2:
-            raise ValueError("surface dictionary can only have two keys")
-        # loop through the keys
-
-    # coerce bottom to list
-    if isinstance(bottom, str):
-        bottom = [bottom]
-
-    # if obs_dir != "default":
-    #     if not os.path.exists(obs_dir):
-    #         raise ValueError(f"{obs_dir} does not exist")
-    #     session_info["obs_dir"] = obs_dir
-    # else:
-    #     obs_dir = session_info["obs_dir"]
-
-    # check that lon_lim and lat_lim and valid when either is not None
-
-
-    point_surface = []
-
-    if isinstance(surface, str):
-        surface = [surface]
-        surface = {"gridded": surface, "point": []}
-    
-
-
-    # now fiddle with some files in case people got things slightly wrong
-    if isinstance(surface, dict) and "gridded" not in surface:
-        # if gridded is not in surface, then we assume that the user wants to use point data
-        surface["gridded"] = []
-
-    if isinstance(surface, dict) and "point" not in surface:
-        surface["point"] = []
-    
-
-
-
-
-    if isinstance(surface, dict):
-        # throw error if gridded and point not in surface
-        if "gridded" not in surface and "point" not in surface:
-            raise ValueError("Please provide gridded or point variables")
-
-        if "gridded" not in surface:
-            surface["gridded"] = []
-        else:
-            if "point" not in surface:
-                surface["point"] = []
-
-        point_surface = surface["point"]
-        surface = surface["gridded"]
-        if isinstance(surface, str):
-            surface = [surface]
-        if isinstance(point_surface, str):
-            point_surface = [point_surface]
-        if point_surface is None:
-            point_surface = []
-        if surface is None:
-            surface = []
-
-    if surface is None:
-        surface = []
-
-
-
-    if bottom is None:
-        bottom = []
-    if isinstance(bottom, str):
-        bottom = [bottom]
-
-    # coerce point_all to list if it's str
-    if isinstance(point_all, str):
-        point_all = [point_all]
-    point_all = list(set(point_all))
+    # coerce point to list if it's str
+    if isinstance(point, str):
+        point = [point]
+    point = list(set(point))
 
     # the same with pco2
-    if "pco2" in point_all:
-        point_all.remove("pco2")
-        if "pco2" not in point_surface:
-            point_surface.append("pco2")
-    if "pco2" in bottom:
-        raise ValueError("pco2 cannot be in the bottom variables")
+    if "pco2" in point:
+        point.remove("pco2")
 
     if end < 1998:
         # kd
-        try:
-            surface["gridded"].remove("kd")
-        except:
-            pass
+        gridded.remove("kd")
 
-    surface_req = copy.deepcopy(surface)
-    bottom_req = copy.deepcopy(bottom)
-    point_surface_req = copy.deepcopy(point_surface)
-
-
-    # throw an error if all of these are empty
-    if (
-        len(surface_req) == 0
-        and len(bottom_req) == 0
-        and len(point_surface_req) == 0
-        and len(point_all) == 0
-    ):
-        raise ValueError("Please provide at least one variable to matchup")
 
     if isinstance(exclude, str):
         exclude = [exclude]
@@ -990,21 +809,19 @@ def matchup(
         all_df = pd.read_csv(mapping)
 
     # create lists for working out which variables are needed for point matchups
-    # change point_all to list if str
-    if isinstance(point_all, str):
-        point_all = [point_all]
-    # check point_all is a list
-    if not isinstance(point_all, list):
-        raise ValueError("point_all must be a list")
-    point_bottom = []
+    # change point to list if str
+    if isinstance(point, str):
+        point = [point]
+    # check point is a list
+    if not isinstance(point, list):
+        raise ValueError("point must be a list")
 
-    if isinstance(bottom, str):
-        bottom = [bottom]
-    if bottom is None:
-        bottom = []
 
-    var_choice = surface + bottom + point_surface + point_all
+    var_choice = gridded 
     var_choice = list(set(var_choice))
+    if isinstance(gridded, str):
+        var_choice = [gridded]
+    
 
     for vv in var_choice:
         if vv not in valid_vars and vv != "all":
@@ -1020,11 +837,6 @@ def matchup(
                 f"{vv} is not a valid variable. Please choose from {valid_vars}"
             )
 
-    if len(bottom) > 0:
-        if bottom != "all":
-            point_bottom = bottom
-
-    # restrict surface to valids
 
     if all_df is None:
         all_df = extract_variable_mapping(sim_dir, exclude=exclude, n_check = n_check)
@@ -1097,8 +909,6 @@ def matchup(
     if global_grid:
         model_domain = "global"
     
-    if global_grid:
-        bottom = []
 
     # ask user if they are happy with the model domain
     if model_domain == "nws":
@@ -1130,37 +940,34 @@ def matchup(
         valid_points = list(set([x for x in glob.glob(obs_dir + "/point/**/all/*")]))
     # extract directory base name
     valid_points = [os.path.basename(x) for x in valid_points]
-    for pp in point_surface:
-        if pp not in valid_points:
-            raise ValueError(f"{pp} is not a valid point dataset")
 
     if global_grid:
         if session_info["user_dir"]:
-            valid_surface = [
+            valid_gridded = [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/user/*")
             ]
-            valid_surface += [
+            valid_gridded += [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/global/*")
             ]
         else:
-            valid_surface = [
+            valid_gridded = [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/global/*")
             ]
     else:
         if session_info["user_dir"]:
-            valid_surface = [
+            valid_gridded += [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/nws/*")
             ]
-            valid_surface += [
+            valid_gridded += [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/user/*")
             ]
         else:
-            valid_surface = [
+            valid_gridded = [
                 os.path.basename(x)
                 for x in glob.glob(obs_dir + f"/gridded/{model_domain}/*")
             ]
             # add in global data
-            valid_surface += [
+            valid_gridded += [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/global/*")
             ]
 
@@ -1172,38 +979,16 @@ def matchup(
             )
 
 
-    if session_info["user_dir"]:
-        valid_bottom = [
-            os.path.basename(x) for x in glob.glob(obs_dir + "/point/user/bottom/*")
-        ]
-        if len(valid_bottom) == 0:
-            valid_bottom = [
-                os.path.basename(x) for x in glob.glob(obs_dir + "/point/nws/bottom/*")
-            ]
-
-    else:
-        valid_bottom = [
-            os.path.basename(x) for x in glob.glob(obs_dir + "/point/nws/bottom/*")
-        ]
-
     if everything:
-        surface = valid_surface
+        gridded = valid_gridded
         # only valid variables
-        surface = [x for x in surface if x in valid_vars]
-        point_surface = valid_points
-        point_surface = [x for x in point_surface if x in valid_vars]
-        bottom = valid_bottom
-        bottom = [x for x in bottom if x in valid_vars]
-        point_all = point_surface
+        gridded = [x for x in gridded if x in valid_vars]
+        point = valid_points
 
     if global_grid:
-        point_surface = []
-        point_bottom = []
-        surface = [x for x in surface if x in valid_surface]
+        gridded = [x for x in gridded if x in valid_gridded]
     else:
-        point_surface = [x for x in point_surface if x in valid_points]
-        point_bottom = [x for x in point_bottom if x in valid_bottom]
-        surface = [x for x in surface if x in valid_surface]
+        gridded = [x for x in gridded if x in valid_gridded]
 
     vars_available = list(
         all_df
@@ -1215,32 +1000,15 @@ def matchup(
     # check variables chosen are valid
 
     remove = []
-    for vv in surface_req:
-        if vv not in valid_surface:
-            if surface_default:
-                remove.append(vv)
-            else:
-                raise ValueError(f"{vv} is not a valid surface dataset")
-    if surface_default:
-        for vv in remove:
-            surface_req.remove(vv)
-    for vv in bottom_req:
-        if vv not in valid_bottom:
-            # remove it 
-            bottom_req.remove(vv)
-            print("*******************************************************************")
-            print(f"{vv} is not a valid bottom dataset. Removing from matchups")
-            print("*******************************************************************")
-    for vv in point_surface_req:
-        if vv not in valid_points:
-            raise ValueError(f"{vv} is not a valid point dataset")
 
-    surface = [x for x in surface if x in vars_available]
-    point_surface = [x for x in point_surface if x in vars_available]
-    point_bottom = [x for x in point_bottom if x in vars_available]
-    var_chosen = surface + bottom +  point_bottom + point_surface
+
+    gridded = [x for x in gridded if x in vars_available]
+    point = [x for x in point if x in valid_points]
+    point = [x for x in point if x in vars_available]
+    var_chosen = gridded + point
     var_chosen = list(set(var_chosen))
-    point_all = [x for x in point_all if x in vars_available]
+    point = [x for x in point if x in vars_available]
+
 
     # create matched directory
     if not os.path.exists("matched"):
@@ -1250,35 +1018,12 @@ def matchup(
         else:
             os.mkdir("matched")
 
-    for vv in point_all:
-        if vv not in ["pco2"]:
-            if vv in point_bottom:
-                point_bottom.remove(vv)
-            if vv in point_surface:
-                point_surface.remove(vv)
-        if vv in ["pco2"]:
-            if vv not in point_surface:
-                point_surface.append(vv)
-            point_all.remove(vv)
 
-    # combine all point variables
-    point_selection = point_surface + point_bottom +  point_all
-    point_selection = list(set(point_selection))
 
-    for vv in point_selection:
-        # check point_time_res
-        if vv in point_time_dict:
-            continue
-        if vv in ["benbio"]:
-            continue
-        if "default" not in point_time_dict:
-            raise ValueError(
-                f"Please provide time resolution for {vv} or set the default!"
-            )
 
     print("sorting out thickness")
     invert_thickness = False
-    if len(point_bottom) > 0 or len(point_all) > 0:
+    if len(point) > 0:
         if session_info["z_level"] == False:
             ds_depths = False
             if True:
@@ -1375,7 +1120,6 @@ def matchup(
                             ds_bath.vertical_sum()
                             ds_bath.to_nc(ff_bath, zip=True)
 
-                        # thickness needs to be inverted if the sea surface is at the bottom
 
                         if invert_thickness and ignore_invert_check is False:
                             # user check
@@ -1423,9 +1167,7 @@ def matchup(
             # add the global checker here
             # sort all_df alphabetically by variable
             all_df = all_df.sort_values("variable").reset_index(drop=True)
-            surface.sort()
-            point_surface.sort()
-            point_bottom.sort()
+            gridded.sort()
             # ensure variables are in all_df.variable
             vars_available = list(
                 all_df
@@ -1434,9 +1176,7 @@ def matchup(
                 # get all variables
                 .variable
             )
-            surface = [x for x in surface if x in vars_available]
-            point_surface = [x for x in point_surface if x in vars_available]
-            point_bottom = [x for x in point_bottom if x in vars_available]
+            gridded = [x for x in gridded if x in vars_available]
 
             all_df_print = copy.deepcopy(all_df).reset_index(drop=True)
 
@@ -1474,60 +1214,23 @@ def matchup(
             print("Variables that will be matched up")
             print("******************************")
 
-            if len(surface) > 0:
+            if len(gridded) > 0:
                 print(
-                    f"The following variables will be matched up with gridded surface data: {','.join(surface)}"
+                    f"The following variables will be matched up with gridded surface data: {','.join(gridded)}"
                 )
-                missing_surface = [x for x in valid_surface if x not in surface]
+                missing_surface = [x for x in valid_surface if x not in gridded]
                 if len(missing_surface) > 0:
                     print(
                         f"Surface variables that could be validated, but are not requested: {', '.join(missing_surface)}"
                     )
             else:
                 print("No variables will be matched up with gridded surface data")
-                missing_surface = [x for x in valid_surface if x not in surface]
+                missing_surface = [x for x in valid_surface if x not in gridded]
                 if len(missing_surface) > 0:
                     print(
                         f"Surface variables that could be validated, but are not requested: {', '.join(missing_surface)}"
                     )
 
-            if len(point_surface) > 0:
-                print(
-                    f"The following variables will be matched up with in-situ near-bottom data: {','.join(point_surface)}"
-                )
-                missing_point_surface = [
-                    x for x in valid_points if x not in point_surface
-                ]
-                if len(missing_point_surface) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_point_surface)}"
-                    )
-            else:
-                print("No variables will be matched up with in-situ surface data")
-                missing_point_surface = [
-                    x for x in valid_points if x not in point_surface
-                ]
-                if len(missing_point_surface) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_point_surface)}"
-                    )
-
-            if len(point_bottom) > 0:
-                print(
-                    f"The following variables will be matched up with in-situ near-bottom data: {','.join(point_bottom)}"
-                )
-                missing_bottom = [x for x in valid_bottom if x not in point_bottom]
-                if len(missing_bottom) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_bottom)}"
-                    )
-            else:
-                print("No variables will be matched up with in-situ bottom data")
-                missing_bottom = [x for x in valid_bottom if x not in point_bottom]
-                if len(missing_bottom) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_bottom)}"
-                    )
 
 
             print("Are you happy with this? Y/N")
@@ -1544,65 +1247,15 @@ def matchup(
             # add the global checker here
             # sort all_df alphabetically by variable
             all_df = all_df.sort_values("variable").reset_index(drop=True)
-            surface.sort()
-            point_surface.sort()
-            point_bottom.sort()
+            gridded.sort()
             print("Variables that will be matched up")
             print("******************************")
-            if len(surface) > 0:
+            if len(gridded) > 0:
                 print(
-                    f"The following variables will be matched up with gridded surface data: {','.join(surface)}"
+                    f"The following variables will be matched up with gridded surface data: {','.join(gridded)}"
                 )
-                missing_surface = [x for x in valid_surface if x not in surface]
-                if len(missing_surface) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_surface)}"
-                    )
-            else:
-                print("No variables will be matched up with gridded surface data")
-                missing_surface = [x for x in valid_surface if x not in surface]
-                if len(missing_surface) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_surface)}"
-                    )
 
-            if len(point_surface) > 0:
-                print(
-                    f"The following variables will be matched up with in-situ surface data: {','.join(point_surface)}"
-                )
-                missing_point_surface = [
-                    x for x in valid_points if x not in point_surface
-                ]
-                if len(missing_point_surface) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_point_surface)}"
-                    )
-            else:
-                print("No variables will be matched up with in-situ surface data")
-                missing_point_surface = [
-                    x for x in valid_points if x not in point_surface
-                ]
-                if len(missing_point_surface) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_point_surface)}"
-                    )
 
-            if len(point_bottom) > 0:
-                print(
-                    f"The following variables will be matched up with in-situ near-bottom data: {','.join(point_bottom)}"
-                )
-                missing_bottom = [x for x in valid_bottom if x not in point_bottom]
-                if len(missing_bottom) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_bottom)}"
-                    )
-            else:
-                print("No variables will be matched up with in-situ bottom data")
-                missing_bottom = [x for x in valid_bottom if x not in point_bottom]
-                if len(missing_bottom) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_bottom)}"
-                    )
 
             print("******************************")
             # do a unit check
@@ -1736,29 +1389,15 @@ def matchup(
         else:
             model_domain = "nws"
 
-    if "ph" in surface and model_domain == "nws":
-        surface.remove("ph")
-        point_surface.append("ph")
-    if "alkalinity" in surface and model_domain == "nws":
-        surface.remove("alkalinity")
-        point_surface.append("alkalinity")
+    if "ph" in gridded and model_domain == "nws":
+        gridded.remove("ph")
+    if "alkalinity" in gridded and model_domain == "nws":
+        gridded.remove("alkalinity")
 
-    if pft:
-        point_surface.append("pft")
-
-    if type(surface) is str:
-        surface = [surface]
-
-    point_surface = list(set(point_surface))
 
     # combine all variables into a list
-    all_vars = surface + bottom + point_surface + point_all
+    all_vars = gridded +  point
     all_vars = list(set(all_vars))
-
-    if pft:
-        all_vars.append("micro")
-        all_vars.append("nano")
-        all_vars.append("pico")
 
     df_variables = all_df.query("variable in @all_vars").reset_index(drop=True)
     # remove rows where model_variable is None
@@ -1847,42 +1486,21 @@ def matchup(
     df_mapping = all_df
     good_model_vars = [x for x in all_df.model_variable if x is not None]
 
-    point_surface = list(set(point_surface))
-
     df_mapping = all_df
 
     if model_domain in ["nws", "europe"] or session_info["user_dir"]:
 
 
-        if len(point_all) > 0 or len(point_bottom) > 0:
+        if len(point) > 0:
             print("Matching up with observational point data")
             print("********************************")
 
         # if model_variable is None remove from all_df
 
-        for depths in ["bottom", "all", "surface"]:
+        for depths in [ "all"]:
             the_vars = list(df_mapping.dropna().variable)
             var_choice = [x for x in var_choice if x in the_vars]
-            if depths == "all":
-                point_vars = point_all
-            else:
-                if depths == "bottom":
-                    point_vars = point_bottom
-                    if isinstance(point_bottom, str):
-                        point_vars = [point_bottom]
-                    if point_bottom is None:
-                        point_bottom = []
-                    # do the same for ices_all
-                    if isinstance(point_all, str):
-                        point_all = [point_all]
-                    if point_all is None:
-                        point_all = []
-                if depths == "surface":
-                    point_vars = point_surface
-                    if isinstance(point_surface, str):
-                        point_surface = [point_surface]
-                    if point_surface is None:
-                        point_surface = []
+            point_vars = point
 
             # sort the list
             point_vars.sort()
@@ -1895,12 +1513,7 @@ def matchup(
                 )
 
                 all_df = all_df.dropna()
-                if vv != "pft":
-                    all_df = all_df.query("variable == @vv").reset_index(drop=True)
-                else:
-                    all_df = all_df.query("variable == 'chlorophyll'").reset_index(
-                        drop=True
-                    )
+                all_df = all_df.query("variable == @vv").reset_index(drop=True)
                 patterns = list(set(all_df.pattern))
 
                 for pattern in patterns:
@@ -1944,8 +1557,6 @@ def matchup(
                     ):
                         with warnings.catch_warnings(record=True) as w:
                             point_variable = variable
-                            if variable == "pft":
-                                point_variable = "chlorophyll"
                             ersem_variable = list(
                                 all_df.query(
                                     "variable == @point_variable"
@@ -1964,19 +1575,11 @@ def matchup(
                                 paths = glob.glob(
                                     f"{obs_dir}/point/nws/**/{variable}/**{variable}**.feather"
                                 )
+                            
 
-                            if variable == "pft":
-                                point_variable = "pft"
                             source = os.path.basename(paths[0]).split("_")[0]
-                            if depths == "surface":
-                                paths = [x for x in paths if "all" in x]
-                            else:
-                                paths = [x for x in paths if depths in x]
 
-                            if variable == "pft":
-                                paths = [x for x in paths if "pft" in x]
-                            else:
-                                paths = [x for x in paths if f"{point_variable}/" in x]
+                            paths = [x for x in paths if f"{point_variable}/" in x]
                             for exc in exclude:
                                 paths = [
                                     x
@@ -1996,11 +1599,7 @@ def matchup(
 
 
                             # extract point_time_res from dictionary
-                            try:
-                                point_time_res = point_time_dict[variable]
-                            except:
-                                # use the default
-                                point_time_res = point_time_dict["default"]
+                            point_time_res = copy.deepcopy(session_info["point_time_res"])
                             for x in [
                                 x
                                 for x in ["year", "month", "day"]
@@ -2008,27 +1607,6 @@ def matchup(
                             ]:
                                 if x in df.columns:
                                     df = df.drop(columns=x)
-                            if depths == "surface":
-                                if "depth" in df.columns:
-                                    df = df.query("depth < 5").reset_index(drop=True)
-                                    # grouping
-                                    # drop depth
-                                    df = df.drop(columns="depth")
-                                    grouping = [
-                                        x
-                                        for x in df.columns
-                                        if x
-                                        in [
-                                            "lon",
-                                            "lat",
-                                            "year",
-                                            "month",
-                                            "day",
-                                            "source",
-                                        ]
-                                    ]
-                                    df = df.groupby(grouping).mean().reset_index()
-                                # add in a nominal depth
                             # restrict the lon_lat
                             lon_min = lons[0]
                             lon_max = lons[1]
@@ -2109,8 +1687,6 @@ def matchup(
                             "observation",
                         ]
                         select_these = [x for x in df.columns if x in valid_cols]
-                        if variable != "pft":
-                            df = df.loc[:, select_these]
 
 
                         if len(df) == 0:
@@ -2207,12 +1783,7 @@ def matchup(
                                             session_warnings.append(str(ww.message))
 
                             grid_setup = True
-                            if layer == "surface":
-                                top_layer = True
-                            else:
-                                top_layer = False
-                            if depths == "surface":
-                                ds_depths = None
+                            top_layer = False
 
                             temp = pool.apply_async(
                                 mm_match,
@@ -2266,10 +1837,9 @@ def matchup(
                             ]
                         ][0]
                         #
-                        if vv != "pft":
-                            df_all = df_all.rename(
-                                columns={change_this: "model"}
-                            ).merge(df)
+                        df_all = df_all.rename(
+                            columns={change_this: "model"}
+                        ).merge(df)
                             # add model to name column names with frac in them
                         df_all = df_all.dropna().reset_index(drop=True)
 
@@ -2283,9 +1853,9 @@ def matchup(
                         df_all = df_all.groupby(grouping).mean().reset_index()
 
                         if session_info["out_dir"] != "":
-                            out = f"{session_info['out_dir']}/matched/point/{model_domain}/{depths}/{variable}/{source}_{depths}_{variable}.csv"
+                            out = f"{session_info['out_dir']}/matched/point/{model_domain}/all/{variable}/{source}_all_{variable}.csv"
                         else:
-                            out = f"matched/point/{model_domain}/{depths}/{variable}/{source}_{depths}_{variable}.csv"
+                            out = f"matched/point/{model_domain}/all/{variable}/{source}_all_{variable}.csv"
 
                         # create directory for out if it does not exists
                         if not os.path.exists(os.path.dirname(out)):
@@ -2301,94 +1871,8 @@ def matchup(
                                 f"lat > {lat_lim[0]} and lat < {lat_lim[1]}"
                             )
 
-                        if vv == "pft":
-                            # do a row sum
-                            nano = (
-                                df_mapping.query("variable == 'nano'")
-                                .model_variable.values[0]
-                                .split("+")
-                            )
-                            pico = (
-                                df_mapping.query("variable == 'pico'")
-                                .model_variable.values[0]
-                                .split("+")
-                            )
-                            micro = (
-                                df_mapping.query("variable == 'micro'")
-                                .model_variable.values[0]
-                                .split("+")
-                            )
-                            df_all["nano_frac"] = df_all.loc[:, nano].sum(axis=1)
-                            df_all["pico_frac"] = df_all.loc[:, pico].sum(axis=1)
-                            df_all["micro_frac"] = df_all.loc[:, micro].sum(axis=1)
-                            # fraction should be 1 over the sum of the 3
-                            nano_frac = df_all["nano_frac"] / (
-                                df_all["nano_frac"]
-                                + df_all["pico_frac"]
-                                + df_all["micro_frac"]
-                            )
-                            pico_frac = df_all["pico_frac"] / (
-                                df_all["nano_frac"]
-                                + df_all["pico_frac"]
-                                + df_all["micro_frac"]
-                            )
-                            micro_frac = df_all["micro_frac"] / (
-                                df_all["nano_frac"]
-                                + df_all["pico_frac"]
-                                + df_all["micro_frac"]
-                            )
-                            df_all["nano_frac"] = nano_frac
-                            df_all["pico_frac"] = pico_frac
-                            df_all["micro_frac"] = micro_frac
-
-                            valid_vars = [
-                                "lon",
-                                "lat",
-                                "year",
-                                "month",
-                                "day",
-                                "nano_frac",
-                                "pico_frac",
-                                "micro_frac",
-                            ]
-                            valid_vars = [x for x in valid_vars if x in df_all.columns]
-                            df_all = df_all.loc[:, valid_vars]
-                            df_all.rename(
-                                columns={
-                                    "nano_frac": "nano_frac_model",
-                                    "pico_frac": "pico_frac_model",
-                                    "micro_frac": "micro_frac_model",
-                                },
-                                inplace=True,
-                            )
-
-                            df = df.rename(
-                                columns={
-                                    "nano_frac": "nano_frac_obs",
-                                    "pico_frac": "pico_frac_obs",
-                                    "micro_frac": "micro_frac_obs",
-                                }
-                            )
-
-                            df_all = df_all.merge(df)
 
                         if len(df_all) > 0:
-                            # read in bottom data
-                            bottom_paths = glob.glob(
-                                f"{obs_dir}/point/nws/bottom/{variable}/*bottom*{variable}.feather"
-                            )
-
-                            if len(bottom_paths) == 1:
-                                # average based on point_time_res
-                                # drop observation
-                                df_bottom = pd.read_feather(bottom_paths[0])
-                                df_bottom = df_bottom.loc[:, ["lon", "lat", "depth"]]
-                                df_bottom = df_bottom.assign(bottom=1)
-                                df_all = df_all.merge(df_bottom, how="left")
-                                # fill in the missing values
-                                df_all = df_all.fillna(0)
-                                # drop duplicates
-                                df_all = df_all.drop_duplicates().reset_index(drop=True)
 
                             if "year" not in point_time_res:
                                 try:
@@ -2428,9 +1912,9 @@ def matchup(
                                 pickle.dump(the_dict, f)
 
                             if session_info["out_dir"] != "":
-                                out_unit = f"{session_info['out_dir']}/matched/point/{model_domain}/{depths}/{variable}/{source}_{depths}_{variable}_unit.csv"
+                                out_unit = f"{session_info['out_dir']}/matched/point/{model_domain}/all/{variable}/{source}_{depths}_{variable}_unit.csv"
                             else:
-                                out_unit = f"matched/point/{model_domain}/{depths}/{variable}/{source}_{depths}_{variable}_unit.csv"
+                                out_unit = f"matched/point/{model_domain}/all/{variable}/{source}_all_{variable}_unit.csv"
                             ds = nc.open_data(paths[0], checks=False)
                             ds_contents = ds.contents
                             ersem_variable = ersem_variable.split("+")[0]
@@ -2452,43 +1936,33 @@ def matchup(
                         out = glob.glob(
                             session_info["out_dir"]
                             + "/"
-                            + f"matched/point/{model_domain}/{depths}/{vv}/**_{depths}_{vv}.csv"
+                            + f"matched/point/{model_domain}/all/{vv}/**_all_{vv}.csv"
                         )
 
                     else:
                         out = glob.glob(
-                            f"matched/point/{model_domain}/{depths}/{vv}/**_{depths}_{vv}.csv"
+                            f"matched/point/{model_domain}/all/{vv}/**_all_{vv}.csv"
                         )
 
                     if len(out) > 0:
                         if session_info["overwrite"] is False:
                             continue
 
-                    if depths == "all":
+                    if vv_variable != "benbio":
                         print(
-                            f"Matching up model {vv_variable} with vertically resolved bottle and CDT {vv_variable}"
-                        )
-                    else:
-                        if depths == "surface":
-                            print(
-                                f"Matching up model {vv_variable} with observational surface point {vv_variable} data"
+                                f"Matching up model {vv_variable} with vertically resolved bottle and CDT {vv_variable}"
                             )
-                        if depths == "bottom":
-                            print(
-                                f"Matching up model {vv_variable} with near-bottom point {vv_variable} data"
+                    else:
+                        print(
+                                f"Matching up model benthic biomass with North Sea Benthos Survey data"
                             )
 
                     print("**********************")
-                    if depths == "surface":
-                        try:
-                            point_match(vv, layer="surface", df_times=df_times)
-                        except:
-                            pass
-                    else:
-                        try:
-                            point_match(vv, ds_depths=ds_depths, df_times=df_times)
-                        except:
-                            pass
+                    if True:
+
+                        point_match(vv, ds_depths=ds_depths, df_times=df_times)
+                    # except:
+                    #     pass
 
                     output_warnings = []
                     for ww in session_warnings:
@@ -2513,7 +1987,7 @@ def matchup(
     gridded_matchup(
         df_mapping=df_mapping,
         folder=sim_dir,
-        var_choice=surface,
+        var_choice=gridded,
         exclude=exclude,
         sim_start=sim_start,
         sim_end=sim_end,
