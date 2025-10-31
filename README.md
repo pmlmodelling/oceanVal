@@ -244,10 +244,10 @@ The `matchup` function is used to match up model output with observational data 
 
 ## Variable Selection Arguments
 
-### Surface Variables
+### Surface and gridded observational data 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
-| `surface` | `str`, `list`, or `dict` | `"default"` | Surface variables to matchup. Can be:<br>- `"default"`: All available surface variables<br>- `list`: List of variables<br>- `dict`: Fine-grained control with "gridded" and "point" keys |
+| `gridded` | `str`, `list` | `["chlorophyll", "oxygen"]` | Surface variables to matchup with gridded observational data. Can be: <br>- `list`: List of variables<br>- `dict`: Fine-grained control with "gridded" and "point" keys |
 
 **Available surface variables (NWS only):**
 
