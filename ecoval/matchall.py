@@ -1853,6 +1853,16 @@ def matchup(
                                 [pd.read_feather(x) for x in paths_bottom]
                             )
                             df_bottom = df_bottom.loc[:,["lon", "lat", "year", "month", "day", "depth", "observation"]]
+                            # remove based on what's in point_time_res
+                            # not benbio
+                            if variable != "benbio":
+                                for x in [
+                                    x
+                                    for x in ["year", "month", "day"]
+                                    if x not in point_time_res
+                                ]:
+                                    if x in df_bottom.columns:
+                                        df_bottom = df_bottom.drop(columns=x)
                             df_bottom = df_bottom.assign(bottom = 1)
                             df_all = df_all.merge(df_bottom, how="left", on=["lon", "lat", "year", "month", "day", "depth", "observation"])
                             # if bottom is nan, set to 0
