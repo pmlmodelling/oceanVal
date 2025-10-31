@@ -148,8 +148,6 @@ def fix_toc_comparison():
         x = f.write(f"- caption: Comparisons with point observations\n")
         x = f.write("  chapters:\n")
         x = f.write(f"  - file: notebooks/comparison_point_surface.ipynb\n")
-        x = f.write(f"  - file: notebooks/comparison_point_benthic.ipynb\n")
-        x = f.write(f"  - file: notebooks/comparison_point_bottom.ipynb\n")
 
 
 
@@ -360,7 +358,7 @@ def validate(
                         with open(file1, "r") as file:
                             filedata = file.read()
 
-                        if layer in ["surface", "all", "benthic"]:
+                        if layer in [ "all"]:
                             filedata = filedata.replace(
                                 "chunk_point_surface", "chunk_point"
                             )
@@ -917,7 +915,7 @@ def compare(model_dict=None):
     i = 0
 
     if i == 0:
-        for ss in ["surface", "bottom", "benthic"]:
+        for ss in [ "bottom"]:
             file1 = importlib.resources.files(__name__).joinpath("data/comparison_point.ipynb")
 
             if (
