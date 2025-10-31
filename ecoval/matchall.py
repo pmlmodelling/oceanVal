@@ -1565,11 +1565,21 @@ def matchup(
 
                             if session_info["user_dir"]:
                                 paths = glob.glob(
-                                    f"{obs_dir}/point/nws/**/{variable}/**{variable}**.feather"
+                                    f"{obs_dir}/point/nws/all/{variable}/**{variable}**.feather"
                                 )
                             else:
                                 paths = glob.glob(
-                                    f"{obs_dir}/point/nws/**/{variable}/**{variable}**.feather"
+                                    f"{obs_dir}/point/nws/all/{variable}/**{variable}**.feather"
+                                )
+                            # paths bottom
+                            
+                            if session_info["user_dir"]:
+                                paths_bottom = glob.glob(
+                                    f"{obs_dir}/point/nws/bottom/{variable}/**{variable}**.feather"
+                                )
+                            else:
+                                paths_bottom = glob.glob(
+                                    f"{obs_dir}/point/nws/bottom/{variable}/**{variable}**.feather"
                                 )
                             
 
@@ -1837,6 +1847,18 @@ def matchup(
                         ).merge(df)
                             # add model to name column names with frac in them
                         df_all = df_all.dropna().reset_index(drop=True)
+                        # read in point_bottom data
+                        if len(paths_bottom) > 0:
+                            df_bottom = pd.concat(
+                                [pd.read_feather(x) for x in paths_bottom]
+                            )
+                            df_bottom = df_bottom.loc[:,["lon", "lat", "year", "month", "day", "depth", "observation"]]
+                            df_bottom = df_bottom.assign(bottom = 1)
+                            df_all = df_all.merge(df_bottom, how="left", on=["lon", "lat", "year", "month", "day", "depth", "observation"])
+                            # if bottom is nan, set to 0
+                            df_all = df_all.assign(bottom = lambda x: x.bottom.fillna(0))
+
+                            # if it exists, coerce year to int
 
                         grouping = copy.deepcopy(point_time_res)
                         grouping.append("lon")
