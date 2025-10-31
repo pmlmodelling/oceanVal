@@ -247,8 +247,8 @@ The `matchup` function is used to match up model output with observational data 
 ### Surface and gridded observational data 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
-| `gridded` | `str`, `list` | `["chlorophyll", "oxygen"]` | Surface variables to matchup with gridded observational data. Can be: <br>- `list`: List of variables<br>- |
-| `point` | `str`, `list` | `[]` | Variables to matchup with in-situ observational data. Can be: <br>- `list`: List of variables<br>-  |
+| `gridded` | `str`, `list` | `["chlorophyll", "oxygen"]` | Surface variables to matchup with gridded observational data. Can be: <br>- `list`: List of variables<br>- 
+| `point` | `str`, `list` | `[]` | Variables to matchup with in-situ observational data. Can be: <br>- `list`: List of variables<br>-  
 
 ## Processing Configuration
 
@@ -273,7 +273,7 @@ The `matchup` function is used to match up model output with observational data 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
 | `n_dirs_down` | `int` | `2` | Directory levels to search for netCDF files (format: `*/*/*.nc`) If all files are in the sim_dir, set to 0 |
-| `point_time_res` | `list` or `dict` | `["year", "month", "day"]` | Time resolution for point data matchup. For example, if you only have 1 year of simulation output, you might want to set this to `["month", "day"]` so that it picks up observational data for all years to compare with the 1 year of simulation output. Note: if you do not include year, all simulated years (between start and end) will be included. |
+| `point_time_res` | `list`  | `["year", "month", "day"]` | Time resolution for point data matchup. For example, if you only have 1 year of simulation output, you might want to set this to `["month", "day"]` so that it picks up observational data for all years to compare with the 1 year of simulation output. Note: if you do not include year, all simulated years (between start and end) will be included. |
 
 ## Special Features
 
