@@ -225,12 +225,6 @@ def mm_match(
             ds.as_missing(0)
             ds.run()
 
-            if variable == "susfrac":
-                ds_variables = ds.variables
-                if "Y2_c" in ds_variables and "Y3_c" in ds_variables:
-                    ds.assign(fraction=lambda x: x.Y3_c / (x.Y2_c + x.Y3_c), drop=True)
-                    ersem_variable = "Y3_c/(Y2_c + Y3_c)"
-                    ds.run()
             if variable != "pft":
                 if len(var_match) > 1:
                         ds.sum_all()
@@ -1321,7 +1315,7 @@ def matchup(
         # check point_time_res
         if vv in point_time_dict:
             continue
-        if vv in ["benbio",  "susfrac"]:
+        if vv in ["benbio"]:
             continue
         if "default" not in point_time_dict:
             raise ValueError(
@@ -1777,13 +1771,6 @@ def matchup(
                 all_df.to_csv(mapping, index=False)
                 return None
 
-    # check if benbio is in all_df variable column
-    if "benbio" in point_benthic:
-        # add another column using benbio row
-        df_benbio = all_df.query("variable == 'benbio'").reset_index(drop=True)
-        df_benbio["variable"] = ["susfrac"]
-        all_df = pd.concat([all_df, df_benbio]).reset_index(drop=True)
-        point_benthic.append("susfrac")
 
     if session_info["out_dir"] != "":
         out = session_info["out_dir"] + "/matched/mapping.csv"
@@ -2143,8 +2130,7 @@ def matchup(
                             sel_these = point_time_res
                             sel_these = [x for x in df.columns if x in sel_these]
                             if variable not in [
-                                "benbio",
-                                "susfrac"
+                                "benbio"
                             ]:
                                 paths = list(
                                     set(
