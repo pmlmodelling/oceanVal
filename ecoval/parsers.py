@@ -23,15 +23,11 @@ def generate_mapping(ds):
         "ammonium",
         "co2flux",
         "pco2",
-        "doc",
-        "poc",
         "benbio",
         "alkalinity",
         "micro",
         "nano",
         "pico",
-        "mesozoo",
-        "spm",
         "kd",
     ]
     ds1 = nc.open_data(ds[0], checks=False)
@@ -73,26 +69,6 @@ def generate_mapping(ds):
             the_vars = [
                 x for x in ds_contents.long_name if "chloroph" in x and ("micro" in x)
             ]
-        if vv == "doc":
-            # doc = [x for x in ds.contents.long_name if "arbon" in x and "iss" in x and " organic" in x and "benthic" not in x]
-            the_vars = [
-                x
-                for x in ds_contents.long_name
-                if "arbon" in x
-                and "iss" in x
-                and " organic" in x
-                and "benthic" not in x
-            ]
-            vars_2 = [
-                x
-                for x in ds_contents.long_name
-                if "photolabile" in str(x) and "carbon" in str(x)
-            ]
-            if len(vars_2) > 0:
-                the_vars += vars_2
-
-            the_vars = [x for x in the_vars if " loss " not in x]
-            the_vars = [x for x in the_vars if "depth" not in x]
 
         if vv == "benbio":
             the_vars = [
@@ -175,16 +151,6 @@ def generate_mapping(ds):
                 if "chloroph" in x and ("micro" in x or "diatom" in x)
             ]
 
-        if vv == "mesozoo":
-            the_vars = [
-                x
-                for x in ds_contents.long_name
-                if "mesozoo" in x
-                and "ingestion" not in x.lower()
-                and "respiration" not in x.lower()
-                and "mortality" not in x.lower()
-                and "loss" not in x.lower()
-            ]
         if vv == "kd":
             the_vars = [
                 x
@@ -206,9 +172,6 @@ def generate_mapping(ds):
                 if "chloroph" in x.lower() and "pico" in x
             ]
 
-        if vv == "doc":
-            if len(the_vars) > 1:
-                the_vars = [x for x in the_vars if "total" not in x.lower()]
 
         if vv == "chlorophyll":
             if len(the_vars) > 1:
@@ -230,7 +193,6 @@ def generate_mapping(ds):
         add = True
 
         if len(model_vars) > 1 and vv not in [
-            "doc",
             "chlorophyll",
             "benbio",
             "micro"

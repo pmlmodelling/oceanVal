@@ -117,12 +117,8 @@ valid_vars = [
     "chlorophyll",
     "co2flux",
     "pco2",
-    "doc",
-    "poc",
     "benbio",
-    "mesozoo",
-    "kd",
-    # "spm"
+    "kd"
 ]
 
 session_warnings = Manager().list()
@@ -551,13 +547,13 @@ def matchup(
         When gridded data is available it will use it, otherwise it will use point_data.
         For finer grained control, you can pass a dictionary with two keys, "gridded" and "point".
         The value of each key is a list of variables to matchup.
-        Possible variables are: ["temperature", "salinity", "oxygen", "phosphate", "silicate", "nitrate", "ammonium", "alkalinity", "ph", "chlorophyll", "doc", "pco2", "co2flux", "poc"]
+        Possible variables are: ["temperature", "salinity", "oxygen", "phosphate", "silicate", "nitrate", "ammonium", "alkalinity", "ph", "chlorophyll", "pco2", "co2flux"]
         Note: availability of variables depends on the model domain.
         Point data is only available for the North West European Shelf (NWS).
     bottom : list
         List of bottom variables to matchup with observational data.
         This will only work for the north west European shelf currently.
-        Full list of options for NWS: ["temperature", "salinity", "oxygen", "phosphate", "silicate", "nitrate", "ammonium", "alkalinity", "ph", "chlorophyll", "doc", "poc"]
+        Full list of options for NWS: ["temperature", "salinity", "oxygen", "phosphate", "silicate", "nitrate", "ammonium", "alkalinity", "ph", "chlorophyll"]
     benthic : list
         List of benthic variables.
         This is only available for the North West European Shelf (NWS).
@@ -744,20 +740,6 @@ def matchup(
     if point_all is None:
         point_all = []
 
-    # convert anything with meso and zoo into mesozoo
-    if isinstance(point_all, str):
-        point_all = [point_all]
-    for vv in point_all:
-        if "meso" in vv and "zoo" in vv:
-            point_all.remove(vv)
-            point_all.append("mesozoo")
-    try:
-        for vv in surface["point"]:
-            if "meso" in vv and "zoo" in vv:
-                surface["point"].remove(vv)
-                surface["point"].append("mesozoo")
-    except:
-        pass
     # do the same for anything with ben and bio in it
     for vv in benthic:
         if "ben" in vv and "bio" in vv:
@@ -894,10 +876,6 @@ def matchup(
     if isinstance(surface, list):
         surface_default = True
 
-    if surface == "default":
-        surface = copy.deepcopy(valid_vars)
-        surface.append("mesozoo")
-    # add overwrite to session_info
 
     if everything:
         pft = True
@@ -931,12 +909,6 @@ def matchup(
         surface = {"gridded": surface, "point": []}
     
 
-    if isinstance(surface, list):
-        if "mesozoo" in surface:
-            surface.remove("mesozoo")
-            surface = {"gridded": surface, "point": ["mesozoo"]}
-        else:
-            surface = {"gridded": surface, "point": []}
 
     # now fiddle with some files in case people got things slightly wrong
     if isinstance(surface, dict) and "gridded" not in surface:
@@ -946,22 +918,8 @@ def matchup(
     if isinstance(surface, dict) and "point" not in surface:
         surface["point"] = []
     
-    if isinstance(surface, dict):
-        for vv in surface["gridded"]:
-            if ("meso" in vv and "zoo" in vv) or "zooplankton" in vv.lower():
-                surface["gridded"].remove(vv)
-                point_surface.append("mesozoo")
-                surface["point"].append("mesozoo")
-        # accept ben bio
 
 
-    # do the same for point
-    if surface is not None:
-        for vv in surface["point"]:
-            if ("meso" in vv and "zoo" in vv) or "zooplankton" in vv.lower():
-                surface["point"].remove(vv)
-                point_surface.append("mesozoo")
-                surface["point"].append("mesozoo")
 
 
     if isinstance(surface, dict):
@@ -1008,16 +966,8 @@ def matchup(
     # coerce point_all to list if it's str
     if isinstance(point_all, str):
         point_all = [point_all]
-    # remove mesozoo from point_all
     point_all = list(set(point_all))
 
-    if "mesozoo" in point_all:
-        point_all.remove("mesozoo")
-        if "mesozoo" not in point_surface:
-            point_surface.append("mesozoo")
-    # mesozoo cannot be in the bottom
-    if "mesozoo" in bottom:
-        raise ValueError("mesozoo cannot be in the bottom variables")
     # the same with pco2
     if "pco2" in point_all:
         point_all.remove("pco2")
@@ -1027,18 +977,9 @@ def matchup(
         raise ValueError("pco2 cannot be in the bottom variables")
 
     if end < 1998:
-        try:
-            surface["gridded"].remove("doc")    
-        except:
-            pass
         # kd
         try:
             surface["gridded"].remove("kd")
-        except:
-            pass
-        # doc
-        try:
-            surface["gridded"].remove("doc")
         except:
             pass
 
@@ -1139,74 +1080,6 @@ def matchup(
             .head(1)
             .reset_index(drop=True)
         )
-        # check if poc in variables
-        if "poc" in surface_req or "poc" in point_surface_req:
-            # add in poc
-            df_poc = all_df.query("variable == 'chlorophyll'").reset_index(drop=True)
-            if df_poc.model_variable[0] is not None:
-                poc_mapping = df_poc.model_variable[0]
-                # replace Chl with c
-                poc_mapping = poc_mapping.replace("Chl", "c")
-                poc_mapping = poc_mapping + "+Z5_c+Z6_c+R4_c+R6_c+R8_c"
-                df_poc["model_variable"] = [poc_mapping]
-                df_poc["variable"] = ["poc"]
-
-                if "poc" in list(all_df.variable):
-                    all_df = all_df.query("variable != 'poc'").reset_index(drop=True)
-                    all_df = pd.concat([all_df, df_poc]).reset_index(drop=True)
-                else:
-                    all_df = pd.concat([all_df, df_poc]).reset_index(drop=True)
-            else:
-                # make model_variable and pattern None for poc
-                df_poc = pd.DataFrame(
-                    {"variable": ["poc"], "model_variable": [None], "pattern": [None]}
-                )
-                if "poc" in list(all_df.variable):
-                    print("********************************************")
-                    print("POC mapping could not be determined. Removing from matchups")
-                    print("********************************************")
-                    all_df = all_df.query("variable != 'poc'").reset_index(drop=True)
-                    all_df = pd.concat([all_df, df_poc]).reset_index(drop=True)
-    if "poc" in surface_req or "poc" in point_surface_req:
-        pattern = list(all_df.query("variable == 'poc'").pattern)
-        if len(pattern) == 0:
-            surface_req.remove("poc")
-            all_df = all_df.query("variable != 'poc'").reset_index(drop=True)
-        else:
-            pattern = pattern[0]
-            if pattern is None:
-                surface_req.remove("poc")
-                all_df = all_df.query("variable != 'poc'").reset_index(drop=True)
-            else:
-
-                final_extension = extension_of_directory(sim_dir)
-
-                if final_extension[0] == "/":
-                    final_extension = final_extension[1:]
-
-                wild_card = final_extension + pattern
-                wild_card = wild_card.replace("**", "*")
-                path = None
-                for x in pathlib.Path(sim_dir).glob(wild_card):
-                    path = x
-                    # convert to string
-                    path = str(path)
-                    break
-                if path is None: 
-                    raise ValueError(
-                        f"Unable to identify potential files. Please check n_dirs_down arg: {n_dirs_down} and sim_dir: {sim_dir}"
-                    )
-                ds = nc.open_data(path, checks=False)
-                poc_variables = list(all_df.query("variable == 'poc'").model_variable)[
-                    0
-                ].split("+")
-                if len([x for x in poc_variables if x not in ds.variables]):
-                    surface_req.remove("poc")
-                    print(
-                        "POC variables not available in model output. Removing from matchups"
-                    )
-                    all_df = all_df.query("variable != 'poc'").reset_index(drop=True)
-
     # check if the variables are in all_df
 
     pattern = all_df.reset_index(drop=True).iloc[0, :].pattern
@@ -1965,16 +1838,6 @@ def matchup(
     if "alkalinity" in surface and model_domain == "nws":
         surface.remove("alkalinity")
         point_surface.append("alkalinity")
-    # do the same for alkalinity, poc and doc
-    if "poc" in surface and model_domain == "nws":
-        if surface_default:
-            point_surface.append("poc")
-    if "doc" in surface and model_domain == "nws":
-        if surface_default:
-            point_surface.append("doc")
-    if "mesozoo" in surface and model_domain == "nws":
-        if surface_default:
-            point_surface.append("mesozoo")
 
     if pft:
         point_surface.append("pft")
@@ -2233,9 +2096,6 @@ def matchup(
                             if "day" in df.columns:
                                 df = df.assign(day=lambda x: x.day.astype(int))
 
-                            if variable == "doc":
-                                # go from mole to g of C
-                                df = df.assign( observation=lambda x: x.observation * 12.011)
 
                             # extract point_time_res from dictionary
                             try:
@@ -2538,8 +2398,6 @@ def matchup(
                             os.makedirs(os.path.dirname(out))
                         out1 = out.replace(os.path.basename(out), "paths.csv")
                         pd.DataFrame({"path": paths}).to_csv(out1, index=False)
-                        if variable == "doc":
-                            df_all = df_all.assign( model=lambda x: x.model + (40 * 12.011))
                         if lon_lim is not None:
                             df_all = df_all.query(
                                 f"lon > {lon_lim[0]} and lon < {lon_lim[1]}"
@@ -2695,9 +2553,7 @@ def matchup(
                     vv_variable = vv
                     if vv == "ph":
                         vv_variable = "pH"
-                    if vv in ["poc", "doc"]:
-                        # upper case
-                        vv_variable = vv.upper()
+
                     if session_info["out_dir"] != "":
                         out = glob.glob(
                             session_info["out_dir"]
