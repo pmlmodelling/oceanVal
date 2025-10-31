@@ -1,0 +1,63 @@
+Metadata-Version: 2.4
+Name: ecoval
+Version: 0.2.0
+Summary: Fast and easy analysis of netCDF data in Python
+Home-page: https://github.com/pmlmodelling/nctoolkit
+Author: Robert Wilson
+Author-email: rwi@pml.ac.uk
+Maintainer: Robert Wilson
+Project-URL: Bug Tracker, https://github.com/pmlmodelling/ecoval/issues
+Project-URL: Source Code, https://github.com/pmlmodelling/ecoval
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: MacOS
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Python: >=3.6.1
+Requires-Dist: xarray
+Requires-Dist: netCDF4
+Requires-Dist: hvplot
+Requires-Dist: panel
+Requires-Dist: pandas
+Requires-Dist: ncplot
+Requires-Dist: dill
+Requires-Dist: python-dateutil
+Requires-Dist: matplotlib
+Requires-Dist: jupytext
+Requires-Dist: nctoolkit>=1.1.1
+Requires-Dist: jellyfish
+Requires-Dist: geopandas
+Requires-Dist: holoviews
+Requires-Dist: plotnine
+Requires-Dist: jupyter-book
+Requires-Dist: seawater
+Requires-Dist: cmocean
+Requires-Dist: numpydoc
+Requires-Dist: sphinx_rtd_theme
+Requires-Dist: nbsphinx
+Requires-Dist: molmass
+Provides-Extra: complete
+Requires-Dist: geoviews; extra == "complete"
+Requires-Dist: rioxarray; extra == "complete"
+Requires-Dist: cfchecker; extra == "complete"
+Requires-Dist: geocube; extra == "complete"
+Requires-Dist: geopandas; extra == "complete"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: home-page
+Dynamic: maintainer
+Dynamic: project-url
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+
+
+**ecoval** is an automated ERSEM evaluation toolkit 
+
+
