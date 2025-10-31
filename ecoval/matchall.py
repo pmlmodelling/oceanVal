@@ -499,7 +499,7 @@ def matchup(
     sim_dir=None,
     start=None,
     end=None,
-    gridded = ["chlorophyll", "nitrate"],
+    gridded = "default", 
     point = [], 
     lon_lim=None,
     lat_lim=None,
@@ -833,9 +833,10 @@ def matchup(
                 raise ValueError(
                     f"{vv} is not a valid variable. Did you mean {close[0]}?"
                 )
-            raise ValueError(
-                f"{vv} is not a valid variable. Please choose from {valid_vars}"
-            )
+            if vv != "default":
+                raise ValueError(
+                    f"{vv} is not a valid variable. Please choose from {valid_vars}"
+                )
 
 
     if all_df is None:
@@ -970,6 +971,9 @@ def matchup(
             valid_gridded += [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/global/*")
             ]
+    if len(gridded) > 0:
+        if gridded[0] == "default" and len(gridded) == 1:
+            gridded = valid_gridded
 
     dirs = glob.glob(obs_dir + "/gridded/**/**")
     for ff in dirs:
@@ -978,6 +982,8 @@ def matchup(
                 f"{ff} does not have a single text file to identify data source. Please add an empty file of the format {{source}}.txt"
             )
 
+    if len(gridded) == 0 and len(point) == 0:
+        raise ValueError("Please provide at least one variable to matchup")
 
     if everything:
         gridded = valid_gridded
