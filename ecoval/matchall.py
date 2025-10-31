@@ -931,7 +931,7 @@ def matchup(
     if session_info["user_dir"]:
         if global_grid:
             valid_points = list(
-                set([x for x in glob.glob(obs_dir + "/point/user/all/*")])
+                set([x for x in glob.glob(obs_dir + "/point/**/all/*")])
             )
         else:
             valid_points = list(
@@ -944,9 +944,6 @@ def matchup(
 
     if global_grid:
         if session_info["user_dir"]:
-            valid_gridded = [
-                os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/user/*")
-            ]
             valid_gridded += [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/global/*")
             ]
@@ -956,11 +953,8 @@ def matchup(
             ]
     else:
         if session_info["user_dir"]:
-            valid_gridded += [
+            valid_gridded = [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/nws/*")
-            ]
-            valid_gridded += [
-                os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/user/*")
             ]
         else:
             valid_gridded = [
@@ -1571,12 +1565,8 @@ def matchup(
 
                             if session_info["user_dir"]:
                                 paths = glob.glob(
-                                    f"{obs_dir}/point/user/**/{variable}/**{variable}**.feather"
+                                    f"{obs_dir}/point/nws/**/{variable}/**{variable}**.feather"
                                 )
-                                if len(paths) == 0:
-                                    paths = glob.glob(
-                                        f"{obs_dir}/point/nws/**/{variable}/**{variable}**.feather"
-                                    )
                             else:
                                 paths = glob.glob(
                                     f"{obs_dir}/point/nws/**/{variable}/**{variable}**.feather"
@@ -1602,7 +1592,6 @@ def matchup(
                                 df = df.assign(month=lambda x: x.month.astype(int))
                             if "day" in df.columns:
                                 df = df.assign(day=lambda x: x.day.astype(int))
-
 
                             # extract point_time_res from dictionary
                             point_time_res = copy.deepcopy(session_info["point_time_res"])
@@ -1963,12 +1952,10 @@ def matchup(
                                 f"Matching up model benthic biomass with North Sea Benthos Survey data"
                             )
 
-                    print("**********************")
-                    if True:
-
+                    try:
                         point_match(vv, ds_depths=ds_depths, df_times=df_times)
-                    # except:
-                    #     pass
+                    except:
+                        pass
 
                     output_warnings = []
                     for ww in session_warnings:

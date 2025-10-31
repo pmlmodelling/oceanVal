@@ -19,8 +19,6 @@ import importlib
 def fix_toc(concise = True):
     paths = glob.glob(f"book/notebooks/*.ipynb")
     variables = list(pd.read_csv("matched/mapping.csv").variable)
-    if len([x for x in paths if "pft" in x]) > 0:
-        variables.append("pft")
     variables.sort()
 
     vv_dict = dict()
@@ -101,11 +99,6 @@ def fix_toc(concise = True):
             # capitalize if not ph
             if vv != "ph":
                 vv_out = vv.capitalize()
-            if vv.lower() in ["poc", "doc"]:
-                if vv.lower() == "poc":
-                    vv_out = "Particulate Organic Carbon"
-                if vv.lower() == "doc":
-                    vv_out = "Dissolved Organic Carbon"
             if vv == "pco2":
                 vv_out = "pCO2"
             # correct ph
@@ -113,17 +106,7 @@ def fix_toc(concise = True):
                 vv_out = "pH"
             if vv.lower() == "benbio":
                 vv_out = "Benthic biomass"
-            if vv.lower() == "susfrac":
-                vv_out = "Suspension feeding fraction"
-            if vv == "mesozoo":
-                vv_out = "Mesozooplankton"
-            if vv == "carbon":
-                vv_out = "Sediment carbon"
-            if vv == "oxycons":
-                vv_out = "Benthic oxygen consumption"
 
-            if vv.lower() == "pft":
-                vv_out = "Plankton Functional Types"
             if vv.lower() == "co2flux":
                 # user markdown subscript
                 vv_out = "Air-sea CO2 fluxes"
@@ -329,7 +312,6 @@ def validate(
 
         point_paths = glob.glob("matched/point/**/**/**/**.csv")
         point_paths = [x for x in point_paths if "paths.csv" not in x]
-        point_paths = [x for x in point_paths if "pft" not in x]
         point_paths = [x for x in point_paths if "unit" not in os.path.basename(x)]
         # loop through the paths
         for pp in point_paths:
@@ -360,8 +342,6 @@ def validate(
                     Variable = "macrobenthos biomass"
                 if vv == "susfrac":
                     Variable = "suspension feeding fraction"
-                if vv == "pft":
-                    Variable = "Plankton Functional Types"
                 if variable.lower() == "mesozoo":
                     Variable = "Mesozooplankton biomass"
                 vv_file = pp
@@ -461,8 +441,6 @@ def validate(
                             Variable = "macrobenthos biomass"
                         if variable == "pco2":
                             Variable = "pCO2"
-                        if variable == "pft":
-                            Variable = "PFT"
                         if variable == "kd":
                             Variable = "light attenuation coefficient"
                         file1 = importlib.resources.files(__name__).joinpath("data/gridded_template.ipynb")
@@ -503,28 +481,6 @@ def validate(
                                 )
                             )
 
-        if os.path.exists("matched/point/nws/surface/pft/cefas_surface_pft.csv"):
-            if not os.path.exists(f"book/notebooks/surface_pft.ipynb"):
-                file1 = importlib.resources.files(__name__).joinpath("data/pft_template.ipynb")
-                with open(file1, "r") as file:
-                    filedata = file.read()
-
-                # Replace the target string
-                filedata = filedata.replace("template_variable", "pft")
-                filedata = filedata.replace("template_title", "Primary production")
-
-                # Write the file out again
-                with open(f"book/notebooks/surface_pft.ipynb", "w") as file:
-                    file.write(filedata)
-
-                path_df.append(
-                    pd.DataFrame(
-                        {
-                            "variable": ["pft"],
-                            "path": [f"book/notebooks/surface_pft.ipynb"],
-                        }
-                    )
-                )
 
         # loop through all notebooks and replace paths
 
