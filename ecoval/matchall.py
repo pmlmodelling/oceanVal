@@ -502,7 +502,6 @@ def matchup(
     end=None,
     surface="default",
     bottom=["ph", "oxygen"],
-    benthic=["benbio"],
     lon_lim=None,
     lat_lim=None,
     pft=False,
@@ -548,10 +547,6 @@ def matchup(
         List of bottom variables to matchup with observational data.
         This will only work for the north west European shelf currently.
         Full list of options for NWS: ["temperature", "salinity", "oxygen", "phosphate", "silicate", "nitrate", "ammonium", "alkalinity", "ph", "chlorophyll"]
-    benthic : list
-        List of benthic variables.
-        This is only available for the North West European Shelf (NWS).
-        Full list of options for NWS: ["benbio"]
     pft : bool
         Matchup phytoplankton functional types. Default is False.
     cores : int
@@ -720,8 +715,6 @@ def matchup(
 
     if isinstance(bottom, str):
         bottom = [bottom]
-    if isinstance(benthic, str):
-        benthic = [benthic]
     # if they are None, make them empty lists
     if bottom is None:
         bottom = []
@@ -729,20 +722,9 @@ def matchup(
     if not isinstance(bottom, list):
         raise TypeError(f"bottom must be a list or str not a {type(bottom)}")
 
-    if benthic is None:
-        benthic = []
     if point_all is None:
         point_all = []
 
-    # do the same for anything with ben and bio in it
-    for vv in benthic:
-        if "ben" in vv and "bio" in vv:
-            benthic.remove(vv)
-            benthic.append("benbio")
-    # do the same for anything with oxy and con in it
-    for vv in benthic:
-        if "oxy" in vv and "con" in vv:
-            benthic.remove(vv)
     # do the same for co2 and flux
     for vv in point_all:
         if "co2" in vv and "flux" in vv:
@@ -772,8 +754,6 @@ def matchup(
             pass
     if isinstance(bottom, list):
         bottom = [x.lower() for x in bottom]
-    if isinstance(benthic, list):
-        benthic = [x.lower() for x in benthic]
     if isinstance(point_all, list):
         point_all = [x.lower() for x in point_all]
     if isinstance(point_all, str):
@@ -893,8 +873,6 @@ def matchup(
 
     # check that lon_lim and lat_lim and valid when either is not None
 
-    if isinstance(benthic, str):
-        benthic = [benthic]
 
     point_surface = []
 
@@ -941,16 +919,7 @@ def matchup(
     if surface is None:
         surface = []
 
-    # fix benthic if something like "benthic biomass" is an element
-    if benthic is None:
-        benthic = []
-    if isinstance(benthic, str):
-        benthic = [benthic]
 
-    for pp in benthic:
-        if "ben" in pp and "bio" in pp:
-            benthic.remove(pp)
-            benthic.append("benbio")
 
     if bottom is None:
         bottom = []
@@ -980,7 +949,6 @@ def matchup(
     surface_req = copy.deepcopy(surface)
     bottom_req = copy.deepcopy(bottom)
     point_surface_req = copy.deepcopy(point_surface)
-    benthic_req = copy.deepcopy(benthic)
 
 
     # throw an error if all of these are empty
@@ -988,7 +956,6 @@ def matchup(
         len(surface_req) == 0
         and len(bottom_req) == 0
         and len(point_surface_req) == 0
-        and len(benthic_req) == 0
         and len(point_all) == 0
     ):
         raise ValueError("Please provide at least one variable to matchup")
@@ -1030,7 +997,6 @@ def matchup(
     if not isinstance(point_all, list):
         raise ValueError("point_all must be a list")
     point_bottom = []
-    point_benthic = benthic
 
     if isinstance(bottom, str):
         bottom = [bottom]
@@ -1133,7 +1099,6 @@ def matchup(
     
     if global_grid:
         bottom = []
-        benthic = []
 
     # ask user if they are happy with the model domain
     if model_domain == "nws":
@@ -1206,9 +1171,6 @@ def matchup(
                 f"{ff} does not have a single text file to identify data source. Please add an empty file of the format {{source}}.txt"
             )
 
-    valid_benthic = [
-        os.path.basename(x) for x in glob.glob(obs_dir + "/point/nws/benthic/*")
-    ]
 
     if session_info["user_dir"]:
         valid_bottom = [
@@ -1230,20 +1192,16 @@ def matchup(
         surface = [x for x in surface if x in valid_vars]
         point_surface = valid_points
         point_surface = [x for x in point_surface if x in valid_vars]
-        benthic = valid_benthic
-        benthic = [x for x in benthic if x in valid_vars]
         bottom = valid_bottom
         bottom = [x for x in bottom if x in valid_vars]
         point_all = point_surface
 
     if global_grid:
         point_surface = []
-        point_benthic = []
         point_bottom = []
         surface = [x for x in surface if x in valid_surface]
     else:
         point_surface = [x for x in point_surface if x in valid_points]
-        point_benthic = [x for x in point_benthic if x in valid_benthic]
         point_bottom = [x for x in point_bottom if x in valid_bottom]
         surface = [x for x in surface if x in valid_surface]
 
@@ -1276,15 +1234,11 @@ def matchup(
     for vv in point_surface_req:
         if vv not in valid_points:
             raise ValueError(f"{vv} is not a valid point dataset")
-    for vv in benthic_req:
-        if vv not in valid_benthic:
-            raise ValueError(f"{vv} is not a valid benthic dataset")
 
     surface = [x for x in surface if x in vars_available]
     point_surface = [x for x in point_surface if x in vars_available]
     point_bottom = [x for x in point_bottom if x in vars_available]
-    point_benthic = [x for x in point_benthic if x in vars_available]
-    var_chosen = surface + bottom + point_benthic + point_bottom + point_surface
+    var_chosen = surface + bottom +  point_bottom + point_surface
     var_chosen = list(set(var_chosen))
     point_all = [x for x in point_all if x in vars_available]
 
@@ -1308,7 +1262,7 @@ def matchup(
             point_all.remove(vv)
 
     # combine all point variables
-    point_selection = point_surface + point_bottom + point_benthic + point_all
+    point_selection = point_surface + point_bottom +  point_all
     point_selection = list(set(point_selection))
 
     for vv in point_selection:
@@ -1472,7 +1426,6 @@ def matchup(
             surface.sort()
             point_surface.sort()
             point_bottom.sort()
-            point_benthic.sort()
             # ensure variables are in all_df.variable
             vars_available = list(
                 all_df
@@ -1484,7 +1437,6 @@ def matchup(
             surface = [x for x in surface if x in vars_available]
             point_surface = [x for x in point_surface if x in vars_available]
             point_bottom = [x for x in point_bottom if x in vars_available]
-            point_benthic = [x for x in point_benthic if x in vars_available]
 
             all_df_print = copy.deepcopy(all_df).reset_index(drop=True)
 
@@ -1577,23 +1529,6 @@ def matchup(
                         f"Surface variables that could be validated, but are not requested: {', '.join(missing_bottom)}"
                     )
 
-            if len(point_benthic) > 0:
-                print(
-                    f"The following variables will be matched up with in-situ benthic data: {','.join(point_benthic)}"
-                )
-                missing_benthic = [x for x in valid_benthic if x not in point_benthic]
-                if len(missing_benthic) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_benthic)}"
-                    )
-
-            else:
-                print("No variables will be matched up with in-situ benthic data")
-                missing_benthic = [x for x in valid_benthic if x not in point_benthic]
-                if len(missing_benthic) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_benthic)}"
-                    )
 
             print("Are you happy with this? Y/N")
 
@@ -1612,7 +1547,6 @@ def matchup(
             surface.sort()
             point_surface.sort()
             point_bottom.sort()
-            point_benthic.sort()
             print("Variables that will be matched up")
             print("******************************")
             if len(surface) > 0:
@@ -1670,23 +1604,6 @@ def matchup(
                         f"Surface variables that could be validated, but are not requested: {', '.join(missing_bottom)}"
                     )
 
-            if len(point_benthic) > 0:
-                print(
-                    f"The following variables will be matched up with in-situ benthic data: {','.join(point_benthic)}"
-                )
-                missing_benthic = [x for x in valid_benthic if x not in point_benthic]
-                if len(missing_benthic) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_benthic)}"
-                    )
-
-            else:
-                print("No variables will be matched up with in-situ benthic data")
-                missing_benthic = [x for x in valid_benthic if x not in point_benthic]
-                if len(missing_benthic) > 0:
-                    print(
-                        f"Surface variables that could be validated, but are not requested: {', '.join(missing_benthic)}"
-                    )
             print("******************************")
             # do a unit check
             print("Doing a unit check...")
@@ -1835,7 +1752,7 @@ def matchup(
     point_surface = list(set(point_surface))
 
     # combine all variables into a list
-    all_vars = surface + bottom + point_surface + benthic + point_all
+    all_vars = surface + bottom + point_surface + point_all
     all_vars = list(set(all_vars))
 
     if pft:
@@ -1943,7 +1860,7 @@ def matchup(
 
         # if model_variable is None remove from all_df
 
-        for depths in ["bottom", "all", "surface", "benthic"]:
+        for depths in ["bottom", "all", "surface"]:
             the_vars = list(df_mapping.dropna().variable)
             var_choice = [x for x in var_choice if x in the_vars]
             if depths == "all":
@@ -1966,12 +1883,6 @@ def matchup(
                         point_surface = [point_surface]
                     if point_surface is None:
                         point_surface = []
-            if depths == "benthic":
-                if isinstance(point_benthic, str):
-                    point_benthic = [point_benthic]
-                if point_benthic is None:
-                    point_benthic = []
-                point_vars = point_benthic
 
             # sort the list
             point_vars.sort()
@@ -2302,9 +2213,6 @@ def matchup(
                                 top_layer = False
                             if depths == "surface":
                                 ds_depths = None
-                            if depths == "benthic":
-                                ds_depths = None
-                                top_layer = False
 
                             temp = pool.apply_async(
                                 mm_match,
@@ -2569,11 +2477,6 @@ def matchup(
                             print(
                                 f"Matching up model {vv_variable} with near-bottom point {vv_variable} data"
                             )
-                    if depths == "benthic":
-                        ds_depths = None
-                        print(
-                            f"Matching up model {vv_variable} with benthic point data"
-                        )
 
                     print("**********************")
                     if depths == "surface":
