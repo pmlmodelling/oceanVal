@@ -65,12 +65,9 @@ In-situ  and gridded historical observations are used for the following variable
 | Ammonium | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | ammonium |
 | Benthic biomass | [NSBS](https://www.vliz.be/vmdcdata/nsbs/) | | benbio |
 | Chlorophyll | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | chlorophyll |
-| Dissolved Organic Carbon | PANGAEA | | doc |
-| Mesozooplankton | CPR |  | mesozoo |
 | Nitrate | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | nitrate |
 | Oxygen | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) |[NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | oxygen |
 | pCO2 | [SOCAT]( https://www.socat.info/) | | pco2 |
-| Plankton Functional Types | [Cefas](https://www.cefas.co.uk/data-and-publications/dois/north-sea-phytoplankton-pigments-2010-to-2011/) |  | pft |
 | pH | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | | ph |
 | Phosphate | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | phosphate |
 | Particulate Organic Carbon | PANGAEA |  | poc |
@@ -259,34 +256,7 @@ The following surface point variables are available:
 `['alkalinity', 'ammonium', 'chlorophyll', 'doc', 'mesozoo', 'nitrate', 'oxygen', 'pco2', 'ph', 'phosphate', 'poc', 'salinity', 'silicate', 'temperature']`
 
 The following gridded variables are available:
-`['ammonium', 'chlorophyll', 'co2flux', 'doc', 'kd', 'nitrate', 'oxygen', 'pco2', 'phosphate', 'poc', 'salinity', 'silicate', 'temperature']`
-
-### Bottom Variables
-| Argument | Type | Default | Description |
-|----------|------|---------|-------------|
-| `bottom` | `list` | `["ph", "oxygen"]` | Bottom variables for North West European Shelf (NWS) only |
-
-The near-bottom variables for the NWS:
-
-`['alkalinity', 'ammonium', 'chlorophyll', 'nitrate', 'oxygen', 'ph', 'phosphate', 'salinity', 'silicate', 'temperature']`
-
-### Benthic Variables
-| Argument | Type | Default | Description |
-|----------|------|---------|-------------|
-| `benthic` | `list` | `["carbon", "benbio"]` | Benthic variables for NWS only |
-
-The benthic variables for the NWS):
-`["carbon", "benbio", "oxycons", "susfrac"]`
-
-### Point Data Variables
-| Argument | Type | Default | Description |
-|----------|------|---------|-------------|
-| `point_all` | `list` | `[]` | Point variables to matchup for all depths. By default, none are matched up |
-
-The depth-resolved point variables for the NWS are:
-
-`['alkalinity', 'ammonium', 'chlorophyll', 'nitrate', 'oxygen', 'ph', 'phosphate', 'salinity', 'silicate', 'temperature']`
-
+`['ammonium', 'chlorophyll', 'co2flux',  'kd', 'nitrate', 'oxygen', 'pco2', 'phosphate',  'salinity', 'silicate', 'temperature']`
 
 ## Processing Configuration
 
@@ -317,8 +287,7 @@ The depth-resolved point variables for the NWS are:
 
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
-| `pft` | `bool` | `False` | Enable phytoplankton functional types matchup. This uses 2010 and 2011 observational data only |
-| `everything` | `bool` | `False` | Match all possible data, including in-situ data for all depths. This could be slow if you have a big simulation  (sets `pft=True`) |
+| `everything` | `bool` | `False` | Match all possible data, including in-situ data for all depths. This could be slow if you have a big simulation |
 
 
 # Validate Function Arguments Summary
