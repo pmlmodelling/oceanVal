@@ -56,6 +56,7 @@ In-situ  and gridded historical observations are used for the following variable
 | Ammonium | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | ammonium |
 | Benthic biomass | [NSBS](https://www.vliz.be/vmdcdata/nsbs/) | | benbio |
 | Chlorophyll | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | chlorophyll |
+| Light attenuation |  | [CMEMS](https://data.marine.copernicus.eu/product/OCEANCOLOUR_GLO_BGC_L4_MY_009_104/description) | kd |
 | Nitrate | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | nitrate |
 | Oxygen | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) |[NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | oxygen |
 | pCO<sub>2</sub> | [SOCAT]( https://www.socat.info/) | | pco2 |
