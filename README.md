@@ -3,7 +3,7 @@
 # ecoval
 Marine ecosystem model validation made easy in Python
 
-ecoval is a fully automated marine ecosystem model tool that reduces ecosystem model validation to a simple to follow step-by-step producedure. It is designed to validate ecosystem models stored in NetCDF format against a range of in-situ and gridded observations. Currently, it uses curated data sets for validations of models on the northwest European shelf, and global datasets elsewhere. 
+ecoval is a fully automated marine ecosystem model tool that reduces ecosystem model validation to a simple to follow step-by-step producedure. It is designed to validate ecosystem models stored in NetCDF format against a range of in-situ and gridded observations. Currently, it uses curated data sets for validations of models on the northwest European shelf. 
 
 # ecoval functions
 
@@ -26,20 +26,10 @@ block-beta
     columns 4 
     c["Alkalinity"] d["Ammonium"] e["Benthic biomass"] f["Chlorophyll"] g["DOC"] h["Light attenuation"]  i["Mesozooplankton"] j["Nitrate"] k["Oxygen"] l["Plankton Functional Types"] m["Phosphate"] n["Particulate Organic Carbon"] o["Salinity"] p["Silicate"] q["Temperature"] 
   end
-  r["<b>Global observational data"]
-    block:group3:9
-    columns 4
-    s["Alkalinity"] t["Chlorophyll"] u["Air-sea carbon dioxide flux"] v["Light attenuation"] w["Nitrate"] x["Oxygen"] y["pCO2"] z["pH"] aa["Phosphate"] ab["Salinity"] ac["Silicate"] ad["Temperature"]
-   end
    ae["<b>Report formats"]
     block:group4:9
-    columns 2
-    af["html"] ag["pdf"] 
-   end
-   ah["<b>Generic summaries"]
-    block:group5:9
-    columns 4
-    ai["Mapped biases"] aj["Assessment of seasonality"] ak["Assessmment of spatial performance"]
+    columns 1
+    af["html"]
    end
    al["<b>NWS summaries"]
     block:group6:9
