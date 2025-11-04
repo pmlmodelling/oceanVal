@@ -72,7 +72,6 @@ def gridded_matchup(
         "pco2",
         "ph",
         "alkalinity",
-        "spm",
         "kd",
     ]
     vars = [x for x in vars if x in var_choice]
@@ -342,10 +341,6 @@ def gridded_matchup(
                     if vv not in ["alkalinity", "ph"]:
                         ds_obs.subset(months=month_sel)
 
-                    if vv_source == "occci" and vv == "chlorophyll":
-                        ds_obs.subset(variable="chlor_a")
-                        ds_obs.subset(years=range(start_year, end_year + 1))
-                        ds_obs.run()
                     if vv_source == "occci" and vv == "kd":
                         ds_obs.subset(variable="kd_490")
                         ds_obs.subset(years=range(start_year, end_year + 1))
