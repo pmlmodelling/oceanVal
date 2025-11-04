@@ -10,7 +10,7 @@ ecoval is a fully automated marine ecosystem model tool that reduces ecosystem m
 The core functionality of ecoval is to match up model output with observational data, and then validate the model output against the observations. The following functions are available:
 - `matchup`: Matches model output with observational data for validation.
 - `validate`: Generates validation reports based on matched data.
-- `compare`: Compares multiple model simulations against each other and against observations. This requires `matchup` and `validate` to have been run first on each simulation.
+- `compare`: Compares multiple model simulations against each other and against observations. This requires `matchup` and `validate` to have been run first on each simulation. This may not be backward compatible with older versions of ecoval, so ensure you have run `matchup` and `validate` using the latest version of ecoval before using `compare`.
 
 
 # Core functionality 
