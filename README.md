@@ -52,6 +52,7 @@ In-situ  and gridded historical observations are used for the following variable
 | Variable | In-situ data | Gridded data source | ecoval name |
 | --- | --- | --- | --- |
 | Alkalinity | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | | alkalinity |
+| Air-sea CO2 flux | | [NCEI](https://www.ncei.noaa.gov/access/ocean-carbon-acidification-data-system/oceans/SPCO2_1982_present_ETH_SOM_FFN.html) | co2flux |
 | Ammonium | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | ammonium |
 | Benthic biomass | [NSBS](https://www.vliz.be/vmdcdata/nsbs/) | | benbio |
 | Chlorophyll | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | chlorophyll |
