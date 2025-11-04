@@ -10,7 +10,12 @@ if layer_select == "surface":
     layer_long = "sea surface"
 if layer == "benthic":
     layer_long = "benthic"
-ff = glob.glob(f"../../matched/point/**/{layer}/{variable}/*_{variable}.csv")[0]
+ff = glob.glob(f"../../matched/point/{layer}/{variable}/*_{variable}.csv")[0]
+
+if "ben" in variable.lower():
+    layer_select = "benthic"
+    layer_long = "benthic"
+    layer = "benthic"
 vv_source = os.path.basename(ff).split("_")[0]
 vv_source = vv_source.upper()
 df = pd.read_csv(ff)
@@ -21,9 +26,7 @@ lat_min = lat_lim[0]
 df = df.query(f"lon >= {lon_min} and lon <= {lon_max} and lat >= {lat_min} and lat <= {lat_max}").reset_index(drop = True) 
 # drop duplicates
 df = df.drop_duplicates().reset_index(drop = True)
-ff_dict = f"../../matched/point/nws/{layer}/{variable}/matchup_dict.pkl"
-if not os.path.exists(ff_dict):
-    ff_dict = f"../../matched/point/europe/{layer}/{variable}/matchup_dict.pkl"
+ff_dict = f"../../matched/point/{layer}/{variable}/matchup_dict.pkl"
 point_time_res = ["year", "month", "day"]
 point_years = None
 variable_formula = None
@@ -60,7 +63,7 @@ if point_time_res is not None:
     grouping = [x for x in ["lon", "lat", "year", "depth", "day", "month"] if x in df.columns]
     df = df.groupby(grouping).mean().reset_index()
 
-if layer_select == "surface":
+if layer_select in ["surface", "benthic"]:
     try:
         df = df.query("depth < 5").reset_index()
     except:
@@ -139,7 +142,7 @@ def data_source(vv_source, vv_name):
 
 
 # %% tags=["remove-input"]
-if available and not concise:
+if available:
     intro = []
     
     if vv_source == "ICES": 
@@ -186,9 +189,10 @@ if available and not concise:
     
     import pickle
     try:
-        ff_dict = f"../../matched/point/nws/{layer}/{variable}/matchup_dict.pkl"
-        if not os.path.exists(ff_dict):
-            ff_dict = f"../../matched/point/europe/{layer}/{variable}/matchup_dict.pkl"
+        if variable == "benbio":
+            ff_dict = f"../../matched/point/surface/{variable}/matchup_dict.pkl"
+        else:
+            ff_dict = f"../../matched/point/{layer}/{variable}/matchup_dict.pkl"
         with open(ff_dict, "rb") as f:
             matchup_dict = pickle.load(f)
             min_year = matchup_dict["start"]

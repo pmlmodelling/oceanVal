@@ -106,7 +106,6 @@ def fix_toc(concise = True):
                 vv_out = "pH"
             if vv.lower() == "benbio":
                 vv_out = "Benthic biomass"
-
             if vv.lower() == "co2flux":
                 # user markdown subscript
                 vv_out = "Air-sea CO2 fluxes"
@@ -308,7 +307,7 @@ def validate(
 
         # loop through the point matchups and generate notebooks
 
-        point_paths = glob.glob("matched/point/**/**/**/**.csv")
+        point_paths = glob.glob("matched/point/**/**/**.csv")
         point_paths = [x for x in point_paths if "paths.csv" not in x]
         point_paths = [x for x in point_paths if "unit" not in os.path.basename(x)]
         # loop through the paths
@@ -321,93 +320,82 @@ def validate(
             source = os.path.basename(pp).split("_")[0]
             variable = vv
             layer = os.path.basename(pp).split("_")[1].replace(".csv", "")
-            if True:
-                if vv != "ph":
-                    Variable = variable
-                else:
-                    Variable = "pH"
-                if vv == "co2flux":
-                    Variable = "Air-sea CO2<sub>2</sub> fluxes"
-                if vv == "kd":
-                    Variable = "light attenuation coefficient"
-                if vv in ["poc", "doc"]:
-                    Variable = Variable.upper()
-                if vv == "pco2":
-                    Variable = "pCO2"
-                    # subscript this, markdown style
-                    Variable = "pCO<sub>2</sub>"
-                if vv == "benbio":
-                    Variable = "macrobenthos biomass"
-                if vv == "susfrac":
-                    Variable = "suspension feeding fraction"
-                if variable.lower() == "mesozoo":
-                    Variable = "Mesozooplankton biomass"
-                vv_file = pp
-                vv_file_find = pp.replace("../../", "")
+            if vv != "ph":
+                Variable = variable
+            else:
+                Variable = "pH"
+            if vv == "co2flux":
+                Variable = "Air-sea CO2<sub>2</sub> fluxes"
+            if vv == "pco2":
+                Variable = "pCO2"
+                # subscript this, markdown style
+                Variable = "pCO<sub>2</sub>"
+            if vv == "benbio":
+                Variable = "macrobenthos biomass"
+            vv_file = pp
+            vv_file_find = pp.replace("../../", "")
 
-                if os.path.exists(vv_file_find):
-                    if (
-                        len(
-                            glob.glob(
-                                f"book/notebooks/*point_{layer}_{variable}.ipynb"
-                            )
+            if os.path.exists(vv_file_find):
+                if (
+                    len(
+                        glob.glob(
+                            f"book/notebooks/*point_{layer}_{variable}.ipynb"
                         )
-                        == 0
-                    ):
-                        file1 = importlib.resources.files(__name__).joinpath("data/point_template.ipynb")
-                        with open(file1, "r") as file:
-                            filedata = file.read()
+                    )
+                    == 0
+                ):
+                    file1 = importlib.resources.files(__name__).joinpath("data/point_template.ipynb")
+                    with open(file1, "r") as file:
+                        filedata = file.read()
 
-                        if layer in [ "all"]:
+                    if layer in [ "all", "surface"]:
+                        filedata = filedata.replace(
+                            "chunk_point_surface", "chunk_point"
+                        )
+                    else:
+                        filedata = filedata.replace("chunk_point_surface", "")
+                    if layer in ["bottom", "all"]:
+                        if vv.lower() not in ["pco2"]:
                             filedata = filedata.replace(
-                                "chunk_point_surface", "chunk_point"
+                                "chunk_point_bottom", "chunk_point"
                             )
-                        else:
-                            filedata = filedata.replace("chunk_point_surface", "")
-                        if layer in ["bottom", "all"]:
-                            if vv.lower() not in ["pco2"]:
-                                filedata = filedata.replace(
-                                    "chunk_point_bottom", "chunk_point"
-                                )
-                            else:
-                                filedata = filedata.replace("chunk_point_bottom", "")
                         else:
                             filedata = filedata.replace("chunk_point_bottom", "")
+                    else:
+                        filedata = filedata.replace("chunk_point_bottom", "")
 
-                        # Replace the target string
-                        out = f"book/notebooks/{source}_{layer}_{variable}.ipynb"
-                        filedata = filedata.replace("point_variable", variable)
-                        if layer != "all":
-                            filedata = filedata.replace(
-                                "Validation of point_layer", f"Validation of {layer}"
-                            )
-                        else:
-                            filedata = filedata.replace(
-                                "Validation of point_layer", f"Validation of "
-                            )
-                        filedata = filedata.replace("point_layer", layer)
-                        filedata = filedata.replace("template_title", Variable)
-
-                        # Write the file out again
-                        with open(out, "w") as file:
-                            file.write(filedata)
-                        variable = vv
-                        if variable in ["poc", "doc"]:
-                            variable = variable.upper()
-                        if variable == "pco2":
-                            variable = "pCO2"
-                        path_df.append(
-                            pd.DataFrame(
-                                {
-                                    "variable": [variable],
-                                    "path": out,
-                                }
-                            )
+                    # Replace the target string
+                    out = f"book/notebooks/{source}_{layer}_{variable}.ipynb"
+                    filedata = filedata.replace("point_variable", variable)
+                    if layer != "all":
+                        filedata = filedata.replace(
+                            "Validation of point_layer", f"Validation of {layer}"
                         )
+                    else:
+                        filedata = filedata.replace(
+                            "Validation of point_layer", f"Validation of "
+                        )
+                    filedata = filedata.replace("point_layer", layer)
+                    filedata = filedata.replace("template_title", Variable)
+
+                    # Write the file out again
+                    with open(out, "w") as file:
+                        file.write(filedata)
+                    variable = vv
+                    if variable == "pco2":
+                        variable = "pCO2"
+                    path_df.append(
+                        pd.DataFrame(
+                            {
+                                "variable": [variable],
+                                "path": out,
+                            }
+                        )
+                    )
 
         # Loop through the gridded matchups and generate notebooks
         # identify gridded variables in matched data
-        gridded_paths = glob.glob("matched/gridded/**/**/**.nc")
+        gridded_paths = glob.glob("matched/gridded/**/**.nc")
 
         if len(gridded_paths) > 0:
             for vv in [
@@ -416,9 +404,8 @@ def validate(
             ]:
                 for source in [
                     os.path.basename(x).split("_")[0]
-                    for x in glob.glob(f"matched/gridded/**/**/**_{vv}_**.nc")
+                    for x in glob.glob(f"matched/gridded/**/**_{vv}_**.nc")
                 ]:
-                    # source = os.path.basename(glob.glob(f"matched/gridded/**/**/**_{vv}_**.nc")[0]).split("_")[0]
 
                     variable = vv
                     if variables != "all":
@@ -433,14 +420,10 @@ def validate(
                             Variable = variable
                         if variable == "co2flux":
                             Variable = "air-sea CO2 fluxes"
-                        if variable in ["poc", "doc"]:
-                            Variable = Variable.upper()
                         if variable == "benbio":
                             Variable = "macrobenthos biomass"
                         if variable == "pco2":
                             Variable = "pCO2"
-                        if variable == "kd":
-                            Variable = "light attenuation coefficient"
                         file1 = importlib.resources.files(__name__).joinpath("data/gridded_template.ipynb")
                         if (
                             len(
@@ -478,11 +461,6 @@ def validate(
                                     }
                                 )
                             )
-
-
-        # loop through all notebooks and replace paths
-
-        i = 0
 
         # need to start by figuring out whether anything has already been run...
 
@@ -666,7 +644,6 @@ def validate(
 
     # fix the toc using the function
 
-    # raise ValueError("here")
     fix_toc(concise = concise)
 
     for ff in glob.glob(f"book/notebooks/*.ipynb"):

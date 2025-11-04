@@ -21,7 +21,6 @@ def gridded_matchup(
     exclude=None,
     sim_start=None,
     sim_end=None,
-    domain="nws",
     lon_lim=None,
     lat_lim=None,
     times_dict=None,
@@ -46,9 +45,6 @@ def gridded_matchup(
         Start year for model simulations
     sim_end : int
         End year for model simulations
-    domain : str
-        Domain to use for matchups. Either "NWS" or "global"
-        This indicates whether the matchups use northwest European shelf data or global data
     ds_thickness : str or nctoolkit DataSet
         File path to thickness file
 
@@ -94,7 +90,7 @@ def gridded_matchup(
             var_dict = {}
             out_dir = session_info["out_dir"]
             out = glob.glob(
-                out_dir + f"matched/gridded/{domain}/{vv}/*_{vv}_surface.nc"
+                out_dir + f"matched/gridded/{vv}/*_{vv}_surface.nc"
             )
             if len(out) > 0:
                 if session_info["overwrite"] is False:
@@ -104,26 +100,12 @@ def gridded_matchup(
             dir_var = f"{obs_dir}/gridded/user/{vv}"
             # check if this directory is empty
             if len(glob.glob(dir_var + "/*")) == 0:
-                dir_var = f"{obs_dir}/gridded/{domain}/{vv}"
+                dir_var = f"{obs_dir}/gridded/{vv}"
                 dirs = glob.glob(f"{obs_dir}/gridded/**/{vv}", recursive=True)
                 if len(dirs) == 0:
                     raise ValueError(f"No data found for {vv}")
                 # get directory names for dirs
                 dir_names = dirs
-
-                non_globals = [
-                    x for x in dir_names if "global" not in x.split("/")[-2]
-                ]
-                non_globals = [x for x in dir_names if domain in x.split("/")[-2]]
-                if len(non_globals) > 1:
-                    raise ValueError(
-                        f"Multiple directories found for {vv}. Please specify the correct directory"
-                    )
-
-                if len(non_globals) == 0:
-                    dir_var = [x for x in dir_names if "global" in x][0]
-                else:
-                    dir_var = non_globals[0]
 
             try:
                 vv_source = [
@@ -136,7 +118,6 @@ def gridded_matchup(
 
             if vv in ["pco2",  "temperature"]:
                 vv_file = nc.create_ensemble(dir_var)
-                vv_file = [x for x in vv_file if "annual" not in x]
                 ds_obs = nc.open_data(
                     vv_file,
                     checks=False,
@@ -190,7 +171,7 @@ def gridded_matchup(
                 ):
                     ds_grid = nc.open_data(paths[0], checks=False)
                     ds_grid.subset(variables=selection[0], time=0)
-                    ds_grid.cdo_command("topvalue")
+                    ds_grid.top()
                     ds_grid.as_missing(0)
                     if max(ds_grid.contents.npoints) == 111375:
                         amm7_out = session_info["out_dir"] + "matched/amm7.txt"
@@ -292,7 +273,7 @@ def gridded_matchup(
                     ds_surface = nc.open_data(paths, checks=False)
 
                     ds_surface.subset(variables=selection)
-                    ds_surface.cdo_command("topvalue")
+                    ds_surface.top()
                     ds_surface.as_missing(0)
                     ds_surface.tmean(
                         ["year", "month"], align="left"
@@ -415,37 +396,10 @@ def gridded_matchup(
                         ds_obs.merge("time")
                         ds_obs.tmean(["year", "month"], align="left")
 
-                    if vv in ["salinity"] and domain not in ["nws", "europe"]:
-                        ds_surface.cdo_command("topvalue")
-                        sub_years = [
-                            x for x in ds_surface.years if x in ds_obs.years
-                        ]
-                        ds_obs.subset(years=sub_years)
-                        ds_surface.subset(years=sub_years)
-                        ds_obs.merge("time")
-                        ds_obs.tmean("month")
-                        ds_surface.merge("time")
-                        ds_surface.tmean("month", align="left")
-                        #ds_obs_annual.subset(years=sub_years)
-                        #ds_obs_annual.tmean(align="left")
-                    if vv in ["chlorophyll"] and domain not in ["nws", "europe"]:
-                        ds_obs.top()
-                        sub_years = [
-                            x for x in ds_surface.years if x in ds_obs.years
-                        ]
-                        ds_obs.subset(years=sub_years)
-                        ds_surface.subset(years=sub_years)
-                        ds_obs.merge("time")
-                        ds_obs.tmean("month")
-                        ds_surface.merge("time")
-                        ds_surface.tmean("month", align="left")
-
                     if vv not in [ "temperature"]:
                         if len(ds_obs.times) > 12:
                             ds_obs.subset(years=sim_years)
 
-                    if vv_source == "occci" and vv == "chlor_a":
-                        ds_obs.subset(variable="chlor_a")
                     if vv_source == "occci" and vv == "kd":
                         ds_obs.subset(variable="kd_490")
 
@@ -492,31 +446,8 @@ def gridded_matchup(
                     lons = [lon_min, lon_max]
                     lats = [lat_min, lat_max]
 
-                    if domain != "global":
-                        ds_surface.subset(lon=lons, lat=lats)
-                        ds_obs.subset(lon=lons, lat=lats)
-
-                    if domain == "global":
-                        obs_extent = get_extent(ds_obs[0])
-                        lon_min = max(session_info["lon_lim"][0], obs_extent[0])
-                        lon_max = min(session_info["lon_lim"][1], obs_extent[1])
-                        lat_min = max(session_info["lat_lim"][0], obs_extent[2])
-                        lat_max = min(session_info["lat_lim"][1], obs_extent[3])
-
-                        # make sure lon_min is greater than -180
-                        if lon_min < -180:
-                            lon_min = -180
-                        if lon_max > 180:
-                            lon_max = 180
-                        if lat_min < -90:
-                            lat_min = -90
-                        if lat_max > 90:
-                            lat_max = 90
-
-                        lons = [lon_min, lon_max]
-                        lats = [lat_min, lat_max]
-                        ds_surface.subset(lon=lons, lat=lats)
-                        ds_obs.subset(lon=lons, lat=lats)
+                    ds_surface.subset(lon=lons, lat=lats)
+                    ds_obs.subset(lon=lons, lat=lats)
 
                     n1 = ds_obs.contents.npoints[0]
                     n2 = ds_surface.contents.npoints[0]
@@ -641,7 +572,7 @@ def gridded_matchup(
 
                     out_file = (
                         session_info["out_dir"]
-                        + f"matched/gridded/{domain}/{vv}/{vv_source}_{vv}_surface.nc"
+                        + f"matched/gridded/{vv}/{vv_source}_{vv}_surface.nc"
                     )
 
                     # check directory exists for out_file
@@ -651,8 +582,6 @@ def gridded_matchup(
                     if os.path.exists(out_file):
                         os.remove(out_file)
                     ds_obs.set_precision("F32")
-                    if vv == "salinity" and domain not in ["nws" "europe"]:
-                        ds_obs.tmean("month")
                     ds_surface = ds_obs.copy()
 
                     if lon_lim is not None and lat_lim is not None:
@@ -695,7 +624,7 @@ def gridded_matchup(
 
                 out = (
                     session_info["out_dir"]
-                    + f"matched/gridded/{domain}/{vv}/{vv}_summary.pkl"
+                    + f"matched/gridded/{vv}/{vv}_summary.pkl"
                 )
                 if not os.path.exists(os.path.dirname(out)):
                     os.makedirs(os.path.dirname(out))
