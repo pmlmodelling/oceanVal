@@ -58,7 +58,7 @@ In-situ  and gridded historical observations are used for the following variable
 | Chlorophyll | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | chlorophyll |
 | Nitrate | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | nitrate |
 | Oxygen | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) |[NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | oxygen |
-| pCO2 | [SOCAT]( https://www.socat.info/) | | pco2 |
+| pCO<sub>2</sub> | [SOCAT]( https://www.socat.info/) | | pco2 |
 | pH | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | | ph |
 | Phosphate | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | phosphate |
 | Salinity | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | salinity |
