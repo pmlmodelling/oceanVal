@@ -75,28 +75,14 @@ except:
     vv_name = "summary"
     variable = "summary"
 Variable = variable.title()
-if vv_name in ["benbio", "carbon", "susfrac", "oxycons"]:
+if vv_name in ["benbio"]:
     compact = True
 if vv_name.lower() == "ph":
     vv_name = "pH"
-if vv_name in ["doc", "poc"]:
-    vv_name = vv_name.upper()
 if vv_name == "benbio":
     vv_name = "biomass of macrobenthos"
-if vv_name == "susfrac":
-    vv_name = "suspension feeding fraction"
-if vv_name == "oxycons":
-    vv_name = "benthic oxygen consumption"
-if vv_name == "mesozoo":
-    vv_name = "mesozooplankton concentration"
 if vv_name == "co2flux":
     vv_name = "air-sea CO2 fluxes"
-if vv_name == "poc":
-    vv_name = "POC"
-if vv_name == "doc":
-    vv_name = "DOC"
 if vv_name == "pco2":
     vv_name = "pCO2"
-if vv_name == "kd":
-    vv_name = "light attenuation coefficient"
 vv_name = fix_variable_name(vv_name)

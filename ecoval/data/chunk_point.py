@@ -83,7 +83,7 @@ df_locs = df.loc[:,["lon", "lat"]].drop_duplicates()
 df_raw = copy.deepcopy(df)
 if variable == "benbio":
     df = df.assign(observation = lambda x: 1000 * 0.45 * x.observation) 
-if variable not in  ["carbon", "benbio", "susfrac", "oxycons"]:
+if variable not in  ["benbio"]:
     if "year" in point_time_res:
         df = df.groupby(["lon", "lat", "year", "month"]).mean().reset_index()
     else:
@@ -118,7 +118,7 @@ if True and available:
     ds_coords.regrid(df_raw.loc[:,["lon", "lat"]].drop_duplicates(), method = "nearest")
     df_coords = ds_coords.to_dataframe().reset_index()
     df = df.merge(df_coords, on = ["lon", "lat"], how = "left")
-    if variable not in  ["carbon", "benbio", "susfrac", "oxycons"]:
+    if variable not in  [ "benbio"]:
         grouping = [x for x in ["lon_model", "lat_model", "year", "month"] if x in df.columns]
         df = df.groupby(grouping).mean().reset_index()
     else:
@@ -132,8 +132,6 @@ if True and available:
 # A function for generating the data source
 
 def data_source(vv_source, vv_name):
-    if vv_name.lower() == "carbon":
-        return "Diesing et al. (2021)"
     if vv_source == "NSBS":
         return "the North Sea Benthos Survey (1986)"
     if vv_source == "NSBS":
@@ -164,25 +162,16 @@ if available:
                 intro.append(f"This data was extracted from vertical profiles. Values from the **top 5m** were extracted from the database. This was compared with the model values from the sea surface level.")
         if variable in ["benbio"]:
             intro.append("Biomass data for macrobenthos was downloaded from the North Sea Benthos Survey 1986.")
-        if variable in ["susfrac"]:
-            intro.append("Abundance data for macrobenthos was downloaded from the North Sea Benthos Survey 1986. It was than converted to biomass using [traitfinder](https://github.com/pmlmodelling/traitfinder) biomasses.")
     
-    if variable in ["carbon"]:
-        intro.append("Carbon data was compiled from multiple sources")
     
     if layer_select == "bottom":
         intro.append("**Note:** this analysis has been restricted to observations on the shelf region.")
     
     
-    if variable == "poc":
-        intro.append("Particulate organic carbon data was compiled from multiple sources")
-    
     if variable == "pco2":
         intro.append("The variable pCO2water_SST_wet was extracted from the SOCAT 2023 database.")
         intro.append("Observational values were averaged for each day in the year.")
     
-    if variable == "doc":
-        intro.append("Dissolved organic carbon data was compiled from multiple sources")
     
     df_mapping = pd.read_csv("../../matched/mapping.csv")
     model_variable = list(df_mapping.query("variable == @variable").model_variable)[0]
@@ -219,7 +208,6 @@ if available:
                 else:
                     intro.append(f"The observational data was restricted to the year **{point_start}**.")
         
-        
     except:
         if "year" in df_raw.columns:
             min_year = df_raw.year.min()
@@ -237,7 +225,6 @@ if available:
     md_basic(" ".join(intro).strip().replace("  ", " "))
     
     md(f"In total there were {len(df_raw)} values extracted from the observational database. The map below shows the locations of the matched up data for {vv_name}.", number = True)
-    #ds.assign(total = lambda x: x.Ymacro_fYG3c_result/12.011 + x.Y4_fYG3c/12.011 + x.H1_fHG3c/12.011 + x.H2_fHG3c/12.011 + 2.0 * x.ben_nit_nrate, drop = True) 
     if variable_formula is not None:
         md_markdown(f"The following model output was used to compare with observational values: **{variable_formula}**.")
     else:
@@ -785,7 +772,7 @@ gg
 
 # %% tags=["remove-input"]
 if available:
-    if variable not in ["carbon", "benbio", "susfrac", "oxycons"]:
+    if variable not in [ "benbio"]:
         if concise is False:
             if layer_select == "surface":
                 md(f"**Figure {i_figure}**: Simulated versus observed {vv_name} in the top 5m of the water column. The blue curve is a linear regression fit to the data, and the black line represents 1-1 relationship between the simulation and observations. The data has been averaged per model grid cell.") 
@@ -858,7 +845,7 @@ if available and not concise:
 
 # %% tags=["remove-input"]
 if available:
-    if variable not in ["carbon", "benbio", "susfrac", "oxycons"]:
+    if variable not in [ "benbio"]:
         df_bias = (
             df_raw
             .assign(bias = lambda x: x.model - x.observation)
@@ -878,7 +865,7 @@ if available:
     else:
         # only want annual
         df_bias = pd.DataFrame({"month": ["All"], "bias": [df_raw.model.mean() - df_raw.observation.mean()]})
-    if variable not in ["carbon", "benbio", "susfrac", "oxycons"]:
+    if variable not in [ "benbio"]:
         # now create an rmse dataframe
         df_rmse = (
             df_raw
@@ -901,7 +888,7 @@ if available:
     df_table = copy.deepcopy(df_bias).merge(df_rmse)
     df_table = df_table.round(2)
     # create df_corr
-    if variable not in ["carbon", "benbio", "susfrac", "oxycons"]:
+    if variable not in [ "benbio"]:
         df_corr = (
             df_raw
             .groupby("month")
@@ -928,7 +915,7 @@ if available:
     # change Month to Period
     df_table = df_table.rename(columns={"Month": "Time period"})
 
-    if variable not in ["carbon", "benbio", "susfrac", "oxycons"]:
+    if variable not in [ "benbio"]:
         # add commas to bias and rmse
         df_number = df_raw.groupby("month").count().reset_index().loc[:,["month", "observation"]]
     # convert month number to name
@@ -939,7 +926,7 @@ if available:
 
     # add total number of observations
     annual_number = len(df_raw)
-    if variable not in ["carbon", "benbio", "susfrac", "oxycons"]:
+    if variable not in [ "benbio"]:
         df_number = pd.concat([df_number, pd.DataFrame({"Time period": ["All"], "Number of observations": [annual_number]})])
     # df_number = df_number.append({"Time period": "All", "Number of observations": annual_number}, ignore_index=True)
     df_table = df_table.merge(df_number)
