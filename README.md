@@ -24,7 +24,7 @@ block-beta
   b["<b>NWS observational data"]
   block:group2:9
     columns 4 
-    c["Alkalinity"] d["Ammonium"] e["Benthic biomass"] f["Chlorophyll"] g["DOC"] h["Light attenuation"]  i["Mesozooplankton"] j["Nitrate"] k["Oxygen"] l["Plankton Functional Types"] m["Phosphate"] n["Particulate Organic Carbon"] o["Salinity"] p["Silicate"] q["Temperature"] 
+    c["Alkalinity"] d["Ammonium"] e["Benthic biomass"] f["Chlorophyll"] g["Light attenuation"]  h["Nitrate"] i["Oxygen"] i["Phosphate"] j["Salinity"] k["Silicate"] l["Temperature"] 
   end
    ae["<b>Report formats"]
     block:group4:9
@@ -60,7 +60,6 @@ In-situ  and gridded historical observations are used for the following variable
 | pCO2 | [SOCAT]( https://www.socat.info/) | | pco2 |
 | pH | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | | ph |
 | Phosphate | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | phosphate |
-| Particulate Organic Carbon | PANGAEA |  | poc |
 | Salinity | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html) | salinity |
 | Silicate | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D)| [NSBC](https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html)  | silicate |
 | Temperature | [ICES](https://www.ices.dk/data/data-portals/Pages/ocean.aspx) (3D) | [CMEMS](https://data.marine.copernicus.eu/product/SST_GLO_SST_L4_REP_OBSERVATIONS_010_011/description) | temperature |
