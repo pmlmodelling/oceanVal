@@ -24,7 +24,7 @@ block-beta
   b["<b>NWS observational data"]
   block:group2:9
     columns 4 
-    c["Air-sea CO2 flux"] d["Alkalinity"] e["Ammonium"] f["Benthic biomass"] g["Chlorophyll"] h["Light attenuation"]  i["Nitrate"] j["Oxygen"] k["pCO2"] l["pH"] m["Phosphate"] n["Salinity"] o["Silicate"] p["Temperature"] 
+    c["Air-sea CO<sub>2</sub> flux"] d["Alkalinity"] e["Ammonium"] f["Benthic biomass"] g["Chlorophyll"] h["Light attenuation"]  i["Nitrate"] j["Oxygen"] k["pCO2"] l["pH"] m["Phosphate"] n["Salinity"] o["Silicate"] p["Temperature"] 
   end
    ae["<b>Report formats"]
     block:group4:9
