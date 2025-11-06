@@ -104,85 +104,96 @@ if global_grid:
 mod_var = ds_model.variables[0]
 obs_var = ds_obs.variables[0]
 # create xlim using mod_var
-time_name = [x for x in list(ds_model.to_xarray().coords) if "time" in x][0]
-lon_name = [x for x in list(ds_obs.to_xarray().coords) if "lon" in x][0]
-lat_name = [x for x in list(ds_obs.to_xarray().coords) if "lat" in x][0]
-time_name
-
-df_model = (
-    ds_model
-    .to_dataframe()
-    .reset_index()
-    .rename(columns = {time_name: "time"})
-    .rename(columns = {lon_name: "lon"})
-    .rename(columns = {lat_name: "lat"})
-    .assign(month = lambda x: x.time.dt.month)
-    .loc[:,["lon", "lat", "month", mod_var ]]
-    .rename(columns = {mod_var: "model"})
-    .dropna()
-)
-
-xlim = np.array([df_model.lon.min(), df_model.lon.max()])
-ylim = np.array([df_model.lat.min(), df_model.lat.max()])
-
-df_obs = (
-    ds_obs
-    .to_dataframe()
-    .reset_index()
-)
-
-time_name = [x for x in list(ds_obs.to_xarray().coords) if "time" in x][0]
-lon_name = [x for x in list(ds_obs.to_xarray().coords) if "lon" in x][0]
-lat_name = [x for x in list(ds_obs.to_xarray().coords) if "lat" in x][0]
-
-
-df_obs = (
-    df_obs
-    .rename(columns = {time_name: "time"}  )
-    .rename(columns = {lon_name: "lon"}  )
-    .rename(columns = {lat_name: "lat"}  )
-    .assign(month = lambda x: x.time.dt.month)
-    .loc[:,["lon", "lat", "month", obs_var ]]
-    .rename(columns = {obs_var: "observation"})
-    .dropna()
-
-)
-
-df_diff = (
-    df_model
-    .merge(df_obs, on = ["lon", "lat", "month"])
-    .assign(diff = lambda x: x.model - x.observation)
-)
 try:
-    model_unit = ds_model.contents.unit[0]
-    model_unit = fix_unit(model_unit)
+    time_name = [x for x in list(ds_model.to_xarray().coords) if "time" in x][0]
 except:
-    model_unit = ds_obs.contents.unit[0]
-    model_unit = fix_unit(model_unit)
-from ecoval.utils import get_extent
-raw_extent = get_extent(ds_annual[0])
-if np.abs(raw_extent[0] - df_model.lon.min()) > 3:
-    # convert longitude to -180-180
-    df_model["lon" ] = [x if x < 180 else x -360 for x in df_model.lon]
-    df_obs["lon" ] = [x if x < 180 else x -360 for x in df_obs.lon]
-    df_diff["lon" ] = [x if x < 180 else x -360 for x in df_diff.lon]
+    time_name = None
+    concise = True
+if len(ds_model.times) == 1:
+    concise = True
+    time_name = None
+    model_unit = ""
+    raw_extent = "foo"
+    xlim = "bar"
+    ylim = "ba"
+if time_name is not None:
+    lon_name = [x for x in list(ds_obs.to_xarray().coords) if "lon" in x][0]
+    lat_name = [x for x in list(ds_obs.to_xarray().coords) if "lat" in x][0]
 
-# generate a temporary csv file name in /tmp
-# create adhoc dir if not
-if not os.path.exists("adhoc/tmp"):
-    os.makedirs("adhoc/tmp")
-tmp_csv = f"adhoc/df_obs_model.csv"
-df_obs.to_csv(tmp_csv)
-tmp_csv = f"adhoc/df_model_model.csv"
-df_model.to_csv(tmp_csv)
-tmp_csv = f"adhoc/df_diff_model.csv"
-df_diff.to_csv(tmp_csv)
+    df_model = (
+        ds_model
+        .to_dataframe()
+        .reset_index()
+        .rename(columns = {time_name: "time"})
+        .rename(columns = {lon_name: "lon"})
+        .rename(columns = {lat_name: "lat"})
+        .assign(month = lambda x: x.time.dt.month)
+        .loc[:,["lon", "lat", "month", mod_var ]]
+        .rename(columns = {mod_var: "model"})
+        .dropna()
+    )
+
+    xlim = np.array([df_model.lon.min(), df_model.lon.max()])
+    ylim = np.array([df_model.lat.min(), df_model.lat.max()])
+
+    df_obs = (
+        ds_obs
+        .to_dataframe()
+        .reset_index()
+    )
+
+    time_name = [x for x in list(ds_obs.to_xarray().coords) if "time" in x][0]
+    lon_name = [x for x in list(ds_obs.to_xarray().coords) if "lon" in x][0]
+    lat_name = [x for x in list(ds_obs.to_xarray().coords) if "lat" in x][0]
 
 
-# %% tags=["remove-input"]
+    df_obs = (
+        df_obs
+        .rename(columns = {time_name: "time"}  )
+        .rename(columns = {lon_name: "lon"}  )
+        .rename(columns = {lat_name: "lat"}  )
+        .assign(month = lambda x: x.time.dt.month)
+        .loc[:,["lon", "lat", "month", obs_var ]]
+        .rename(columns = {obs_var: "observation"})
+        .dropna()
 
-if not concise:
-    md(f"The seasonal cycles of simulated and observed {vv_name} are compared in Figure {i_figure} below. This figure shows the model and observation average in each month of the year, and the differences between the two each month") 
+    )
+
+    df_diff = (
+        df_model
+        .merge(df_obs, on = ["lon", "lat", "month"])
+        .assign(diff = lambda x: x.model - x.observation)
+    )
+    try:
+        model_unit = ds_model.contents.unit[0]
+        model_unit = fix_unit(model_unit)
+    except:
+        model_unit = ds_obs.contents.unit[0]
+        model_unit = fix_unit(model_unit)
+    from ecoval.utils import get_extent
+    raw_extent = get_extent(ds_annual[0])
+    if np.abs(raw_extent[0] - df_model.lon.min()) > 3:
+        # convert longitude to -180-180
+        df_model["lon" ] = [x if x < 180 else x -360 for x in df_model.lon]
+        df_obs["lon" ] = [x if x < 180 else x -360 for x in df_obs.lon]
+        df_diff["lon" ] = [x if x < 180 else x -360 for x in df_diff.lon]
+
+    # generate a temporary csv file name in /tmp
+    # create adhoc dir if not
+    if not os.path.exists("adhoc/tmp"):
+        os.makedirs("adhoc/tmp")
+    tmp_csv = f"adhoc/df_obs_model.csv"
+    df_obs.to_csv(tmp_csv)
+    tmp_csv = f"adhoc/df_model_model.csv"
+    df_model.to_csv(tmp_csv)
+    tmp_csv = f"adhoc/df_diff_model.csv"
+    df_diff.to_csv(tmp_csv)
+
+
+    # %% tags=["remove-input"]
+
+    if not concise:
+        md(f"The seasonal cycles of simulated and observed {vv_name} are compared in Figure {i_figure} below. This figure shows the model and observation average in each month of the year, and the differences between the two each month") 
 
 
 
