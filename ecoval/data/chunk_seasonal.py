@@ -44,7 +44,7 @@ else:
 
 
 # %% tags=["remove-input"]
-md(f"**Figure {i_figure}**: Seasonal temporal correlation between model and observations for {layer} {vv_name}. This is the Pearson correlation coefficient between climatology monthly mean values in the model and observations.")
+md(f"**Figure {i_figure}**: Seasonal temporal correlation between model and observations for {layer} {vv_name}. This is the Pearson correlation coefficient between climatological monthly mean values in the model and observations.")
 i_figure += 1
 
 # %% tags=["remove-cell"]
