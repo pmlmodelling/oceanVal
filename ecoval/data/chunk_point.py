@@ -271,7 +271,7 @@ gg <- df_locs %>%
     theme_gray(base_size = 14)+
     # add colour scale. Minimum zero, label 100, ">100"
     geom_polygon(data = world_map, aes(long, lat, group = group), fill = "grey60")+
-    coord_fixed(xlim = xlim, ylim = ylim, ratio = 1.5) 
+    coord_fixed(xlim = xlim, ylim = ylim, ratio = 1.5, expand = FALSE) 
 
 # figure out if lon minimum is less than -10
 if( min(df_locs$lon) < -13 ){
@@ -382,7 +382,7 @@ gg <- df_map %>%
     ggplot()+
     geom_tile(aes(lon, lat, fill = value))+
     theme_gray(base_size = 14)+
-    coord_fixed(ratio = 1.5, xlim = c(min(df$lon), max(df$lon)), ylim = c(min(df$lat), max(df$lat)))+
+    coord_fixed(ratio = 1.5, xlim = c(min(df$lon), max(df$lon)), ylim = c(min(df$lat), max(df$lat)), expand = FALSE)+
     labs(color = variable)+
     # log10
     scale_color_viridis_c()+
@@ -574,7 +574,7 @@ gg <- df %>%
     geom_point(aes(lon, lat, colour = bias))+
     theme_dark(base_size = 24)+
     # add colour scale. Minimum zero, label 100, ">100"
-    coord_fixed(xlim = xlim, ylim = ylim, ratio = 1.5) +
+    coord_fixed(xlim = xlim, ylim = ylim, ratio = 1.5, expand = FALSE) +
     # move legend to the top. Make it 3 cm wide
     # move legend title to the bottom and centre it
     scale_colour_gradient2(low = "blue", high = "red",
@@ -600,7 +600,7 @@ gg <- df %>%
     geom_tile(aes(lon, lat, fill = bias))+
     theme_dark(base_size = 24)+
     # add colour scale. Minimum zero, label 100, ">100"
-    coord_fixed(xlim = xlim, ylim = ylim, ratio = 1.5) +
+    coord_fixed(xlim = xlim, ylim = ylim, ratio = 1.5, expand = FALSE) +
     # move legend to the top. Make it 3 cm wide
     # move legend title to the bottom and centre it
     scale_fill_gradient2(low = "blue", high = "red",

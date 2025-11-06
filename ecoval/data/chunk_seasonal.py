@@ -380,7 +380,7 @@ lat_labels = c(paste0(round(ylim[1]), "°N"), paste0(round(ylim[1] + 5), "°N"),
 gg1 = ggplot(df_model)+
     geom_tile(aes(x = lon, y = lat, fill = model))+
     facet_wrap(~month, ncol = 6)+
-    coord_cartesian(xlim = xlim, ylim = ylim)+ 
+    coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)+ 
     theme_bw(base_size = 12)+
     theme(legend.title = ggtext::element_markdown(angle = -90), legend.title.align = 0.5)+
     scale_fill_viridis_c(guide  = guide_colourbar(title.position = "right"))+
@@ -400,7 +400,7 @@ gg1 <- gg1 +
 gg2 = ggplot(df_obs)+
     geom_tile(aes(x = lon, y = lat, fill = observation))+
     facet_wrap(~month, ncol = 6)+
-    coord_cartesian(xlim = xlim, ylim = ylim)+ 
+    coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)+ 
     scale_fill_viridis_c(guide  = guide_colourbar(title.position = "right"))+
     theme_bw(base_size = 12)+
     theme(legend.title = ggtext::element_markdown(angle = -90), legend.title.align = 0.5)+
@@ -420,7 +420,7 @@ gg2 <-  gg2 +
 gg3 = ggplot(df_diff)+
 geom_tile(aes(x = lon, y = lat, fill = diff))+
 facet_wrap(~month, ncol = 6)+
-coord_cartesian(xlim = xlim, ylim = ylim)+ 
+coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)+ 
 theme_bw(base_size = 12)+
 scale_fill_gradient2(guide  = guide_colourbar(title.position = "right"), low = "blue", high = "red")+
 theme(legend.title = ggtext::element_markdown(angle = -90), legend.title.align = 0.5)+
@@ -632,7 +632,7 @@ lat_labels = c(paste0(round(ylim[1]), "°N"), paste0(round(ylim[1] + 5), "°N"),
 gg1 = ggplot(df_model)+
 geom_tile(aes(x = lon, y = lat, fill = model))+
 facet_wrap(~month, ncol = 6)+
-coord_cartesian(xlim = xlim, ylim = ylim)+ 
+coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)+ 
 theme_bw(base_size = 12)+
 theme(legend.title = ggtext::element_markdown(angle = -90), legend.title.align = 0.5)+
 scale_fill_viridis_c(guide  = guide_colourbar(title.position = "right"))+
@@ -653,7 +653,7 @@ gg1 <- gg1 +
 gg2 = ggplot(df_obs)+
 geom_tile(aes(x = lon, y = lat, fill = observation))+
 facet_wrap(~month, ncol = 6)+
-coord_cartesian(xlim = xlim, ylim = ylim)+ 
+coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)+ 
 scale_fill_viridis_c(guide  = guide_colourbar(title.position = "right"))+
 theme_bw(base_size = 12)+
 theme(legend.title = ggtext::element_markdown(angle = -90), legend.title.align = 0.5)+
@@ -672,7 +672,7 @@ gg2 <- gg2 +
 gg3 = ggplot(df_diff)+
 geom_tile(aes(x = lon, y = lat, fill = diff))+
 facet_wrap(~month, ncol = 6)+
-coord_cartesian(xlim = xlim, ylim = ylim)+ 
+coord_cartesian(xlim = xlim, ylim = ylim, expand = FALSE)+ 
 theme_bw(base_size = 12)+
 scale_fill_gradient2(guide  = guide_colourbar(title.position = "right"), low = "blue", high = "red")+
 theme(legend.title = ggtext::element_markdown(angle = -90), legend.title.align = 0.5)+
