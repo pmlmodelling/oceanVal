@@ -87,15 +87,16 @@ def gridded_matchup(
                     continue
             # figure out the data source
             #
-            dir_var = f"{obs_dir}/gridded/user/{vv}"
             # check if this directory is empty
-            if len(glob.glob(dir_var + "/*")) == 0:
-                dir_var = f"{obs_dir}/gridded/{vv}"
-                dirs = glob.glob(f"{obs_dir}/gridded/**/{vv}", recursive=True)
-                if len(dirs) == 0:
-                    raise ValueError(f"No data found for {vv}")
-                # get directory names for dirs
-                dir_names = dirs
+            dir_var = f"{obs_dir}/gridded/{vv}"
+            dirs = glob.glob(f"{obs_dir}/gridded/**/{vv}", recursive=True)
+            if len(dirs) == 0:
+                raise ValueError(f"No data found for {vv}")
+            # get directory names for dirs
+            dir_names = dirs
+            if definitions[vv].gridded_dir != "auto":
+                dir_var = definitions[vv].gridded_dir 
+                dirs = glob.glob(dir_var, recursive=True)
 
             try:
                 vv_source = [

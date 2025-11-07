@@ -1987,6 +1987,18 @@ def matchup(
         print("########################################")
 
     # store definitions as a pickle
+    print(definitions.temperature.source["cobe2"])
     ff = session_info["out_dir"] + "matched/definitions.pkl"
-    with open(ff, "wb") as f:
-        pickle.dump(definitions, f)
+    if os.path.exists(ff):
+        os.remove(ff)
+    import dill
+
+    dill.dump(definitions, file = open(ff, "wb"))
+    # reload it
+    # del definitions
+    definitions_in = copy.deepcopy(dill.load(file = open(ff, "rb")))
+    print(definitions_in.temperature.source["cobe2"])
+
+    # with open(ff, "wb") as f:
+    #     definitions_out = copy.deepcopy(definitions)
+    #     dill.dump(definitions_out, f)
