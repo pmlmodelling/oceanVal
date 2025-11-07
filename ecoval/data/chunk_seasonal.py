@@ -375,17 +375,12 @@ df_obs$month <- factor(df_obs$month, levels = c("Jan", "Feb", "Mar", "Apr", "May
 df_diff$month <- factor(df_diff$month, levels = c("Jan", "Feb", "Mar", "Apr", "May", "Jun"))
 
 
-
-
-# lon_label = c("20°W", "10°W", "0°", "10°E")
-# lat_label = c("45°N", "50°N", "55°N", "60°N", "65°N")
 # Create sensible lon/lat labels based on the min/min lon and lat
 # This needs to work on any data, including global data
 lon_breaks = c(xlim[1], xlim[1] + 10, 0, xlim[2] - 10)
 lat_breaks = c(ylim[1], ylim[1] + 5, ylim[1] + 10, ylim[1] + 15, ylim[2])
 lon_labels = c(paste0(round(xlim[1]), "°W"), paste0(round(xlim[1] + 10), "°W"), "0°", paste0(round(xlim[2] - 10), "°E"))
 lat_labels = c(paste0(round(ylim[1]), "°N"), paste0(round(ylim[1] + 5), "°N"), paste0(round(ylim[1] + 10), "°N"), paste0(round(ylim[1] + 15), "°N"), paste0(round(ylim[2]), "°N"))
-
 
 
 gg1 = ggplot(df_model)+
@@ -471,7 +466,6 @@ if (concise == FALSE){
     
 library(tidyverse, warn.conflicts = FALSE)
 library(cowplot, warn.conflicts = FALSE)
-#library(tidyr, warn.conflicts = FALSE)
 library(dplyr, warn.conflicts = FALSE)
 
 df_model <- read_csv("adhoc/df_model_model.csv")

@@ -714,7 +714,6 @@ x_lab <- str_replace(x_lab, "/m\\^3", "m<sup>-3</sup>")
 y_lab <- str_replace(y_lab, "/m\\^3", "m<sup>-3</sup>")
 x_lab <- str_replace(x_lab, "/m\\^2", "m<sup>-2</sup>")
 y_lab <- str_replace(y_lab, "/m\\^2", "m<sup>-2</sup>")
-#title <- str_replace_all(title, "m-([0-9]+)", "m<sup>-\\1</sup>")
 x_lab <- str_replace_all(x_lab, "m-([0-9]+)", "m<sup>-\\1</sup>")
 y_lab <- str_replace_all(y_lab, "m-([0-9]+)", "m<sup>-\\1</sup>")
 # fix O_2

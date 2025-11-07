@@ -1,4 +1,6 @@
 import warnings
+from ecoval.parsers import Validator
+definitions = Validator()
 
 
 # function to convert list to string with , separator, with an "and" at the end
@@ -54,6 +56,7 @@ def tidy_name_1(x, lower=False):
     A function to create a better name for tables etc.
 
     """
+    return definitions[x].short_title
 
     if "flux" in x.lower():
         if lower:

@@ -15,6 +15,8 @@ import warnings
 import pickle
 import xarray as xr
 from ecoval.session import session_info
+from ecoval.parsers import Validator
+definitions = Validator()
 from multiprocessing import Manager
 from tqdm import tqdm
 from ecoval.utils import extension_of_directory
@@ -106,22 +108,7 @@ def extract_units(df, sim_dir, n_dirs_down):
     return df.loc[:,["variable", "unit"]]
 
 # a list of valid variables for validation
-valid_vars = [
-    "temperature",
-    "salinity",
-    "oxygen",
-    "phosphate",
-    "silicate",
-    "nitrate",
-    "ammonium",
-    "alkalinity",
-    "ph",
-    "chlorophyll",
-    "co2flux",
-    "pco2",
-    "benbio",
-    "kd"
-]
+valid_vars = definitions.keys 
 
 session_warnings = Manager().list()
 

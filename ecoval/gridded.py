@@ -12,6 +12,8 @@ import xarray as xr
 from ecoval.fixers import tidy_warnings
 from ecoval.utils import extension_of_directory, get_extent, is_latlon, get_resolution
 from ecoval.session import session_info
+from ecoval.parsers import Validator
+definitions = Validator()
 
 
 def gridded_matchup(
@@ -59,21 +61,11 @@ def gridded_matchup(
 
     all_df = all_df.dropna()
 
-    vars = [
-        "ammonium",
-        "chlorophyll",
-        "nitrate",
-        "phosphate",
-        "oxygen",
-        "silicate",
-        "salinity",
-        "temperature",
-        "co2flux",
-        "pco2",
-        "ph",
-        "alkalinity",
-        "kd",
-    ]
+    vars = []
+    for x in definitions.keys:
+        if definitions[x].gridded:
+            vars.append(x)
+
     vars = [x for x in vars if x in var_choice]
     vars.sort()
 

@@ -15,6 +15,33 @@ import re
 from ecoval.fvcom import fvcom_preprocess
 import importlib
 
+from ecoval.parsers import Validator
+definitions = Validator()
+# loop through the keys and make sure all attributes are set
+#for key in definitions.keys:
+for key in definitions.keys: 
+    try:
+        x = definitions[key].gridded
+    except AttributeError:
+        raise AttributeError(f"Variable '{key}' is missing 'gridded' attribute")
+    try:
+        x = definitions[key].point
+    except AttributeError:
+        raise AttributeError(f"Variable '{key}' is missing 'point' attribute")
+    try:
+        x = definitions[key].source
+    except AttributeError:
+        raise AttributeError(f"Variable '{key}' is missing 'source' attribute")
+    try:
+        x = definitions[key].short_name
+    except AttributeError:
+        raise AttributeError(f"Variable '{key}' is missing 'short_name' attribute")
+    try:
+        x = definitions[key].long_name
+    except AttributeError:
+        raise AttributeError(f"Variable '{key}' is missing 'long_name' attribute")
+# add a test to make sure definitions is complete
+
 
 def fix_toc(concise = True):
     paths = glob.glob(f"book/notebooks/*.ipynb")
@@ -320,18 +347,7 @@ def validate(
             source = os.path.basename(pp).split("_")[0]
             variable = vv
             layer = os.path.basename(pp).split("_")[1].replace(".csv", "")
-            if vv != "ph":
-                Variable = variable
-            else:
-                Variable = "pH"
-            if vv == "co2flux":
-                Variable = "Air-sea CO2<sub>2</sub> fluxes"
-            if vv == "pco2":
-                Variable = "pCO2"
-                # subscript this, markdown style
-                Variable = "pCO<sub>2</sub>"
-            if vv == "benbio":
-                Variable = "macrobenthos biomass"
+            Variable = definitions[variable].short_name
             vv_file = pp
             vv_file_find = pp.replace("../../", "")
 
@@ -414,16 +430,8 @@ def validate(
                     if not os.path.exists(
                         f"book/notebooks/{source}_{variable}.ipynb"
                     ):
-                        if variable == "ph":
-                            Variable = "pH"
-                        else:
-                            Variable = variable
-                        if variable == "co2flux":
-                            Variable = "air-sea CO2 fluxes"
-                        if variable == "benbio":
-                            Variable = "macrobenthos biomass"
-                        if variable == "pco2":
-                            Variable = "pCO2"
+                        Variable = definitions[variable].short_name
+    
                         file1 = importlib.resources.files(__name__).joinpath("data/gridded_template.ipynb")
                         if (
                             len(

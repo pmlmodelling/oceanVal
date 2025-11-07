@@ -21,6 +21,7 @@ import hvplot.pandas
 from plotnine import *
 from IPython.core.interactiveshell import InteractiveShell
 from ecoval.tidiers import tidy_info
+definitions = ecoval.parsers.Validator()
 InteractiveShell.ast_node_interactivity = "all"
 
 try:
@@ -39,13 +40,10 @@ try:
 except:
     concise = False
 
-# from ecoval.tidiers import fix_basename
-# from ecoval.tidiers import fix_unit, fix_variable_name
-# from ecoval.tidiers import df_display
-# from ecoval.tidiers import md, md_basic
-# from ecoval.tidiers import tidy_summary_paths
+# from ecoval.tidiers import fix_basenay_paths
 # in one line
-from ecoval.tidiers import fix_basename, fix_unit, fix_variable_name, df_display, tidy_summary_paths, md, md_basic
+#from ecoval.tidiers import fix_basename, fix_unit, fix_variable_name, df_display, tidy_summary_paths, md, md_basic
+from ecoval.tidiers import fix_basename, fix_unit, df_display, tidy_summary_paths, md, md_basic
 
 warnings.filterwarnings('ignore')
 
@@ -77,12 +75,7 @@ except:
 Variable = variable.title()
 if vv_name in ["benbio"]:
     compact = True
-if vv_name.lower() == "ph":
-    vv_name = "pH"
-if vv_name == "benbio":
-    vv_name = "biomass of macrobenthos"
-if vv_name == "co2flux":
-    vv_name = "air-sea CO2 fluxes"
-if vv_name == "pco2":
-    vv_name = "pCO2"
-vv_name = fix_variable_name(vv_name)
+try:
+    vv_name = definitions[variable].long_name 
+except:
+    pass

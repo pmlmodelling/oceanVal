@@ -3,6 +3,8 @@ import re
 import glob
 import os
 import pandas as pd
+from ecoval.parsers import Validator
+definitions = Validator()
 tidy_info = {}
 def fix_basename(x):
     #annualmean_nitrate_nsbc.nc
@@ -37,30 +39,6 @@ def fix_unit(x):
 
     return x
 
-
-def fix_variable_name(x):
-    if "concentration" in x:
-        return x
-    if "nitrate" in x:
-        return "nitrate concentration"
-    if "phosphate" in x:
-        return "phosphate concentration"
-    if "silicate" in x:
-        return "silicate concentration"
-    if "ammonium" in x:
-        return "ammonium concentration"
-    if "temperature" in x:
-        return "temperature"
-    if "salinity" in x:
-        return "salinity"
-    if "oxygen" in x and "enthic" not in x:
-        return "oxygen concentration"
-    if x =="ph":
-        return "pH"
-    if "chlorophyll" in x:
-        return "chlorophyll concentration"
-
-    return x
 
 
 def df_display(df):
