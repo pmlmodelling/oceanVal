@@ -1,5 +1,6 @@
 import nctoolkit as nc
 import re
+import os
 import warnings
 from ecoval.session import session_info
 
@@ -69,6 +70,8 @@ class Validator:
     chlorophyll.short_title = "Chlorophyll"
     chlorophyll.long_name = "chlorophyll concentration"
     chlorophyll.model_variable = "auto"
+    chlorophyll.point_dir = "auto"
+    chlorophyll.gridded_dir = "auto"
     session_info["keys"].append("chlorophyll")
 
     # oxygen
@@ -83,6 +86,8 @@ class Validator:
     oxygen.short_title = "Oxygen"
     oxygen.long_name = "dissolved oxygen concentration"
     oxygen.model_variable = "auto"
+    oxygen.point_dir = "auto"
+    oxygen.gridded_dir = "auto"
     keys.append("oxygen")
 
     # now nitrate
@@ -99,6 +104,8 @@ class Validator:
     nitrate.short_title = "Nitrate"
     nitrate.long_name = "nitrate concentration"
     nitrate.model_variable = "auto"
+    nitrate.point_dir = "auto"
+    nitrate.gridded_dir = "auto"
     keys.append("nitrate")
 
     # phosphate
@@ -114,6 +121,8 @@ class Validator:
     phosphate.short_title = "Phosphate"
     phosphate.long_name = "phosphate concentration"
     phosphate.model_variable = "auto"
+    phosphate.point_dir = "auto"
+    phosphate.gridded_dir = "auto"
     keys.append("phosphate")
 
     # silicate
@@ -129,6 +138,8 @@ class Validator:
     silicate.short_title = "Silicate"
     silicate.long_name = "silicate concentration"
     silicate.model_variable = "auto"
+    silicate.point_dir = "auto"
+    silicate.gridded_dir = "auto"
     keys.append("silicate")
 
     # benbio
@@ -141,6 +152,8 @@ class Validator:
     benbio.long_name = "macrobenthos biomass"
     benbio.short_title = "Macrobenthos Biomass"
     benbio.model_variable = "auto"
+    benbio.point_dir = "auto"
+    benbio.gridded_dir = "auto"
     keys.append("benbio")
 
     # ammonium
@@ -154,6 +167,8 @@ class Validator:
     ammonium.short_title = "Ammonium"
     ammonium.long_name = "ammonium concentration"
     ammonium.model_variable = "auto"
+    ammonium.point_dir = "auto"
+    ammonium.gridded_dir = "auto"
     keys.append("ammonium")
 
 
@@ -167,6 +182,8 @@ class Validator:
     pco2.short_title = "pCO<sub>2</sub>" 
     pco2.long_name = "partial pressure of CO<sub>2</sub>"
     pco2.model_variable = "auto"
+    pco2.point_dir = "auto"
+    pco2.gridded_dir = "auto"
     keys.append("pco2")
 
     # ph
@@ -179,6 +196,8 @@ class Validator:
     ph.short_title = "pH"
     ph.long_name = "pH"
     ph.model_variable = "auto"
+    ph.point_dir = "auto"
+    ph.gridded_dir = "auto"
     keys.append("ph")
 
 
@@ -193,6 +212,8 @@ class Validator:
     salinity.short_title = "Salinity"
     salinity.long_name = "salinity"
     salinity.model_variable = "auto"
+    salinity.point_dir = "auto"
+    salinity.gridded_dir = "auto"
     keys.append("salinity")
 
     # temperature
@@ -205,6 +226,8 @@ class Validator:
     temperature.short_title = "Temperature"
     temperature.long_name = "temperature"
     temperature.model_variable = "auto"
+    temperature.point_dir = "auto"
+    temperature.gridded_dir = "auto"
     keys.append("temperature")
 
     # co2flux
@@ -217,6 +240,8 @@ class Validator:
     co2flux.short_title = "CO2<sub>2</sub> fluxes"
     co2flux.long_name = "air-sea CO2<sub>2</sub> fluxes" 
     co2flux.model_variable = "auto"
+    co2flux.point_dir = "auto"
+    co2flux.gridded_dir = "auto"
     keys.append("co2flux")
 
 
@@ -231,6 +256,8 @@ class Validator:
     alkalinity.short_title = "Alkalinity"
     alkalinity.long_name = "total alkalinity"
     alkalinity.model_variable = "auto"
+    alkalinity.point_dir = "auto"
+    alkalinity.gridded_dir = "auto"
     keys.append("alkalinity")
 
     # now kd
@@ -243,6 +270,8 @@ class Validator:
     kd.short_title = "kd"
     kd.long_name = "light attenuation"
     kd.model_variable = "auto"
+    kd.point_dir = "auto"
+    kd.gridded_dir = "auto"
     keys.append("kd")
 
     # ensure self.x = y, adds x to the keys list
@@ -263,7 +292,7 @@ class Validator:
     
     # add a method that let's user create a new Variable and add it to the definitions
     # use the set_all method
-    def add_variable(self, name, long_name, short_name, short_title, gridded, point, source, model_variable): 
+    def add_variable(self, name, long_name, short_name, short_title, gridded, point, source, model_variable, point_dir = "auto", gridded_dir = "auto"): 
         var = Variable()
         var.long_name = long_name
         var.short_name = short_name
@@ -272,6 +301,15 @@ class Validator:
         var.point = point
         var.source = source
         var.model_variable = model_variable
+        var.point_dir = point_dir
+        # check this exists
+        if point_dir != "auto":
+            if not os.path.exists(point_dir):
+                raise ValueError(f"Point directory {point_dir} does not exist")
+        var.gridded_dir = gridded_dir
+        if gridded_dir != "auto":
+            if not os.path.exists(gridded_dir):
+                raise ValueError(f"Gridded directory {gridded_dir} does not exist")
         # ensure nothing is None
         for attr in [var.long_name, var.short_name, var.short_title, var.source, var.model_variable]:
             if attr is None:

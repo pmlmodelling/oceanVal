@@ -859,16 +859,25 @@ def matchup(
         lat_max = session_info["lat_lim"][1]
         lat_min = session_info["lat_lim"][0]
 
-
-
     if session_info["user_dir"]:
         valid_points = list(
             set([x for x in glob.glob(obs_dir + "/point/all/*")])
         )
+        for key in definitions.keys:
+            dir_name = definitions[key].point_dir
+            if os.path.exists(dir_name):
+                if key not in valid_points:
+                    valid_points.append(key)
     else:
         valid_points = list(set([x for x in glob.glob(obs_dir + "/point/all/*")]))
     # extract directory base name
     valid_points = [os.path.basename(x) for x in valid_points]
+
+    for key in definitions.keys:
+        dir_name = definitions[key].point_dir
+        if os.path.exists(dir_name):
+            if key not in valid_points:
+                valid_points.append(key)
 
 
     if True:
@@ -876,6 +885,11 @@ def matchup(
             valid_gridded = [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/*")
             ]
+            for key in definitions.keys:
+                dir_name = definitions[key].gridded_dir
+                if os.path.exists(dir_name):
+                    if key not in valid_gridded:
+                        valid_gridded.append(key)
         else:
             valid_gridded = [
                 os.path.basename(x)
@@ -885,6 +899,11 @@ def matchup(
             valid_gridded += [
                 os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/*")
             ]
+            for key in definitions.keys:
+                dir_name = definitions[key].gridded_dir
+                if os.path.exists(dir_name):
+                    if key not in valid_gridded:
+                        valid_gridded.append(key)
     if len(gridded) > 0:
         if gridded[0] == "default" and len(gridded) == 1:
             gridded = valid_gridded
@@ -1100,6 +1119,7 @@ def matchup(
                 "You have asked for variables that require the specification of thickness"
             )
         print("Thickness is sorted out")
+
 
     if mapping is not None:
 
@@ -1484,6 +1504,10 @@ def matchup(
                                     f"{obs_dir}/point/{layer_select}/{variable}/**{variable}**.feather"
                                 )
                             # paths bottom
+                            if definitions[variable].point_dir != "auto":
+                                paths = glob.glob(
+                                    f"{definitions[variable].point_dir}/**{variable}**.feather"
+                                )
 
                             if session_info["user_dir"]:
                                 paths_bottom = glob.glob(
@@ -1494,10 +1518,10 @@ def matchup(
                                     f"{obs_dir}/point/bottom/{variable}/**{variable}**.feather"
                                 )
 
-
                             source = os.path.basename(paths[0]).split("_")[0]
 
-                            paths = [x for x in paths if f"{point_variable}/" in x]
+                            if definitions[variable].point_dir == "auto":
+                                paths = [x for x in paths if f"{point_variable}/" in x]
                             for exc in exclude:
                                 paths = [
                                     x
@@ -1506,6 +1530,9 @@ def matchup(
                                 ]
 
                             df = pd.concat([pd.read_feather(x) for x in paths])
+                            # remove source if it's in df
+                            if "source" in df.columns:
+                                df = df.query("source == @source").reset_index(drop=True)
                             # if it exists, coerce year to int
                             if "year" in df.columns:
                                 df = df.assign(year=lambda x: x.year.astype(int))
