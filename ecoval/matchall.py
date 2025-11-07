@@ -15,8 +15,7 @@ import warnings
 import pickle
 import xarray as xr
 from ecoval.session import session_info
-from ecoval.parsers import Validator
-definitions = Validator()
+from ecoval.parsers import Validator, definitions
 from multiprocessing import Manager
 from tqdm import tqdm
 from ecoval.utils import extension_of_directory
@@ -1959,3 +1958,8 @@ def matchup(
             print(x)
         print("########################################")
         print("########################################")
+
+    # store definitions as a pickle
+    ff = session_info["out_dir"] + "matched/definitions.pkl"
+    with open(ff, "wb") as f:
+        pickle.dump(definitions, f)

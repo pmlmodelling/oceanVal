@@ -12,8 +12,7 @@ import xarray as xr
 from ecoval.fixers import tidy_warnings
 from ecoval.utils import extension_of_directory, get_extent, is_latlon, get_resolution
 from ecoval.session import session_info
-from ecoval.parsers import Validator
-definitions = Validator()
+from ecoval.parsers import Validator, definitions
 
 
 def gridded_matchup(

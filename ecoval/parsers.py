@@ -3,9 +3,16 @@ import re
 import warnings
 from ecoval.session import session_info
 
+session_info["keys"] = []
 
 bad_conc_vars = ["medium", "pod", "size"]
 
+def get_name(obj):
+    namespace = globals()
+    for name in namespace:
+        if namespace[name] is obj:
+            return name
+    return None
 
 # create a validator class
 # create a variable class to hold metadata
@@ -13,6 +20,24 @@ class Variable:
     def __init__(self):
         self.long_name = None
         self.gridded = None 
+
+    # add a setter for each attribute
+    def set_all(self, long_name = None, gridded = None, point = None, source = None, short_name = None, short_title = None, model_variable = None):
+        # if any of these are None, return an error
+        if long_name is None or gridded is None or point is None or source is None or short_name is None or short_title is None or model_variable is None:
+            raise ValueError("All attributes must be provided")
+        self.long_name = long_name
+        self.gridded = gridded
+        self.point = point
+        self.source = source
+        self.short_name = short_name
+        self.short_title = short_title
+        self.model_variable = model_variable
+        # add the __name__ of self to keys
+        key = get_name(self)
+        if key is not None:
+            session_info["keys"].append(key)
+
 
 class Validator:
     def __init__(self):
@@ -29,7 +54,8 @@ class Validator:
     # add chlorophyll
     def add_rule(self, field, rule):
         self.rules[field] = rule
-    keys = []
+
+    keys = session_info["keys"]
 
     chlorophyll = Variable()
     chlorophyll.gridded = True
@@ -42,7 +68,8 @@ class Validator:
     chlorophyll.short_name = "chlorophyll"
     chlorophyll.short_title = "Chlorophyll"
     chlorophyll.long_name = "chlorophyll concentration"
-    keys.append("chlorophyll")
+    chlorophyll.model_variable = "auto"
+    session_info["keys"].append("chlorophyll")
 
     # oxygen
     oxygen = Variable()
@@ -55,6 +82,7 @@ class Validator:
     oxygen.short_name = "oxygen"
     oxygen.short_title = "Oxygen"
     oxygen.long_name = "dissolved oxygen concentration"
+    oxygen.model_variable = "auto"
     keys.append("oxygen")
 
     # now nitrate
@@ -70,6 +98,7 @@ class Validator:
     nitrate.short_name = "nitrate"
     nitrate.short_title = "Nitrate"
     nitrate.long_name = "nitrate concentration"
+    nitrate.model_variable = "auto"
     keys.append("nitrate")
 
     # phosphate
@@ -84,6 +113,7 @@ class Validator:
     phosphate.short_name = "phosphate"
     phosphate.short_title = "Phosphate"
     phosphate.long_name = "phosphate concentration"
+    phosphate.model_variable = "auto"
     keys.append("phosphate")
 
     # silicate
@@ -98,6 +128,7 @@ class Validator:
     silicate.short_name = "silicate"
     silicate.short_title = "Silicate"
     silicate.long_name = "silicate concentration"
+    silicate.model_variable = "auto"
     keys.append("silicate")
 
     # benbio
@@ -109,6 +140,7 @@ class Validator:
     benbio.short_name = "macrobenthos biomass"
     benbio.long_name = "macrobenthos biomass"
     benbio.short_title = "Macrobenthos Biomass"
+    benbio.model_variable = "auto"
     keys.append("benbio")
 
     # ammonium
@@ -121,6 +153,7 @@ class Validator:
     ammonium.short_name = "ammonium"
     ammonium.short_title = "Ammonium"
     ammonium.long_name = "ammonium concentration"
+    ammonium.model_variable = "auto"
     keys.append("ammonium")
 
 
@@ -133,6 +166,7 @@ class Validator:
     pco2.short_name = "pCO<sub>2</sub>" 
     pco2.short_title = "pCO<sub>2</sub>" 
     pco2.long_name = "partial pressure of CO<sub>2</sub>"
+    pco2.model_variable = "auto"
     keys.append("pco2")
 
     # ph
@@ -144,6 +178,7 @@ class Validator:
     ph.short_name = "pH"
     ph.short_title = "pH"
     ph.long_name = "pH"
+    ph.model_variable = "auto"
     keys.append("ph")
 
 
@@ -157,6 +192,7 @@ class Validator:
     salinity.short_name = "salinity"    
     salinity.short_title = "Salinity"
     salinity.long_name = "salinity"
+    salinity.model_variable = "auto"
     keys.append("salinity")
 
     # temperature
@@ -168,6 +204,7 @@ class Validator:
     temperature.short_name = "temperature"  
     temperature.short_title = "Temperature"
     temperature.long_name = "temperature"
+    temperature.model_variable = "auto"
     keys.append("temperature")
 
     # co2flux
@@ -179,6 +216,7 @@ class Validator:
     co2flux.short_name = "air-sea CO2<sub>2</sub> fluxes" 
     co2flux.short_title = "CO2<sub>2</sub> fluxes"
     co2flux.long_name = "air-sea CO2<sub>2</sub> fluxes" 
+    co2flux.model_variable = "auto"
     keys.append("co2flux")
 
 
@@ -192,6 +230,7 @@ class Validator:
     alkalinity.short_name = "alkalinity"
     alkalinity.short_title = "Alkalinity"
     alkalinity.long_name = "total alkalinity"
+    alkalinity.model_variable = "auto"
     keys.append("alkalinity")
 
     # now kd
@@ -203,21 +242,17 @@ class Validator:
     kd.short_name = "kd" 
     kd.short_title = "kd"
     kd.long_name = "light attenuation"
+    kd.model_variable = "auto"
     keys.append("kd")
 
-    # mesozoo
-    mesozoo = Variable()
-    mesozoo.gridded = False
-    mesozoo.point = True
-    mesozoo.source = {}
-    mesozoo.source["cpr"] = "Angus Atkinson"
-    mesozoo.short_name = "mesozooplankton biomass"
-    mesozoo.short_title = "Mesozooplankton Biomass"
-    mesozoo.long_name = "mesozooplankton biomass"
-    keys.append("mesozoo")
+    # ensure self.x = y, adds x to the keys list
+    def __setattr__(self, name, value):
+        if name != "keys" and "rules" not in name:
+            if name not in self.keys:
+                self.keys.append(name)
+                # ensure this can be accessed via self[name]
 
-
-
+        super().__setattr__(name, value)
 
     # create a [] style accessor
     # make Validator subsettable, so that validator["chlorophyll"] returns the chlorophyll variable
@@ -225,13 +260,26 @@ class Validator:
         # if key == "chlorophyll":
         #     return  
         return getattr(self, key, None)
+    
+    # add a method that let's user create a new Variable and add it to the definitions
+    # use the set_all method
+    def add_variable(self, name, long_name, short_name, short_title, gridded, point, source, model_variable): 
+        var = Variable()
+        var.long_name = long_name
+        var.short_name = short_name
+        var.short_title = short_title
+        var.gridded = gridded
+        var.point = point
+        var.source = source
+        var.model_variable = model_variable
+        # ensure nothing is None
+        for attr in [var.long_name, var.short_name, var.short_title, var.source, var.model_variable]:
+            if attr is None:
+                raise ValueError(f"Attribute {attr} cannot be None")
+        setattr(self, name, var)
+    # 
 
 definitions = Validator()
-
-
-
-
-
 
 
 
@@ -258,6 +306,10 @@ def generate_mapping(ds):
     model_dict = {}
     for vv in candidate_variables:
         vv_check = vv
+
+        if definitions[vv].model_variable != "auto":
+            model_dict[vv] = definitions[vv].model_variable
+            continue
 
         if vv != "ph":
             the_vars = [
@@ -361,16 +413,6 @@ def generate_mapping(ds):
                 x
                 for x in ds_contents.long_name
                 if "atten" in x.lower() and "coeff" in x.lower()
-            ]
-        if vv == "mesozoo":
-            the_vars = [
-                x
-                for x in ds_contents.long_name
-                if "mesozoo" in x
-                and "ingestion" not in x.lower()
-                and "respiration" not in x.lower()
-                and "mortality" not in x.lower()
-                and "loss" not in x.lower()
             ]
 
         if vv == "chlorophyll":

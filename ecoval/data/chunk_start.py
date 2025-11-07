@@ -5,6 +5,11 @@ import warnings
 import calendar
 import copy
 import ecoval
+ff  = "../../matched/definitions.pkl"
+import pickle
+with open(ff, "rb") as f:
+    definitions = pickle.load(f)
+
 import glob
 import geopandas as gpd
 import jellyfish
@@ -21,7 +26,6 @@ import hvplot.pandas
 from plotnine import *
 from IPython.core.interactiveshell import InteractiveShell
 from ecoval.tidiers import tidy_info
-definitions = ecoval.parsers.Validator()
 InteractiveShell.ast_node_interactivity = "all"
 
 try:

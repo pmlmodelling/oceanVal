@@ -1,6 +1,6 @@
 import warnings
 from ecoval.parsers import Validator
-definitions = Validator()
+from ecoval.session import session_info
 
 
 # function to convert list to string with , separator, with an "and" at the end
@@ -56,7 +56,11 @@ def tidy_name_1(x, lower=False):
     A function to create a better name for tables etc.
 
     """
-    return definitions[x].short_title
+    ff  = "../../matched/definitions.pkl"
+    import pickle
+    with open(ff, "rb") as f:
+        definitions = pickle.load(f)
+        return definitions[x].short_title
 
     if "flux" in x.lower():
         if lower:

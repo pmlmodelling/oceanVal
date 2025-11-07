@@ -15,11 +15,10 @@ import re
 from ecoval.fvcom import fvcom_preprocess
 import importlib
 
-from ecoval.parsers import Validator
-definitions = Validator()
+from ecoval.parsers import Validator, definitions
 # loop through the keys and make sure all attributes are set
 #for key in definitions.keys:
-for key in definitions.keys: 
+for key in session_info["keys"]:
     try:
         x = definitions[key].gridded
     except AttributeError:
