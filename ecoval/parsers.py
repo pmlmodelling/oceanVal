@@ -1,6 +1,7 @@
 import nctoolkit as nc
 import re
 import os
+import glob
 import warnings
 from ecoval.session import session_info
 
@@ -310,6 +311,15 @@ class Validator:
         if gridded_dir != "auto":
             if not os.path.exists(gridded_dir):
                 raise ValueError(f"Gridded directory {gridded_dir} does not exist")
+        if os.path.exists(gridded_dir):
+            # source values
+            issue = 0
+            for source in var.source.keys():
+                if len(glob.glob(gridded_dir + f"/{source}*.txt")) > 0:
+                    issue = 1
+            if issue == 0:
+                raise ValueError(f"No source identifier files found in {gridded_dir} for source {source}")
+
         # ensure nothing is None
         for attr in [var.long_name, var.short_name, var.short_title, var.source, var.model_variable]:
             if attr is None:
