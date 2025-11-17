@@ -343,6 +343,13 @@ class Validator:
         var.long_name = long_name
         var.short_name = short_name
         var.short_title = short_title
+        if list(source.keys())[0] in orig_source:
+            # ensure the value is the same
+            if orig_source[list(source.keys())[0]] != source[list(source.keys())[0]]:
+                raise ValueError(f"Source {list(source.keys())[0]} already exists with a different value")
+        # ensure the sourc key does not included "_"
+        if "_" in list(source.keys())[0]:
+            raise ValueError("Source key cannot contain '_'")
         var.source = orig_source | source
         var.gridded_source = list(source.keys())[0]
         var.model_variable = model_variable
@@ -360,14 +367,6 @@ class Validator:
         if gridded_dir != "auto":
             if not os.path.exists(gridded_dir):
                 raise ValueError(f"Gridded directory {gridded_dir} does not exist")
-        if os.path.exists(gridded_dir):
-            # source values
-            issue = 0
-            for source in var.source.keys():
-                if len(glob.glob(gridded_dir + f"/{source}*.txt")) > 0:
-                    issue = 1
-            if issue == 0:
-                raise ValueError(f"No source identifier files found in {gridded_dir} for source {source}")
 
         # ensure nothing is None
         for attr in [var.long_name, var.short_name, var.short_title, var.source, var.model_variable, var.obs_var]:
@@ -397,6 +396,14 @@ class Validator:
         var.short_name = short_name
         var.short_title = short_title
         # append source to the var.source
+        # check if source key is in orig_source
+        if list(source.keys())[0] in orig_source:
+            # ensure the value is the same
+            if orig_source[list(source.keys())[0]] != source[list(source.keys())[0]]:
+                raise ValueError(f"Source {list(source.keys())[0]} already exists with a different value")
+        # ensure the sourc key does not included "_"
+        if "_" in list(source.keys())[0]:
+            raise ValueError("Source key cannot contain '_'")
         var.source = orig_source | source 
         var.gridded_source = gridded_source
         var.point_source = list(source.keys())[0]   
