@@ -17,6 +17,7 @@ if "ben" in variable.lower():
     layer_long = "benthic"
     layer = "benthic"
 vv_source = os.path.basename(ff).split("_")[0]
+vv_source_raw = vv_source
 vv_source = vv_source.upper()
 df = pd.read_csv(ff)
 lon_max = lon_lim[1]
