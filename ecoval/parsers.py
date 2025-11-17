@@ -314,7 +314,7 @@ class Validator:
             point_dir = getattr(self, name).point_dir
             point = getattr(self, name).point
             point_source = getattr(self, name).point_source
-            orig_sources = getattr(self, name).source
+            orig_sources = getattr(self, name).sources
         except:
             orig_sources = dict()
             pass
@@ -353,7 +353,7 @@ class Validator:
                 raise ValueError(f"Gridded directory {gridded_dir} does not exist")
 
         # ensure nothing is None
-        for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_var]:
+        for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_var, var.gridded_source]:
             if attr is None:
                 raise ValueError(f"Attribute {attr} cannot be None")
         setattr(self, name, var)
