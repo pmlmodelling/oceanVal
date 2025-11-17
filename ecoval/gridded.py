@@ -98,14 +98,7 @@ def gridded_matchup(
                 dir_var = definitions[vv].gridded_dir 
                 dirs = glob.glob(dir_var, recursive=True)
 
-            try:
-                vv_source = [
-                    os.path.basename(x).replace(".txt", "")
-                    for x in glob.glob(dir_var + "/*")
-                    if ".txt" in x
-                ][0]
-            except:
-                continue
+            vv_source = definitions[vv].gridded_source
 
             if vv in ["pco2",  "temperature"]:
                 vv_file = nc.create_ensemble(dir_var)
@@ -332,6 +325,9 @@ def gridded_matchup(
                     )
                     if vv not in ["alkalinity", "ph"]:
                         ds_obs.subset(months=month_sel)
+                    
+                    if definitions[vv].obs_var != "auto":
+                        ds_obs.subset(variables=definitions[vv].obs_var)
 
                     if vv_source == "occci" and vv == "kd":
                         ds_obs.subset(variable="kd_490")
