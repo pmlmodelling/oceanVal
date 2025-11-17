@@ -23,22 +23,6 @@ class Variable:
         self.long_name = None
         self.gridded = None 
 
-    # add a setter for each attribute
-    def set_all(self, long_name = None, gridded = None, point = None, source = None, short_name = None, short_title = None, model_variable = None):
-        # if any of these are None, return an error
-        if long_name is None or gridded is None or point is None or source is None or short_name is None or short_title is None or model_variable is None:
-            raise ValueError("All attributes must be provided")
-        self.long_name = long_name
-        self.gridded = gridded
-        self.point = point
-        self.source = source
-        self.short_name = short_name
-        self.short_title = short_title
-        self.model_variable = model_variable
-        # add the __name__ of self to keys
-        key = get_name(self)
-        if key is not None:
-            session_info["keys"].append(key)
 
 
 class Validator:
@@ -324,16 +308,15 @@ class Validator:
         return getattr(self, key, None)
     
     # add a method that let's user create a new Variable and add it to the definitions
-    # use the set_all method
     # 
-    def add_gridded_comparison(self, name, long_name, short_name, short_title, source, model_variable, obs_dir = "auto", obs_var = "auto" ): 
+    def add_gridded_comparison(self, name, long_name, short_name, short_title, source, description, model_variable, obs_dir = "auto", obs_var = "auto" ): 
         try:
             point_dir = getattr(self, name).point_dir
             point = getattr(self, name).point
             point_source = getattr(self, name).point_source
-            orig_source = getattr(self, name).source
+            orig_sources = getattr(self, name).source
         except:
-            orig_source = dict()
+            orig_sources = dict()
             pass
 
         var = Variable()
@@ -343,14 +326,15 @@ class Validator:
         var.long_name = long_name
         var.short_name = short_name
         var.short_title = short_title
-        if list(source.keys())[0] in orig_source:
+        source = {source: description}
+        if list(source.keys())[0] in orig_sources:
             # ensure the value is the same
-            if orig_source[list(source.keys())[0]] != source[list(source.keys())[0]]:
+            if orig_sources[list(source.keys())[0]] != source[list(source.keys())[0]]:
                 raise ValueError(f"Source {list(source.keys())[0]} already exists with a different value")
         # ensure the sourc key does not included "_"
         if "_" in list(source.keys())[0]:
             raise ValueError("Source key cannot contain '_'")
-        var.source = orig_source | source
+        var.sources = orig_sources | source
         var.gridded_source = list(source.keys())[0]
         var.model_variable = model_variable
         var.point_dir = point_dir
@@ -369,24 +353,24 @@ class Validator:
                 raise ValueError(f"Gridded directory {gridded_dir} does not exist")
 
         # ensure nothing is None
-        for attr in [var.long_name, var.short_name, var.short_title, var.source, var.model_variable, var.obs_var]:
+        for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_var]:
             if attr is None:
                 raise ValueError(f"Attribute {attr} cannot be None")
         setattr(self, name, var)
     # 
-    def add_point_comparison(self, name, long_name, short_name, short_title, source, model_variable, obs_dir = "auto"): 
+    def add_point_comparison(self, name, long_name, short_name, short_title, source, description, model_variable, obs_dir = "auto"): 
         try:
             gridded_dir = getattr(self, name).gridded_dir   
             obs_var = getattr(self, name).obs_var
             gridded = getattr(self, name).gridded
             gridded_source = getattr(self, name).gridded_source
-            orig_source = getattr(self, name).source
+            orig_sources = getattr(self, name).sources
         except:
             gridded_dir = "auto"
             obs_var = "auto"
             gridded_source = "auto"
             gridded = False
-            orig_source = dict()
+            orig_sources = dict()
             pass
 
         var = Variable()
@@ -397,14 +381,15 @@ class Validator:
         var.short_title = short_title
         # append source to the var.source
         # check if source key is in orig_source
-        if list(source.keys())[0] in orig_source:
+        source = {source: description}
+        if list(source.keys())[0] in orig_sources:
             # ensure the value is the same
-            if orig_source[list(source.keys())[0]] != source[list(source.keys())[0]]:
+            if orig_sources[list(source.keys())[0]] != source[list(source.keys())[0]]:
                 raise ValueError(f"Source {list(source.keys())[0]} already exists with a different value")
         # ensure the sourc key does not included "_"
         if "_" in list(source.keys())[0]:
             raise ValueError("Source key cannot contain '_'")
-        var.source = orig_source | source 
+        var.sources = orig_sources | source 
         var.gridded_source = gridded_source
         var.point_source = list(source.keys())[0]   
         var.model_variable = model_variable
@@ -424,7 +409,7 @@ class Validator:
                 raise ValueError(f"Gridded directory {gridded_dir} does not exist")
 
         # ensure nothing is None
-        for attr in [var.long_name, var.short_name, var.short_title, var.source, var.model_variable, var.obs_var]:
+        for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_var]:
             if attr is None:
                 raise ValueError(f"Attribute {attr} cannot be None")
         setattr(self, name, var)
