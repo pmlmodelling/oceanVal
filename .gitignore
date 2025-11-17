@@ -1,0 +1,16 @@
+build/*
+dist/
+*egg*
+*.R*
+#*.ipynb
+*.nc
+*.gz
+*.swp
+docs/source/*ipynb_checkpoints/
+tests/__pycache__/
+__pycache__/
+*.py[codz]
+data/soc/*
+
+
+
