@@ -316,8 +316,11 @@ def gridded_matchup(
                     end_year = max(ds_surface.years)
 
                     # Read in the monthly observational data
-                    vv_file = nc.create_ensemble(dir_var)
-                    vv_file = [x for x in vv_file if "annual" not in x]
+                    if dir_var.endswith(".nc"):
+                        vv_file = dir_var
+                    else:
+                        vv_file = nc.create_ensemble(dir_var)
+                        vv_file = [x for x in vv_file if "annual" not in x]
 
                     ds_obs = nc.open_data(
                         vv_file,
