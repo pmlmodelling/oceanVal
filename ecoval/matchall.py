@@ -1414,7 +1414,7 @@ def matchup(
                             # paths bottom
                             if definitions[variable].point_dir != "auto":
                                 paths = glob.glob(
-                                    f"{definitions[variable].point_dir}/**{variable}**.feather"
+                                    f"{definitions[variable].point_dir}/**.feather"
                                 )
 
                             if session_info["user_dir"]:
@@ -1431,6 +1431,7 @@ def matchup(
 
                             if definitions[variable].point_dir == "auto":
                                 paths = [x for x in paths if f"{point_variable}/" in x]
+
                             for exc in exclude:
                                 paths = [
                                     x
