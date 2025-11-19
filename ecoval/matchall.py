@@ -902,11 +902,6 @@ def matchup(
             gridded = valid_gridded
 
     dirs = glob.glob(obs_dir + "/gridded/**")
-    for ff in dirs:
-        if len(glob.glob(ff + "/*.txt")) != 1:
-            raise ValueError(
-                f"{ff} does not have a single text file to identify data source. Please add an empty file of the format {{source}}.txt"
-            )
 
     if len(gridded) == 0 and len(point) == 0:
         raise ValueError("Please provide at least one variable to matchup")
