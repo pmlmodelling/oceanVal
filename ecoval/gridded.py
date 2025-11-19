@@ -112,11 +112,7 @@ def gridded_matchup(
                     session_info["end_messages"] += [f"No observation years found for gridded {vv}. Please check start and end args!"]
                     return None
             #
-            vv_name = vv
-            if vv == "co2flux":
-                vv_name = "air-sea CO2 flux"
-            if vv == "ph":
-                vv_name = "pH"
+            vv_name = definitions[vv].long_name
 
             print(
                 f"Matching up surface {vv_name} with {vv_source.upper()} gridded data"
@@ -526,12 +522,7 @@ def gridded_matchup(
                         ds_obs.merge("variable", match=["year", "month"])
                     else:
                         ds_obs.merge("variable", match="month")
-                    ds_obs.nco_command(
-                        f"ncatted -O -a start_year,global,o,c,{start_year}"
-                    )
-                    ds_obs.nco_command(
-                        f"ncatted -O -a end_year,global,o,c,{end_year}"
-                    )
+
                     ds_obs.set_fill(-9999)
                     ds_mask = ds_obs.copy()
                     ds_mask.assign( mask_these=lambda x: -1e30 * ((isnan(x.observation) + isnan(x.model)) > 0), drop=True,)
