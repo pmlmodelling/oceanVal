@@ -281,6 +281,12 @@ def md(x, number = False):
             if "period" not in x.lower():
                 # do not use numbers between brackets ()
                 x = re.sub(r"(\d{1,3})(\d{3})", r"\1,\2", x)
+    # identify any urls in the text and convert to markdown links
+    url_pattern = re.compile(r'(https?://\S+)')
+    urls = url_pattern.findall(x)
+    for url in urls:
+        x = x.replace(url, f"[{url}]({url})")
+
 
     return md_markdown(x)
 
