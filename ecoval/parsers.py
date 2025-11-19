@@ -1,5 +1,6 @@
 import nctoolkit as nc
 import re
+import pandas as pd
 import os
 import glob
 import warnings
@@ -46,12 +47,12 @@ class Validator:
     chlorophyll = Variable()
     chlorophyll.gridded = True
     chlorophyll.point = True
-    chlorophyll.source = {}
-    chlorophyll.source["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
+    chlorophyll.sources = {}
+    chlorophyll.sources["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
     chlorophyll.gridded_source = "nsbc"
-    chlorophyll.source["various"] = "ICES Data Portal, Dataset on Ocean HydroChemistry, Extracted March 3, 2023. ICES, Copenhagen. \n Olsen, A., R. M. Key, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Pérez and T. Suzuki. The Global Ocean Data Analysis Project version 2 (GLODAPv2) – an internally consistent data product for the world ocean, Earth Syst. Sci. Data, 8, 297–323, 2016, doi:10.5194/essd-8-297-2016. \n Key, R.M., A. Olsen, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Perez, and T. Suzuki. 2015. Global Ocean Data Analysis Project, Version 2 (GLODAPv2), ORNL/CDIAC-162, NDP-093. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi:10.3334/CDIAC/OTG.NDP093_GLODAPv2."
+    chlorophyll.sources["various"] = "ICES Data Portal, Dataset on Ocean HydroChemistry, Extracted March 3, 2023. ICES, Copenhagen. \n Olsen, A., R. M. Key, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Pérez and T. Suzuki. The Global Ocean Data Analysis Project version 2 (GLODAPv2) – an internally consistent data product for the world ocean, Earth Syst. Sci. Data, 8, 297–323, 2016, doi:10.5194/essd-8-297-2016. \n Key, R.M., A. Olsen, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Perez, and T. Suzuki. 2015. Global Ocean Data Analysis Project, Version 2 (GLODAPv2), ORNL/CDIAC-162, NDP-093. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi:10.3334/CDIAC/OTG.NDP093_GLODAPv2."
     chlorophyll.point_source = "various"
-    chlorophyll.source["socat23"] = "Bakker, Dorothee C. E.; Alin, Simone R.; Bates, Nicholas; Becker, Meike; Feely, Richard A.; Gkritzalis, Thanos; Jones, Steve D.; Kozyr, Alex; Lauvset, Siv K.; Metzl, Nicolas; Munro, David R.; Nakaoka, Shin-ichiro; Nojiri, Yukihiro; O'Brien, Kevin M.; Olsen, Are; Pierrot, Denis; Rehder, Gregor; Steinhoff, Tobias; Sutton, Adrienne J.; Sweeney, Colm; Tilbrook, Bronte; Wada, Chisato; Wanninkhof, Rik; Akl, John; Barbero, Leticia; Beatty, Cory M.; Berghoff, Carla F.; Bittig, Henry C.; Bott, Randy; Burger, Eugene F.; Cai, Wei-Jun; Castaño-Primo, Rocío; Corredor, Jorge E.; Cronin, Margot; De Carlo, Eric H.; DeGrandpre, Michael D.; Dietrich, Colin; Drennan, William M.; Emerson, Steven R.; Enochs, Ian C.; Enyo, Kazutaka; Epherra, Lucía; Evans, Wiley; Fiedler, Björn; Fontela, Marcos; Frangoulis, Constantin; Gehrung, Martina; Giannoudi, Louisa; Glockzin, Michael; Hales, Burke; Howden, Stephan D.; Ibánhez, J. Severino P.; Kamb, Linus; Körtzinger, Arne; Lefèvre, Nathalie; Lo Monaco, Claire; Lutz, Vivian A.; Macovei, Vlad A.; Maenner Jones, Stacy; Manalang, Dana; Manzello, Derek P.; Metzl, Nicolas; Mickett, John; Millero, Frank J.; Monacci, Natalie M.; Morell, Julio M.; Musielewicz, Sylvia; Neill, Craig; Newberger, Tim; Newton, Jan; Noakes, Scott; Ólafsdóttir, Sólveig Rósa; Ono, Tsuneo; Osborne, John; Padín, Xose A.; Paulsen, Melf; Perivoliotis, Leonidas; Petersen, Wilhelm; Petihakis, George; Plueddemann, Albert J.; Rodriguez, Carmen; Rutgersson, Anna; Sabine, Christopher L.; Salisbury, Joseph E.; Schlitzer, Reiner; Skjelvan, Ingunn; Stamataki, Natalia; Sullivan, Kevin F.; Sutherland, Stewart C.; T'Jampens, Michiel; Tadokoro, Kazuaki; Tanhua, Toste; Telszewski, Maciej; Theetaert, Hannelore; Tomlinson, Michael; Vandemark, Douglas; Velo, Antón; Voynova, Yoana G.; Weller, Robert A.; Whitehead, Chris; Wimart-Rousseau, Cathy (2023). Surface Ocean CO2 Atlas Database Version 2023 (SOCATv2023) (NCEI Accession 0278913). [indicate subset used]. NOAA National Centers for Environmental Information. Dataset. <https://doi.org/10.25921/r7xa-bt92>. Accessed [25/04/2024]."
+    chlorophyll.sources["socat23"] = "Bakker, Dorothee C. E.; Alin, Simone R.; Bates, Nicholas; Becker, Meike; Feely, Richard A.; Gkritzalis, Thanos; Jones, Steve D.; Kozyr, Alex; Lauvset, Siv K.; Metzl, Nicolas; Munro, David R.; Nakaoka, Shin-ichiro; Nojiri, Yukihiro; O'Brien, Kevin M.; Olsen, Are; Pierrot, Denis; Rehder, Gregor; Steinhoff, Tobias; Sutton, Adrienne J.; Sweeney, Colm; Tilbrook, Bronte; Wada, Chisato; Wanninkhof, Rik; Akl, John; Barbero, Leticia; Beatty, Cory M.; Berghoff, Carla F.; Bittig, Henry C.; Bott, Randy; Burger, Eugene F.; Cai, Wei-Jun; Castaño-Primo, Rocío; Corredor, Jorge E.; Cronin, Margot; De Carlo, Eric H.; DeGrandpre, Michael D.; Dietrich, Colin; Drennan, William M.; Emerson, Steven R.; Enochs, Ian C.; Enyo, Kazutaka; Epherra, Lucía; Evans, Wiley; Fiedler, Björn; Fontela, Marcos; Frangoulis, Constantin; Gehrung, Martina; Giannoudi, Louisa; Glockzin, Michael; Hales, Burke; Howden, Stephan D.; Ibánhez, J. Severino P.; Kamb, Linus; Körtzinger, Arne; Lefèvre, Nathalie; Lo Monaco, Claire; Lutz, Vivian A.; Macovei, Vlad A.; Maenner Jones, Stacy; Manalang, Dana; Manzello, Derek P.; Metzl, Nicolas; Mickett, John; Millero, Frank J.; Monacci, Natalie M.; Morell, Julio M.; Musielewicz, Sylvia; Neill, Craig; Newberger, Tim; Newton, Jan; Noakes, Scott; Ólafsdóttir, Sólveig Rósa; Ono, Tsuneo; Osborne, John; Padín, Xose A.; Paulsen, Melf; Perivoliotis, Leonidas; Petersen, Wilhelm; Petihakis, George; Plueddemann, Albert J.; Rodriguez, Carmen; Rutgersson, Anna; Sabine, Christopher L.; Salisbury, Joseph E.; Schlitzer, Reiner; Skjelvan, Ingunn; Stamataki, Natalia; Sullivan, Kevin F.; Sutherland, Stewart C.; T'Jampens, Michiel; Tadokoro, Kazuaki; Tanhua, Toste; Telszewski, Maciej; Theetaert, Hannelore; Tomlinson, Michael; Vandemark, Douglas; Velo, Antón; Voynova, Yoana G.; Weller, Robert A.; Whitehead, Chris; Wimart-Rousseau, Cathy (2023). Surface Ocean CO2 Atlas Database Version 2023 (SOCATv2023) (NCEI Accession 0278913). [indicate subset used]. NOAA National Centers for Environmental Information. Dataset. <https://doi.org/10.25921/r7xa-bt92>. Accessed [25/04/2024]."
     chlorophyll.short_name = "chlorophyll"
     chlorophyll.short_title = "Chlorophyll"
     chlorophyll.long_name = "chlorophyll concentration"
@@ -59,15 +60,16 @@ class Validator:
     chlorophyll.point_dir = "auto"
     chlorophyll.gridded_dir = "auto"
     chlorophyll.obs_var = "auto"
+    chlorophyll.verbose_description = ""
     keys.append("chlorophyll")
 
     # oxygen
     oxygen = Variable()
     oxygen.gridded = True
     oxygen.point = True
-    oxygen.source = {}
-    oxygen.source["nsbc"] = "Hinrichs,Iris; Gouretski; Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
-    oxygen.source["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
+    oxygen.sources = {}
+    oxygen.sources["nsbc"] = "Hinrichs,Iris; Gouretski; Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
+    oxygen.sources["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
     oxygen.gridded_source = "nsbc"
     oxygen.point_source = "ices"
     oxygen.short_name = "oxygen"
@@ -77,6 +79,7 @@ class Validator:
     oxygen.point_dir = "auto"
     oxygen.gridded_dir = "auto"
     oxygen.obs_var = "auto"
+    oxygen.verbose_description = ""
     keys.append("oxygen")
 
     # now nitrate
@@ -84,10 +87,10 @@ class Validator:
     nitrate = Variable()
     nitrate.gridded = True
     nitrate.point = True
-    nitrate.source = {}
-    nitrate.source["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
-    nitrate.source["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
-    nitrate.source["various"] = "ICES Data Portal, Dataset on Ocean HydroChemistry, Extracted March 3, 2023. ICES, Copenhagen. \n Olsen, A., R. M. Key, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Pérez and T. Suzuki. The Global Ocean Data Analysis Project version 2 (GLODAPv2) – an internally consistent data product for the world ocean, Earth Syst. Sci. Data, 8, 297–323, 2016, doi:10.5194/essd-8-297-2016. \n Key, R.M., A. Olsen, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Perez, and T. Suzuki. 2015. Global Ocean Data Analysis Project, Version 2 (GLODAPv2), ORNL/CDIAC-162, NDP-093. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi:10.3334/CDIAC/OTG.NDP093_GLODAPv2."
+    nitrate.sources = {}
+    nitrate.sources["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
+    nitrate.sources["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
+    nitrate.sources["various"] = "ICES Data Portal, Dataset on Ocean HydroChemistry, Extracted March 3, 2023. ICES, Copenhagen. \n Olsen, A., R. M. Key, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Pérez and T. Suzuki. The Global Ocean Data Analysis Project version 2 (GLODAPv2) – an internally consistent data product for the world ocean, Earth Syst. Sci. Data, 8, 297–323, 2016, doi:10.5194/essd-8-297-2016. \n Key, R.M., A. Olsen, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Perez, and T. Suzuki. 2015. Global Ocean Data Analysis Project, Version 2 (GLODAPv2), ORNL/CDIAC-162, NDP-093. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi:10.3334/CDIAC/OTG.NDP093_GLODAPv2."
     nitrate.gridded_source = "nsbc"
     nitrate.point_source = "various"
     nitrate.short_name = "nitrate"
@@ -97,16 +100,17 @@ class Validator:
     nitrate.point_dir = "auto"
     nitrate.gridded_dir = "auto"
     nitrate.obs_var = "auto"
+    nitrate.verbose_description = ""
     keys.append("nitrate")
 
     # phosphate
     phosphate = Variable()
     phosphate.gridded = True
     phosphate.point = True
-    phosphate.source = {}
-    phosphate.source["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
-    phosphate.source["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
-    phosphate.source["various"] = "ICES Data Portal, Dataset on Ocean HydroChemistry, Extracted March 3, 2023. ICES, Copenhagen. \n Olsen, A., R. M. Key, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Pérez and T. Suzuki. The Global Ocean Data Analysis Project version 2 (GLODAPv2) – an internally consistent data product for the world ocean, Earth Syst. Sci. Data, 8, 297–323, 2016, doi:10.5194/essd-8-297-2016. \n Key, R.M., A. Olsen, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Perez, and T. Suzuki. 2015. Global Ocean Data Analysis Project, Version 2 (GLODAPv2), ORNL/CDIAC-162, NDP-093. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi:10.3334/CDIAC/OTG.NDP093_GLODAPv2."
+    phosphate.sources = {}
+    phosphate.sources["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
+    phosphate.sources["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
+    phosphate.sources["various"] = "ICES Data Portal, Dataset on Ocean HydroChemistry, Extracted March 3, 2023. ICES, Copenhagen. \n Olsen, A., R. M. Key, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Pérez and T. Suzuki. The Global Ocean Data Analysis Project version 2 (GLODAPv2) – an internally consistent data product for the world ocean, Earth Syst. Sci. Data, 8, 297–323, 2016, doi:10.5194/essd-8-297-2016. \n Key, R.M., A. Olsen, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Perez, and T. Suzuki. 2015. Global Ocean Data Analysis Project, Version 2 (GLODAPv2), ORNL/CDIAC-162, NDP-093. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi:10.3334/CDIAC/OTG.NDP093_GLODAPv2."
     phosphate.gridded_source = "nsbc"
     phosphate.point_source = "various"
     phosphate.short_name = "phosphate"
@@ -116,15 +120,16 @@ class Validator:
     phosphate.point_dir = "auto"
     phosphate.gridded_dir = "auto"
     phosphate.obs_var = "auto"
+    phosphate.verbose_description = ""
     keys.append("phosphate")
 
     # silicate
     silicate = Variable()
     silicate.gridded = True
     silicate.point = True
-    silicate.source = {}
-    silicate.source["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
-    silicate.source["various"] = "ICES Data Portal, Dataset on Ocean HydroChemistry, Extracted March 3, 2023. ICES, Copenhagen. \n Olsen, A., R. M. Key, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Pérez and T. Suzuki. The Global Ocean Data Analysis Project version 2 (GLODAPv2) – an internally consistent data product for the world ocean, Earth Syst. Sci. Data, 8, 297–323, 2016, doi:10.5194/essd-8-297-2016. \n Key, R.M., A. Olsen, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Perez, and T. Suzuki. 2015. Global Ocean Data Analysis Project, Version 2 (GLODAPv2), ORNL/CDIAC-162, NDP-093. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi:10.3334/CDIAC/OTG.NDP093_GLODAPv2."
+    silicate.sources = {}
+    silicate.sources["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
+    silicate.sources["various"] = "ICES Data Portal, Dataset on Ocean HydroChemistry, Extracted March 3, 2023. ICES, Copenhagen. \n Olsen, A., R. M. Key, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Pérez and T. Suzuki. The Global Ocean Data Analysis Project version 2 (GLODAPv2) – an internally consistent data product for the world ocean, Earth Syst. Sci. Data, 8, 297–323, 2016, doi:10.5194/essd-8-297-2016. \n Key, R.M., A. Olsen, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Perez, and T. Suzuki. 2015. Global Ocean Data Analysis Project, Version 2 (GLODAPv2), ORNL/CDIAC-162, NDP-093. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi:10.3334/CDIAC/OTG.NDP093_GLODAPv2."
     silicate.gridded_source = "nsbc"
     silicate.point_source = "various"
     silicate.short_name = "silicate"
@@ -134,14 +139,15 @@ class Validator:
     silicate.point_dir = "auto"
     silicate.gridded_dir = "auto"
     silicate.obs_var = "auto"
+    silicate.verbose_description = ""
     keys.append("silicate")
 
     # benbio
     benbio = Variable()
     benbio.gridded = False
     benbio.point = True
-    benbio.source = {}
-    benbio.source["nsbs"] = "URL: <https://www.vliz.be/vmdcdata/nsbs/about.php>" 
+    benbio.sources = {}
+    benbio.sources["nsbs"] = "URL: <https://www.vliz.be/vmdcdata/nsbs/about.php>" 
     benbio.point_source = "nsbs"
     benbio.short_name = "macrobenthos biomass"
     benbio.long_name = "macrobenthos biomass"
@@ -150,15 +156,16 @@ class Validator:
     benbio.point_dir = "auto"
     benbio.gridded_dir = "auto"
     benbio.obs_var = "auto"
+    benbio.verbose_description = ""
     keys.append("benbio")
 
     # ammonium
     ammonium = Variable()
     ammonium.gridded = False
     ammonium.point = True
-    ammonium.source = {}
-    ammonium.source["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
-    ammonium.source["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
+    ammonium.sources = {}
+    ammonium.sources["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
+    ammonium.sources["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
     ammonium.point_source = "ices"
     ammonium.gridded_source = "nsbc"
     ammonium.short_name = "ammonium"
@@ -168,6 +175,7 @@ class Validator:
     ammonium.point_dir = "auto"
     ammonium.gridded_dir = "auto"
     ammonium.obs_var = "auto"
+    ammonium.verbose_description = ""
     keys.append("ammonium")
 
 
@@ -175,8 +183,8 @@ class Validator:
     pco2 = Variable()
     pco2.gridded = False
     pco2.point = True
-    pco2.source = {}
-    pco2.source["socat23"] = "Bakker, Dorothee C. E.; Alin, Simone R.; Bates, Nicholas; Becker, Meike; Feely, Richard A.; Gkritzalis, Thanos; Jones, Steve D.; Kozyr, Alex; Lauvset, Siv K.; Metzl, Nicolas; Munro, David R.; Nakaoka, Shin-ichiro; Nojiri, Yukihiro; O'Brien, Kevin M.; Olsen, Are; Pierrot, Denis; Rehder, Gregor; Steinhoff, Tobias; Sutton, Adrienne J.; Sweeney, Colm; Tilbrook, Bronte; Wada, Chisato; Wanninkhof, Rik; Akl, John; Barbero, Leticia; Beatty, Cory M.; Berghoff, Carla F.; Bittig, Henry C.; Bott, Randy; Burger, Eugene F.; Cai, Wei-Jun; Castaño-Primo, Rocío; Corredor, Jorge E.; Cronin, Margot; De Carlo, Eric H.; DeGrandpre, Michael D.; Dietrich, Colin; Drennan, William M.; Emerson, Steven R.; Enochs, Ian C.; Enyo, Kazutaka; Epherra, Lucía; Evans, Wiley; Fiedler, Björn; Fontela, Marcos; Frangoulis, Constantin; Gehrung, Martina; Giannoudi, Louisa; Glockzin, Michael; Hales, Burke; Howden, Stephan D.; Ibánhez, J. Severino P.; Kamb, Linus; Körtzinger, Arne; Lefèvre, Nathalie; Lo Monaco, Claire; Lutz, Vivian A.; Macovei, Vlad A.; Maenner Jones, Stacy; Manalang, Dana; Manzello, Derek P.; Metzl, Nicolas; Mickett, John; Millero, Frank J.; Monacci, Natalie M.; Morell, Julio M.; Musielewicz, Sylvia; Neill, Craig; Newberger, Tim; Newton, Jan; Noakes, Scott; Ólafsdóttir, Sólveig Rósa; Ono, Tsuneo; Osborne, John; Padín, Xose A.; Paulsen, Melf; Perivoliotis, Leonidas; Petersen, Wilhelm; Petihakis, George; Plueddemann, Albert J.; Rodriguez, Carmen; Rutgersson, Anna; Sabine, Christopher L.; Salisbury, Joseph E.; Schlitzer, Reiner; Skjelvan, Ingunn; Stamataki, Natalia; Sullivan, Kevin F.; Sutherland, Stewart C.; T'Jampens, Michiel; Tadokoro, Kazuaki; Tanhua, Toste; Telszewski, Maciej; Theetaert, Hannelore; Tomlinson, Michael; Vandemark, Douglas; Velo, Antón; Voynova, Yoana G.; Weller, Robert A.; Whitehead, Chris; Wimart-Rousseau, Cathy (2023). Surface Ocean CO2 Atlas Database Version 2023 (SOCATv2023) (NCEI Accession 0278913). [indicate subset used]. NOAA National Centers for Environmental Information. Dataset. <https://doi.org/10.25921/r7xa-bt92>. Accessed [25/04/2024]."
+    pco2.sources = {}
+    pco2.sources["socat23"] = "Bakker, Dorothee C. E.; Alin, Simone R.; Bates, Nicholas; Becker, Meike; Feely, Richard A.; Gkritzalis, Thanos; Jones, Steve D.; Kozyr, Alex; Lauvset, Siv K.; Metzl, Nicolas; Munro, David R.; Nakaoka, Shin-ichiro; Nojiri, Yukihiro; O'Brien, Kevin M.; Olsen, Are; Pierrot, Denis; Rehder, Gregor; Steinhoff, Tobias; Sutton, Adrienne J.; Sweeney, Colm; Tilbrook, Bronte; Wada, Chisato; Wanninkhof, Rik; Akl, John; Barbero, Leticia; Beatty, Cory M.; Berghoff, Carla F.; Bittig, Henry C.; Bott, Randy; Burger, Eugene F.; Cai, Wei-Jun; Castaño-Primo, Rocío; Corredor, Jorge E.; Cronin, Margot; De Carlo, Eric H.; DeGrandpre, Michael D.; Dietrich, Colin; Drennan, William M.; Emerson, Steven R.; Enochs, Ian C.; Enyo, Kazutaka; Epherra, Lucía; Evans, Wiley; Fiedler, Björn; Fontela, Marcos; Frangoulis, Constantin; Gehrung, Martina; Giannoudi, Louisa; Glockzin, Michael; Hales, Burke; Howden, Stephan D.; Ibánhez, J. Severino P.; Kamb, Linus; Körtzinger, Arne; Lefèvre, Nathalie; Lo Monaco, Claire; Lutz, Vivian A.; Macovei, Vlad A.; Maenner Jones, Stacy; Manalang, Dana; Manzello, Derek P.; Metzl, Nicolas; Mickett, John; Millero, Frank J.; Monacci, Natalie M.; Morell, Julio M.; Musielewicz, Sylvia; Neill, Craig; Newberger, Tim; Newton, Jan; Noakes, Scott; Ólafsdóttir, Sólveig Rósa; Ono, Tsuneo; Osborne, John; Padín, Xose A.; Paulsen, Melf; Perivoliotis, Leonidas; Petersen, Wilhelm; Petihakis, George; Plueddemann, Albert J.; Rodriguez, Carmen; Rutgersson, Anna; Sabine, Christopher L.; Salisbury, Joseph E.; Schlitzer, Reiner; Skjelvan, Ingunn; Stamataki, Natalia; Sullivan, Kevin F.; Sutherland, Stewart C.; T'Jampens, Michiel; Tadokoro, Kazuaki; Tanhua, Toste; Telszewski, Maciej; Theetaert, Hannelore; Tomlinson, Michael; Vandemark, Douglas; Velo, Antón; Voynova, Yoana G.; Weller, Robert A.; Whitehead, Chris; Wimart-Rousseau, Cathy (2023). Surface Ocean CO2 Atlas Database Version 2023 (SOCATv2023) (NCEI Accession 0278913). [indicate subset used]. NOAA National Centers for Environmental Information. Dataset. <https://doi.org/10.25921/r7xa-bt92>. Accessed [25/04/2024]."
     pco2.point_source = "socat23"
     pco2.short_name = "pCO<sub>2</sub>" 
     pco2.short_title = "pCO<sub>2</sub>" 
@@ -185,14 +193,15 @@ class Validator:
     pco2.point_dir = "auto"
     pco2.gridded_dir = "auto"
     pco2.obs_var = "auto"
+    pco2.verbose_description = ""
     keys.append("pco2")
 
     # ph
     ph = Variable()
     ph.gridded = False
     ph.point = True
-    ph.source = {}
-    ph.source["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
+    ph.sources = {}
+    ph.sources["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
     ph.point_source = "ices"
     ph.short_name = "pH"
     ph.short_title = "pH"
@@ -201,6 +210,7 @@ class Validator:
     ph.point_dir = "auto"
     ph.gridded_dir = "auto"
     ph.obs_var = "auto" 
+    ph.verbose_description = ""
     keys.append("ph")
 
 
@@ -208,9 +218,9 @@ class Validator:
     salinity = Variable()
     salinity.gridded = True
     salinity.point = True
-    salinity.source = {}
-    salinity.source["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
-    salinity.source["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
+    salinity.sources = {}
+    salinity.sources["nsbc"] = "Hinrichs,Iris; Gouretski,Viktor; Paetsch,Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1). URL: <https://www.cen.uni-hamburg.de/en/icdc/data/ocean/nsbc.html>"
+    salinity.sources["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
     salinity.gridded_source = "nsbc"
     salinity.point_source = "ices"
     salinity.short_name = "salinity"    
@@ -220,15 +230,16 @@ class Validator:
     salinity.point_dir = "auto"
     salinity.gridded_dir = "auto"
     salinity.obs_var = "auto"
+    salinity.verbose_description = ""
     keys.append("salinity")
 
     # temperature
     temperature = Variable()
     temperature.gridded = True
     temperature.point = True
-    temperature.source = {}
-    temperature.source["ostia"] =  "Good, S.; Fiedler, E.; Mao, C.; Martin, M.J.; Maycock, A.; Reid, R.; Roberts-Jones, J.; Searle, T.; Waters, J.; While, J.; Worsfold, M. The Current Configuration of the OSTIA System for Operational Production of Foundation Sea Surface Temperature and Ice Concentration Analyses. Remote Sens. 2020, 12, 720, doi:10.3390/rs12040720. \n URL: <https://data.marine.copernicus.eu/product/SST_GLO_SST_L4_REP_OBSERVATIONS_010_011/description> \n From 2022 onwards, the near-real time product is used: <https://data.marine.copernicus.eu/product/SST_GLO_SST_L4_NRT_OBSERVATIONS_010_001/description>"
-    temperature.source["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
+    temperature.sources = {}
+    temperature.sources["ostia"] =  "Good, S.; Fiedler, E.; Mao, C.; Martin, M.J.; Maycock, A.; Reid, R.; Roberts-Jones, J.; Searle, T.; Waters, J.; While, J.; Worsfold, M. The Current Configuration of the OSTIA System for Operational Production of Foundation Sea Surface Temperature and Ice Concentration Analyses. Remote Sens. 2020, 12, 720, doi:10.3390/rs12040720. \n URL: <https://data.marine.copernicus.eu/product/SST_GLO_SST_L4_REP_OBSERVATIONS_010_011/description> \n From 2022 onwards, the near-real time product is used: <https://data.marine.copernicus.eu/product/SST_GLO_SST_L4_NRT_OBSERVATIONS_010_001/description>"
+    temperature.sources["ices"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry , Extracted March 3, 2023. ICES, Copenhagen"
     temperature.gridded_source = "ostia"
     temperature.point_source = "ices"
     temperature.short_name = "temperature"  
@@ -238,14 +249,15 @@ class Validator:
     temperature.point_dir = "auto"
     temperature.gridded_dir = "auto"
     temperature.obs_var = "auto"
+    temperature.verbose_description = ""
     keys.append("temperature")
 
     # co2flux
     co2flux = Variable()
     co2flux.gridded = True
     co2flux.point = False
-    co2flux.source = {}
-    co2flux.source["ncei"] = "Jersild, Annika; Landschützer, Peter; Gruber, Nicolas; Bakker, Dorothee C. E. (2017). An observation-based global monthly gridded sea surface pCO2 and air-sea CO2 flux product from 1982 onward and its monthly climatology (NCEI Accession 0160558). Version 7.7. [v 2022]. NOAA National Centers for Environmental Information. Dataset. https://doi.org/10.7289/v5z899n6. Accessed [2025-11-04] URL: <https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0160558/MPI_SOM-FFN_v2022/>"
+    co2flux.sources = {}
+    co2flux.sources["ncei"] = "Jersild, Annika; Landschützer, Peter; Gruber, Nicolas; Bakker, Dorothee C. E. (2017). An observation-based global monthly gridded sea surface pCO2 and air-sea CO2 flux product from 1982 onward and its monthly climatology (NCEI Accession 0160558). Version 7.7. [v 2022]. NOAA National Centers for Environmental Information. Dataset. https://doi.org/10.7289/v5z899n6. Accessed [2025-11-04] URL: <https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0160558/MPI_SOM-FFN_v2022/>"
     co2flux.gridded_source = "ncei"
     co2flux.short_name = "air-sea CO2<sub>2</sub> fluxes" 
     co2flux.short_title = "CO2<sub>2</sub> fluxes"
@@ -254,6 +266,7 @@ class Validator:
     co2flux.point_dir = "auto"
     co2flux.gridded_dir = "auto"
     co2flux.obs_var = "auto"
+    co2flux.verbose_description = ""
     keys.append("co2flux")
 
 
@@ -261,9 +274,9 @@ class Validator:
     alkalinity = Variable()
     alkalinity.gridded = True
     alkalinity.point = True
-    alkalinity.source = {}
-    alkalinity.source["glodap"] = "Lauvset, S. K., Key, R. M., Olsen, A., van Heuven, S., Velo, A., Lin, X., Schirnick, C., Kozyr, A., Tanhua, T., Hoppema, M., Jutterström, S., Steinfeldt, R., Jeansson, E., Ishii, M., Perez, F. F., Suzuki, T., and Watelet, S.: A new global interior ocean mapped climatology: the 1° ×  1° GLODAP version 2, Earth Syst. Sci. Data, 8, 325–340, https://doi.org/10.5194/essd-8-325-2016, 2016."
-    alkalinity.source["various"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry, Extracted March 3, 2023. ICES, Copenhagen. \n Olsen, A., R. M. Key, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Pérez and T. Suzuki. The Global Ocean Data Analysis Project version 2 (GLODAPv2) – an internally consistent data product for the world ocean, Earth Syst. Sci. Data, 8, 297–323, 2016, doi:10.5194/essd-8-297-2016. \nKey, R.M., A. Olsen, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Perez, and T. Suzuki. 2015. Global Ocean Data Analysis Project, Version 2 (GLODAPv2), ORNL/CDIAC-162, NDP-093. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi:10.3334/CDIAC/OTG.NDP093_GLODAPv2."
+    alkalinity.sources = {}
+    alkalinity.sources["glodap"] = "Lauvset, S. K., Key, R. M., Olsen, A., van Heuven, S., Velo, A., Lin, X., Schirnick, C., Kozyr, A., Tanhua, T., Hoppema, M., Jutterström, S., Steinfeldt, R., Jeansson, E., Ishii, M., Perez, F. F., Suzuki, T., and Watelet, S.: A new global interior ocean mapped climatology: the 1° ×  1° GLODAP version 2, Earth Syst. Sci. Data, 8, 325–340, https://doi.org/10.5194/essd-8-325-2016, 2016."
+    alkalinity.sources["various"] =  "ICES Data Portal, Dataset on Ocean HydroChemistry, Extracted March 3, 2023. ICES, Copenhagen. \n Olsen, A., R. M. Key, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Pérez and T. Suzuki. The Global Ocean Data Analysis Project version 2 (GLODAPv2) – an internally consistent data product for the world ocean, Earth Syst. Sci. Data, 8, 297–323, 2016, doi:10.5194/essd-8-297-2016. \nKey, R.M., A. Olsen, S. van Heuven, S. K. Lauvset, A. Velo, X. Lin, C. Schirnick, A. Kozyr, T. Tanhua, M. Hoppema, S. Jutterström, R. Steinfeldt, E. Jeansson, M. Ishii, F. F. Perez, and T. Suzuki. 2015. Global Ocean Data Analysis Project, Version 2 (GLODAPv2), ORNL/CDIAC-162, NDP-093. Carbon Dioxide Information Analysis Center, Oak Ridge National Laboratory, US Department of Energy, Oak Ridge, Tennessee. doi:10.3334/CDIAC/OTG.NDP093_GLODAPv2."
     alkalinity.gridded_source = "glodap"
     alkalinity.point_source = "various"
     alkalinity.short_name = "alkalinity"
@@ -273,14 +286,15 @@ class Validator:
     alkalinity.point_dir = "auto"
     alkalinity.gridded_dir = "auto"
     alkalinity.obs_var = "auto"
+    alkalinity.verbose_description = ""
     keys.append("alkalinity")
 
     # now kd
     kd = Variable()
     kd.gridded = True
     kd.point = False
-    kd.source = {}
-    kd.source["cmems"] = "URL: <https://doi.org/10.48670/moi-00281>" 
+    kd.sources = {}
+    kd.sources["cmems"] = "URL: <https://doi.org/10.48670/moi-00281>" 
     kd.gridded_source = "cmems"
     kd.short_name = "kd" 
     kd.short_title = "kd"
@@ -289,6 +303,9 @@ class Validator:
     kd.point_dir = "auto"
     kd.gridded_dir = "auto"
     kd.obs_var = "auto"
+    text = "Sea surface light attenuation is compared with KD490 from the Copernicus Marine Environment Monitoring Service (CMEMS) dataset OCEANCOLOUR_GLO_BGC_L4_MY_009_104."
+    text += " Kd490 is a comparable but not identical measure of attenuation, Kd490 refers to attenuation at 490 nm, while the model has no spectral dependence."
+    kd.verbose_description = text
     keys.append("kd")
 
     # ensure self.x = y, adds x to the keys list
@@ -394,6 +411,21 @@ class Validator:
         var.point_source = list(source.keys())[0]   
         var.model_variable = model_variable
         var.point_dir = obs_dir
+        # find feather files in point_dir
+        point_files = [f for f in glob.glob(os.path.join(obs_dir, "*.feather"))] 
+        # if no files exists, raise error
+        if len(point_files) == 0:
+            raise ValueError(f"No feather files found in point directory {obs_dir}")
+        valid_vars = ["lon", "lat", "year", "month", "day", "depth", "observation", "source"]
+        for vv in point_files:
+            # read in the first row
+            df = pd.read_feather(vv)
+            # throw error something else is in there
+            bad_cols = [col for col in df.columns if col not in valid_vars]
+            if len(bad_cols) > 0:
+                raise ValueError(f"Invalid columns {bad_cols} found in point data file {vv}")
+
+
         var.obs_var = obs_var
         # add obs_var, ensure it's a string
         if not isinstance(var.obs_var, str):
