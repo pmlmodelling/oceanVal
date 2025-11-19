@@ -28,7 +28,7 @@ for key in session_info["keys"]:
     except AttributeError:
         raise AttributeError(f"Variable '{key}' is missing 'point' attribute")
     try:
-        x = definitions[key].source
+        x = definitions[key].sources
     except AttributeError:
         raise AttributeError(f"Variable '{key}' is missing 'source' attribute")
     try:
