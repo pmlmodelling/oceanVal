@@ -24,8 +24,7 @@ def gridded_matchup(
     sim_end=None,
     lon_lim=None,
     lat_lim=None,
-    times_dict=None,
-    ds_thickness=None,
+    times_dict=None
 ):
     """
     Function to create gridded matchups for a given set of variables
@@ -46,8 +45,15 @@ def gridded_matchup(
         Start year for model simulations
     sim_end : int
         End year for model simulations
-    ds_thickness : str or nctoolkit DataSet
-        File path to thickness file
+    lon_lim : list
+        Longitude limits for subsetting
+    lat_lim : list
+        Latitude limits for subsetting
+    times_dict : dict
+        Dictionary with file paths as keys and corresponding time DataFrames as values
+    Returns
+    -------
+    None
 
     """
     obs_dir = session_info["obs_dir"]
