@@ -123,18 +123,8 @@ def fix_toc(concise = True):
         # key is the variable name, so is the section
         for vv in vv_dict.keys():
             # capitalize if not ph
-            if vv != "ph":
-                vv_out = vv.capitalize()
-            if vv == "pco2":
-                vv_out = "pCO2"
-            # correct ph
-            if vv == "ph":
-                vv_out = "pH"
-            if vv.lower() == "benbio":
-                vv_out = "Benthic biomass"
-            if vv.lower() == "co2flux":
-                # user markdown subscript
-                vv_out = "Air-sea CO2 fluxes"
+            vv_out = definitions[vv].short_title
+
             x = f.write(f"- caption: {vv_out}\n")
             x = f.write("  chapters:\n")
             for ff in vv_dict[vv]:
