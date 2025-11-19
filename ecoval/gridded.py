@@ -89,7 +89,7 @@ def gridded_matchup(
             #
             # check if this directory is empty
             dir_var = f"{obs_dir}/gridded/{vv}"
-            dirs = glob.glob(f"{obs_dir}/gridded/**/{vv}", recursive=True)
+            dirs = glob.glob(f"{obs_dir}/gridded/**/**.nc", recursive=True)
             if len(dirs) == 0:
                 raise ValueError(f"No data found for {vv}")
             # get directory names for dirs
