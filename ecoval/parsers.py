@@ -61,6 +61,7 @@ class Validator:
     chlorophyll.gridded_dir = "auto"
     chlorophyll.obs_var = "auto"
     chlorophyll.verbose_description = ""
+    chlorophyll.vertical = True
     keys.append("chlorophyll")
 
     # oxygen
@@ -80,6 +81,7 @@ class Validator:
     oxygen.gridded_dir = "auto"
     oxygen.obs_var = "auto"
     oxygen.verbose_description = ""
+    oxygen.vertical = True
     keys.append("oxygen")
 
     # now nitrate
@@ -101,6 +103,7 @@ class Validator:
     nitrate.gridded_dir = "auto"
     nitrate.obs_var = "auto"
     nitrate.verbose_description = ""
+    nitrate.vertical = True
     keys.append("nitrate")
 
     # phosphate
@@ -121,6 +124,7 @@ class Validator:
     phosphate.gridded_dir = "auto"
     phosphate.obs_var = "auto"
     phosphate.verbose_description = ""
+    phosphate.vertical = True
     keys.append("phosphate")
 
     # silicate
@@ -140,6 +144,7 @@ class Validator:
     silicate.gridded_dir = "auto"
     silicate.obs_var = "auto"
     silicate.verbose_description = ""
+    silicate.vertical = True
     keys.append("silicate")
 
     # benbio
@@ -157,6 +162,7 @@ class Validator:
     benbio.gridded_dir = "auto"
     benbio.obs_var = "auto"
     benbio.verbose_description = ""
+    benbio.vertical = False
     keys.append("benbio")
 
     # ammonium
@@ -176,6 +182,7 @@ class Validator:
     ammonium.gridded_dir = "auto"
     ammonium.obs_var = "auto"
     ammonium.verbose_description = ""
+    ammonium.vertical = True
     keys.append("ammonium")
 
 
@@ -194,6 +201,7 @@ class Validator:
     pco2.gridded_dir = "auto"
     pco2.obs_var = "auto"
     pco2.verbose_description = ""
+    pco2.vertical = False
     keys.append("pco2")
 
     # ph
@@ -211,6 +219,7 @@ class Validator:
     ph.gridded_dir = "auto"
     ph.obs_var = "auto" 
     ph.verbose_description = ""
+    ph.vertical = True
     keys.append("ph")
 
 
@@ -231,6 +240,7 @@ class Validator:
     salinity.gridded_dir = "auto"
     salinity.obs_var = "auto"
     salinity.verbose_description = ""
+    salinity.vertical = True
     keys.append("salinity")
 
     # temperature
@@ -250,6 +260,7 @@ class Validator:
     temperature.gridded_dir = "auto"
     temperature.obs_var = "auto"
     temperature.verbose_description = ""
+    temperature.vertical = True 
     keys.append("temperature")
 
     # co2flux
@@ -267,6 +278,7 @@ class Validator:
     co2flux.gridded_dir = "auto"
     co2flux.obs_var = "auto"
     co2flux.verbose_description = ""
+    co2flux.vertical = False
     keys.append("co2flux")
 
 
@@ -287,6 +299,7 @@ class Validator:
     alkalinity.gridded_dir = "auto"
     alkalinity.obs_var = "auto"
     alkalinity.verbose_description = ""
+    alkalinity.vertical = True
     keys.append("alkalinity")
 
     # now kd
@@ -306,6 +319,7 @@ class Validator:
     text = "Sea surface light attenuation is compared with KD490 from the Copernicus Marine Environment Monitoring Service (CMEMS) dataset OCEANCOLOUR_GLO_BGC_L4_MY_009_104."
     text += " Kd490 is a comparable but not identical measure of attenuation, Kd490 refers to attenuation at 490 nm, while the model has no spectral dependence."
     kd.verbose_description = text
+    kd.vertical = False
     keys.append("kd")
 
     # ensure self.x = y, adds x to the keys list
@@ -334,6 +348,9 @@ class Validator:
             orig_sources = getattr(self, name).sources
         except:
             orig_sources = dict()
+            point = None,
+            point_source = None
+            point_dir = None
             pass
 
         var = Variable()
@@ -360,9 +377,6 @@ class Validator:
         if not isinstance(var.obs_var, str):
             raise ValueError("obs_var must be a string")
         # check this exists
-        if point_dir != "auto":
-            if not os.path.exists(point_dir):
-                raise ValueError(f"Point directory {point_dir} does not exist")
         gridded_dir = obs_dir
         var.gridded_dir = gridded_dir
         if gridded_dir != "auto":
@@ -417,6 +431,7 @@ class Validator:
         if len(point_files) == 0:
             raise ValueError(f"No feather files found in point directory {obs_dir}")
         valid_vars = ["lon", "lat", "year", "month", "day", "depth", "observation", "source"]
+        vertical = False
         for vv in point_files:
             # read in the first row
             df = pd.read_feather(vv)
@@ -424,7 +439,10 @@ class Validator:
             bad_cols = [col for col in df.columns if col not in valid_vars]
             if len(bad_cols) > 0:
                 raise ValueError(f"Invalid columns {bad_cols} found in point data file {vv}")
+            if "depth" in df.columns:
+                vertical = True
 
+        var.vertical = vertical
 
         var.obs_var = obs_var
         # add obs_var, ensure it's a string

@@ -776,14 +776,6 @@ def matchup(
 
     all_df = None
 
-    # create lists for working out which variables are needed for point matchups
-    # change point to list if str
-    # if isinstance(point, str):
-    #     point = [point]
-    # # check point is a list
-    # if not isinstance(point, list):
-    #     raise ValueError("point must be a list")
-
     var_choice = gridded 
     var_choice = list(set(var_choice))
     if isinstance(gridded, str):
@@ -868,9 +860,10 @@ def matchup(
 
     for key in definitions.keys:
         dir_name = definitions[key].point_dir
-        if os.path.exists(dir_name):
-            if key not in valid_points:
-                valid_points.append(key)
+        if dir_name is not None:
+            if os.path.exists(dir_name):
+                if key not in valid_points:
+                    valid_points.append(key)
 
 
     if True:
@@ -915,12 +908,10 @@ def matchup(
         point["surface"] = []
         point["bottom"] = []
         point["all"] = copy.deepcopy(valid_points)
-        if "pco2" in valid_points:
-            point["all"].remove("pco2")
-            point["surface"].append("pco2")
-        if "benbio" in valid_points:
-            point["all"].remove("benbio")
-            point["surface"].append("benbio")
+        for vv in point["all"]:
+            if definitions[vv].vertical is False:
+                point["all"].remove(vv)
+                point["surface"].append(vv)
 
     gridded = [x for x in gridded if x in valid_gridded]
 
@@ -943,20 +934,10 @@ def matchup(
         point[key] = [x for x in point[key] if x in vars_available]
         point[key] = [x for x in point[key] if x in valid_points]
 
-    # ensure pco2 is only in surface
-    for key in point.keys():
-        if "pco2" in point[key]:
-            if key != "surface":
-                point[key].remove("pco2")
-            if "pco2" not in point["surface"]:
-                point["surface"].append("pco2")
-    # ensure benbio is only in surface
-    for key in point.keys():
-        if "benbio" in point[key]:
-            if key != "surface":
-                point[key].remove("benbio") 
-            if "benbio" not in point["surface"]:
-                point["surface"].append("benbio")
+    for vv in point["all"]:
+        if definitions[vv].vertical is False:
+            point["all"].remove(vv)
+            point["surface"].append(vv)
 
     var_chosen = gridded + point["all"] + point["surface"] + point["bottom"]
     var_chosen = list(set(var_chosen))
