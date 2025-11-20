@@ -516,7 +516,7 @@ def generate_mapping(ds):
     ds_contents["long_name"] = [str(x) for x in ds_contents["long_name"]]
 
     ds_contents_top = ds_contents.query("nlevels == 1").reset_index(drop=True)
-    ds_contents = ds_contents.query("nlevels > 1").reset_index(drop=True)
+    #ds_contents = ds_contents.query("nlevels > 1").reset_index(drop=True)
     n_levels = ds_contents.nlevels.max()
     if n_levels > session_info["n_levels"]:
         session_info["n_levels"] = n_levels

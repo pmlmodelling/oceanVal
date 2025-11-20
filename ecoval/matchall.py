@@ -181,24 +181,18 @@ def mm_match(
                 df_locs = df.loc[:, valid_locs]
 
             ds.subset(variables=var_match)
-            # not benbio
-            if "benbio" != variable:
-                if "depth" not in df_locs.columns:
-                    ds.cdo_command("topvalue")
+            #
+            ds1 = nc.open_data(ds[0], checks = False)
+            ds_contents = ds1.contents
+            the_var = model_variable.split("+")[0]
+            if list(ds_contents.query("variable == @the_var").nlevels)[0] > 1:
+                ds.cdo_command("topvalue")
 
             if (
                 "year" in df_locs.columns
                 or "month" in df_locs.columns
                 or "day" in df_locs.columns
             ):
-                # idenify if the files have data from multiple days
-                # if "day" in df_locs.columns:
-                #     if len(set(df_locs.day)) < 3:
-                #         df_locs = (
-                #             df_locs.drop(columns=["month"])
-                #             .drop_duplicates()
-                #             .reset_index(drop=True)
-                #         )
                 ff_indices = df_times.query("path == @ff")
 
                 ff_indices = ff_indices.reset_index(drop=True).reset_index()
@@ -478,8 +472,6 @@ def matchup(
     thickness=None,
     n_dirs_down=2,
     point_time_res=["year", "month", "day"],
-    obs_dir="default",
-    everything=False,
     overwrite=True,
     ask=True,
     out_dir="",
@@ -526,11 +518,6 @@ def matchup(
         List of two floats, which must be provided. The first is the minimum longitude, the second is the maximum longitude. Default is None.
     lat_lim : list
         List of two float, which must be provided.. The first is the minimum latitude, the second is the maximum latitude. Default is None.
-    obs_dir : str
-        Path to validation data directory. Default is 'default'. If 'default', the data directory is taken from the session_info dictionary.
-    everything : bool
-        If True, all possible variables at the surface and near-bottom are matched up. Default is False.
-        In most cases this is overkill because point data may not tell you much gridded does not.
     ask : bool
         If True, the user will be asked if they are happy with the matchups. Default is True.
     out_dir : str
@@ -672,9 +659,6 @@ def matchup(
         session_info["cache_dir"] = None
         session_info["cache"] = False
     
-    # check everything
-    if not isinstance(everything, bool):
-        raise TypeError("everything must be a boolean")
     if not isinstance(ask, bool):
         raise TypeError("ask must be a boolean")
     if not isinstance(overwrite, bool):
@@ -724,14 +708,9 @@ def matchup(
     session_info["lat_lim"] = lat_lim
 
 
-    if obs_dir != "default":
-        if not os.path.exists(obs_dir):
-            raise ValueError(f"{obs_dir} does not exist")
-        session_info["obs_dir"] = obs_dir
 
     ds_depths = None
 
-    # check everything is valid
 
     if start is None:
         raise ValueError("Please provide a start year")
@@ -765,11 +744,6 @@ def matchup(
         session_info["levels_down"] = n_dirs_down
     else:
         session_info["levels_down"] = 2
-
-    if obs_dir != "default":
-        session_info["user_dir"] = True
-    else:
-        obs_dir = session_info["obs_dir"]
 
     sim_start = -1000
     sim_end = 10000
@@ -860,79 +834,6 @@ def matchup(
         lat_max = session_info["lat_lim"][1]
         lat_min = session_info["lat_lim"][0]
 
-    if session_info["user_dir"]:
-        valid_points = list(
-            set([x for x in glob.glob(obs_dir + "/point/all/*")])
-        )
-        for key in definitions.keys:
-            dir_name = definitions[key].point_dir
-            if os.path.exists(dir_name):
-                if key not in valid_points:
-                    valid_points.append(key)
-    else:
-        valid_points = list(set([x for x in glob.glob(obs_dir + "/point/all/*")]))
-    # extract directory base name
-    valid_points = [os.path.basename(x) for x in valid_points]
-
-    for key in definitions.keys:
-        dir_name = definitions[key].point_dir
-        if dir_name is not None:
-            if os.path.exists(dir_name):
-                if key not in valid_points:
-                    valid_points.append(key)
-
-
-    if True:
-        if session_info["user_dir"]:
-            valid_gridded = [
-                os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/*")
-            ]
-            for key in definitions.keys:
-                dir_name = definitions[key].gridded_dir
-                if os.path.exists(dir_name):
-                    if key not in valid_gridded:
-                        valid_gridded.append(key)
-        else:
-            valid_gridded = [
-                os.path.basename(x)
-                for x in glob.glob(obs_dir + f"/gridded/*")
-            ]
-            # add in global data
-            valid_gridded += [
-                os.path.basename(x) for x in glob.glob(obs_dir + "/gridded/*")
-            ]
-            for key in definitions.keys:
-                dir_name = definitions[key].gridded_dir
-                if os.path.exists(dir_name):
-                    if key not in valid_gridded:
-                        valid_gridded.append(key)
-    if len(gridded) > 0:
-        if gridded[0] == "default" and len(gridded) == 1:
-            gridded = valid_gridded
-
-    dirs = glob.glob(obs_dir + "/gridded/**")
-
-    if len(gridded) == 0 and len(point) == 0:
-        raise ValueError("Please provide at least one variable to matchup")
-
-    if everything:
-        gridded = valid_gridded
-        # only valid variables
-        gridded = [x for x in gridded if x in valid_vars]
-        point = dict()
-        point["all"] = []
-        point["surface"] = []
-        point["bottom"] = []
-        point["all"] = copy.deepcopy(valid_points)
-        for vv in point["all"]:
-            try:
-                if definitions[vv].vertical is False:
-                    point["all"].remove(vv)
-                    point["surface"].append(vv)
-            except:
-                pass
-
-    gridded = [x for x in gridded if x in valid_gridded]
 
     vars_available = list(
         all_df
@@ -951,7 +852,7 @@ def matchup(
     #print(vars_available)
     for key in point.keys():
         point[key] = [x for x in point[key] if x in vars_available]
-        point[key] = [x for x in point[key] if x in valid_points]
+        # point[key] = [x for x in point[key] if x in valid_points]
 
     for vv in point["all"]:
         if definitions[vv].vertical is False:
@@ -1341,7 +1242,6 @@ def matchup(
             point_vars.sort()
 
             for vv in point_vars:
-                print(f"Matching up with {vv} point data")
                 all_df = df_mapping
                 all_df = all_df.query("model_variable in @good_model_vars").reset_index(
                     drop=True
@@ -1405,35 +1305,11 @@ def matchup(
                             else:
                                 layer_select = "bottom"
 
-
-                            if session_info["user_dir"]:
-                                paths = glob.glob(
-                                    f"{obs_dir}/point/{layer_select}/{variable}/**{variable}**.feather"
-                                )
-                            else:
-                                paths = glob.glob(
-                                    f"{obs_dir}/point/{layer_select}/{variable}/**{variable}**.feather"
-                                )
                             # paths bottom
-                            if definitions[variable].point_dir != "auto":
-                                paths = glob.glob(
-                                    f"{definitions[variable].point_dir}/**.feather"
-                                )
-
-                            if session_info["user_dir"]:
-                                paths_bottom = glob.glob(
-                                    f"{obs_dir}/point/bottom/{variable}/**{variable}**.feather"
-                                )
-                            else:
-                                paths_bottom = glob.glob(
-                                    f"{obs_dir}/point/bottom/{variable}/**{variable}**.feather"
-                                )
+                            paths = glob.glob( f"{definitions[variable].point_dir}/**.feather")
 
                             # try finding source in definitions
                             source = definitions[variable].point_source
-
-                            if definitions[variable].point_dir == "auto":
-                                paths = [x for x in paths if f"{point_variable}/" in x]
 
                             for exc in exclude:
                                 paths = [
@@ -1490,9 +1366,7 @@ def matchup(
 
                             sel_these = point_time_res
                             sel_these = [x for x in df.columns if x in sel_these]
-                            if variable not in [
-                                "benbio"
-                            ]:
+                            if "year" in df.columns: 
                                 paths = list(
                                     set(
                                         df.loc[:, sel_these]
@@ -1503,7 +1377,6 @@ def matchup(
                                 )
                             else:
                                 paths = list(set(df_times.path))
-
 
                             if len(paths) == 0:
                                 print(f"No matching times for {variable}")
@@ -1712,28 +1585,6 @@ def matchup(
                                 # add model to name column names with frac in them
                             df_all = df_all.dropna().reset_index(drop=True)
                             # read in point_bottom data
-                            if len(paths_bottom) > 0 and layer == "all":
-                                df_bottom = pd.concat(
-                                    [pd.read_feather(x) for x in paths_bottom]
-                                )
-                                df_bottom = df_bottom.loc[:,["lon", "lat", "year", "month", "day", "depth", "observation"]]
-                                # remove based on what's in point_time_res
-                                # not benbio
-                                if variable != "benbio":
-                                    for x in [
-                                        x
-                                        for x in ["year", "month", "day"]
-                                        if x not in point_time_res
-                                    ]:
-                                        if x in df_bottom.columns:
-                                            df_bottom = df_bottom.drop(columns=x)
-                                df_bottom = df_bottom.assign(bottom = 1)
-                                on_these = [x for x in ["lon", "lat", "year", "month", "day", "depth", "observation"] if x in df_all.columns]
-                                df_all = df_all.merge(df_bottom, how="left", on=on_these)
-                                # if bottom is nan, set to 0
-                                df_all = df_all.assign(bottom = lambda x: x.bottom.fillna(0))
-
-                                # if it exists, coerce year to int
 
                             grouping = copy.deepcopy(point_time_res)
                             grouping.append("lon")
@@ -1832,9 +1683,7 @@ def matchup(
                                 time.sleep(1)
                                 return False
 
-                    vv_variable = vv
-                    if vv == "ph":
-                        vv_variable = "pH"
+                    vv_variable = definitions[vv].long_name
 
                     if session_info["out_dir"] != "":
                         out = glob.glob(
@@ -1852,14 +1701,7 @@ def matchup(
                         if session_info["overwrite"] is False:
                             continue
 
-                    if vv_variable != "benbio":
-                        print(
-                                f"Matching up model {key} {vv_variable} with vertically resolved bottle and CDT {vv_variable}"
-                            )
-                    else:
-                        print(
-                                f"Matching up model benthic biomass with North Sea Benthos Survey data"
-                            )
+                    print( f"Matching up model output of {key} {vv_variable} with in-situ observational data")
 
                     #try:
                     if True:
