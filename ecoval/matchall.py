@@ -118,7 +118,7 @@ nc.options(progress=False)
 
 def mm_match(
     ff,
-    ersem_variable,
+    model_variable,
     df,
     df_times,
     ds_depths,
@@ -131,8 +131,8 @@ def mm_match(
     -------------
     ff: str
         Path to file
-    ersem_variable: str
-        Variable name in ERSEM
+    model_variable: str
+        Variable name in the simulation 
     df: pd.DataFrame
         Dataframe of observational data
     df_times: pd.DataFrame
@@ -160,7 +160,7 @@ def mm_match(
     try:
         with warnings.catch_warnings(record=True) as w:
             ds = nc.open_data(ff, checks=False)
-            var_match = ersem_variable.split("+")
+            var_match = model_variable.split("+")
 
             valid_locs = ["lon", "lat", "year", "month", "day", "depth"]
             valid_locs = [x for x in valid_locs if x in df.columns]
@@ -216,10 +216,8 @@ def mm_match(
 
             if len(var_match) > 1:
                     ds.sum_all()
-            ff1 = "/tmp/adhoc_dictionary_2.pkl"
-            the_dict = {"ersem_variable": ersem_variable}
-            with open(ff1, "wb") as f:
-                pickle.dump(the_dict, f)
+            the_dict = {"model_variable": model_variable}
+            session_info["adhoc"] = copy.deepcopy(the_dict)
 
             if len(df_locs) > 0:
                 ds.run()
@@ -1375,7 +1373,7 @@ def matchup(
                     ):
                         with warnings.catch_warnings(record=True) as w:
                             point_variable = variable
-                            ersem_variable = list(
+                            model_variable = list(
                                 all_df.query(
                                     "variable == @point_variable"
                                 ).model_variable
@@ -1640,7 +1638,7 @@ def matchup(
                                     mm_match,
                                     [
                                         ff,
-                                        ersem_variable,
+                                        model_variable,
                                         df,
                                         df_times_new,
                                         ds_depths,
@@ -1768,7 +1766,6 @@ def matchup(
                                     os.path.basename(out), "matchup_dict.pkl"
                                 )
                                 # read in the adhoc dict in mm_match
-                                ff1 = "/tmp/adhoc_dictionary_2.pkl"
 
                                 point_start = -5000
                                 point_end = 10000
@@ -1786,17 +1783,13 @@ def matchup(
                                 if point_end < max_year:
                                     max_year = point_end
 
-                                with open(ff1, "rb") as f:
-                                    adhoc_dict = pickle.load(f)
-                                    ersem_variable = adhoc_dict["ersem_variable"]
                                 the_dict = {
                                     "start": min_year,
                                     "end": max_year,
                                     "point_time_res": point_time_res,
-                                    "ersem_variable": ersem_variable,
+                                    "model_variable": model_variable,
                                 }
                                 # remove the adhoc dict
-                                os.remove(ff1)
                                 # write to pickle
                                 with open(out1, "wb") as f:
                                     pickle.dump(the_dict, f)
@@ -1807,9 +1800,9 @@ def matchup(
                                     out_unit = f"matched/point/{layer}/{variable}/{source}_{layer}_{variable}_unit.csv"
                                 ds = nc.open_data(paths[0], checks=False)
                                 ds_contents = ds.contents
-                                ersem_variable = ersem_variable.split("+")[0]
+                                model_variable = model_variable.split("+")[0]
                                 ds_contents = ds_contents.query(
-                                    "variable == @ersem_variable"
+                                    "variable == @model_variable"
                                 )
                                 ds_contents.to_csv(out_unit, index=False)
                                 return None

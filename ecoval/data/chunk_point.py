@@ -39,8 +39,8 @@ try:
         point_time_res = matchup_dict["point_time_res"]
         if "point_years" in matchup_dict:
             point_years = matchup_dict["point_years"]
-        if "ersem_variable" in matchup_dict:
-            variable_formula = matchup_dict["ersem_variable"]
+        if "model_variable" in matchup_dict:
+            variable_formula = matchup_dict["model_variable"]
 except:
     pass
 
