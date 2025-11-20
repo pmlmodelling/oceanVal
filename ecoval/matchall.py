@@ -26,8 +26,9 @@ def is_z_up(ff, variable = None):
     import netCDF4 as nc4
     try:
         ds1 = nc.open_data(ff, checks = False)
-        var = ds1.variables[0]
-        if variable is not None:
+        if variable is None:
+            var = ds1.variables[0]
+        else:
             var = variable
         # select variable using nco
         ds1.nco_command(f"ncks -v {var}")
@@ -51,60 +52,12 @@ def is_z_up(ff, variable = None):
                 if z.positive == 'down':
                     return False
                 else:
-                    raise ValueError("The z-axis is down. You therefore need to pre-process your data to have a z-axis that is up.") 
+                    return True 
         raise ValueError("Could not determine if z-axis is down from the provided file.")
     except:
         raise ValueError("Could not determine if z-axis is down from the provided file.")
 
 
-def extract_units(df, sim_dir, n_dirs_down):
-    # 
-    # remove df rows where pattern is None
-    df = df[df.pattern.notna()].reset_index(drop=True)
-    patterns = set(df.pattern.dropna())
-    sim_dir = sim_dir + "/"
-    file_mapping = dict()
-    for pp in patterns:
-        wild_card = pp
-        for i in range(n_dirs_down):
-            wild_card = "/**/" + wild_card
-        wild_card = wild_card.replace("**", "*")
-        # replace double stars with 1
-        wild_card = wild_card.replace("**", "*")
-        if wild_card[0] == "/":
-            wild_card = wild_card[1:]
-        if pp in file_mapping:
-            continue
-        if pp is None:
-            continue
-        # find first file matching sim_dir + pp
-        # efficient approach, not using glob, recursive
-          #  wild_card = os.path.basename(wild_card)
-        for y in pathlib.Path(sim_dir).glob(wild_card):
-            path = y
-            # convert to string
-            path = str(path)
-            break
-
-        file_mapping[pp] = path 
-    # unit is None
-    df["unit"] = None
-    for index, row in df.iterrows():
-        variable = row['variable']
-        try:
-            pattern = row['pattern']
-            file = file_mapping[pattern] 
-            # variable
-            variable = row['variable']
-            model_variable = row['model_variable']
-            model_variable = model_variable.split("+")[0]
-            ds = nc.open_data(file, checks = False)
-            ds_contents = ds.contents
-            unit = list(ds_contents.query("variable == @model_variable").unit)[0]
-            df.at[index, 'unit'] = unit
-        except:
-            pass
-    return df.loc[:,["variable", "unit"]]
 
 # a list of valid variables for validation
 valid_vars = definitions.keys 
@@ -141,7 +94,6 @@ def mm_match(
         Depths to match
 
     """
-
 
     if session_info["cache"]:
         try:
@@ -189,6 +141,9 @@ def mm_match(
             if list(ds_contents.query("variable == @the_var").nlevels)[0] > 1:
                 if layer == "surface":
                     ds.cdo_command("topvalue")
+                else:
+                    if session_info["invert"]:
+                        ds.invert_levels()
 
             if (
                 "year" in df_locs.columns
@@ -223,10 +178,8 @@ def mm_match(
                 )
                 if df_ff is not None:
                     df_ff = df_ff.dropna().reset_index(drop=True)
-
+                
                 # check if foo.nc exists
-                if not os.path.exists("foo.nc"):
-                    ds.to_nc("foo.nc", zip = True)
                 if df_ff is not None:
                     valid_vars = ["lon", "lat", "year", "month", "day", "depth"]
                     for vv in ds.variables:
@@ -996,15 +949,19 @@ def matchup(
             ds_depths - ds_thickness
             ds_depths.run()
             ds_depths.rename({ds_depths.variables[0]: "depth"})
-            if invert_thickness:
-                ds_depths.run()
-                ds_depths.invert_levels()
+            #if invert_thickness:
+            #    ds_depths.run()
+            #    ds_depths.invert_levels()
                 # ds_depths.to_nc("foo.nc")
             ds_depths.run()
             try:
                 ds_depths.fix_amm7_grid()
             except:
                 pass
+        # save as foo.nc
+        if os.path.exists("thickness.nc"):
+            os.remove("thickness.nc")
+        ds_depths.to_nc("thickness.nc", zip=True)
 
         for ww in w:
             if str(ww.message) not in session_warnings:
@@ -1014,6 +971,8 @@ def matchup(
                 "You have asked for variables that require the specification of thickness"
             )
         print("Thickness is sorted out")
+
+    session_info["invert"] = invert_thickness
 
     # add the global checker here
     # sort all_df alphabetically by variable
@@ -1027,30 +986,6 @@ def matchup(
         )
 
     print("******************************")
-    # do a unit check
-    print("Doing a unit check...")
-    data_path = importlib.resources.files("ecoval").joinpath("data/standard_units.feather")
-    df_standard_units = pd.read_feather(data_path)
-    df_units = extract_units(all_df, sim_dir, n_dirs_down).merge(df_standard_units, on="variable", how="left")
-    # only var_chosen
-    df_units = df_units[df_units.variable.isin(var_chosen)].reset_index(drop=True)
-    df_units = df_units.query("unit != standard_unit")
-    if len(df_units) > 0:
-        print("Variable units:")
-        print(df_units)
-        print("There are potential unit mismatches above. Please check before proceeding.")
-        print("Do you want to proceed? Y/N")
-        if ask:
-            x = input()
-        else:
-            x = "y"
-        if x.lower() not in ["y", "n"]:
-            print("Provide Y or N")
-            x = input()
-        if x.lower() == "n":
-            raise ValueError("Unit check failed")
-    print("******************************")
-    print("Unit check is complete")
 
     print("******************************")
     print(f"** Inferred mapping of model variable names from {sim_dir}")
