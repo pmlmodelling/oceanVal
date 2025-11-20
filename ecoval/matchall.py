@@ -416,15 +416,6 @@ def extract_variable_mapping(folder, exclude=[], n_check = None):
             continue
 
         ds_vars = ds.variables
-        # vosaline and votemper are special cases
-
-        if "vosaline" in ds_vars:
-            if ds_dict["salinity"] is None:
-                ds_dict["salinity"] = "vosaline"
-
-        if "votemper" in ds_vars:
-            if ds_dict["temperature"] is None:
-                ds_dict["temperature"] = "votemper"
 
         if len([x for x in ds_dict.values() if x is not None]) > 0:
             new_name = ""
@@ -481,8 +472,6 @@ def matchup(
     sim_dir=None,
     start=None,
     end=None,
-    gridded = "default", 
-    point = [], 
     lon_lim=None,
     lat_lim=None,
     cores=6,
@@ -556,6 +545,11 @@ def matchup(
 
     """
 
+    gridded = None
+    point = None
+
+
+
     if isinstance(point_time_res, str):
         point_time_res = [point_time_res]
     if isinstance(point_time_res, list) is False:
@@ -583,6 +577,29 @@ def matchup(
         point["all"] = point_new
         point["surface"] = []
         point["bottom"] = []
+    # loop through definition keys
+    for key in definitions.keys:
+        try:
+            if definitions[key].depths == "surface":
+                if key not in point["surface"]:
+                    point["surface"].append(key)
+        except:
+            pass
+        try:
+            if definitions[key].depths == "all":
+                if key not in point["all"]:
+                    point["all"].append(key)
+        except:
+            pass
+        # do the same for gridded
+        try:
+            if definitions[key].gridded:
+                if gridded is None:
+                    gridded = []
+                if key not in gridded:
+                    gridded.append(key)
+        except:
+            pass
 
     if isinstance(point, dict):
         # check keys are valid
@@ -908,9 +925,12 @@ def matchup(
         point["bottom"] = []
         point["all"] = copy.deepcopy(valid_points)
         for vv in point["all"]:
-            if definitions[vv].vertical is False:
-                point["all"].remove(vv)
-                point["surface"].append(vv)
+            try:
+                if definitions[vv].vertical is False:
+                    point["all"].remove(vv)
+                    point["surface"].append(vv)
+            except:
+                pass
 
     gridded = [x for x in gridded if x in valid_gridded]
 
@@ -937,6 +957,7 @@ def matchup(
         if definitions[vv].vertical is False:
             point["all"].remove(vv)
             point["surface"].append(vv)
+    
 
     var_chosen = gridded + point["all"] + point["surface"] + point["bottom"]
     var_chosen = list(set(var_chosen))
