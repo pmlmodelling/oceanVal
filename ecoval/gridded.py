@@ -54,7 +54,6 @@ def gridded_matchup(
     None
 
     """
-    obs_dir = session_info["obs_dir"]
 
     all_df = df_mapping
     # if model_variable is None remove from all_df
@@ -140,14 +139,6 @@ def gridded_matchup(
                 ds_grid.subset(variables=selection[0], time=0)
                 ds_grid.top()
                 ds_grid.as_missing(0)
-                if max(ds_grid.contents.npoints) == 111375:
-                    amm7_out = session_info["out_dir"] + "matched/amm7.txt"
-                    # create empty file
-                    with open(amm7_out, "w") as f:
-                        f.write("")
-
-                    ff_grid = f"{obs_dir}/amm7_val_subdomains.nc"
-                    ds_grid.cdo_command(f"setgrid,{ff_grid}")
                 df_grid = ds_grid.to_dataframe().reset_index().dropna()
                 columns = [
                     x for x in df_grid.columns if "lon" in x or "lat" in x
@@ -343,31 +334,6 @@ def gridded_matchup(
                     ds_surface.merge("time")
                     ds_surface.tmean(["year", "month"], align="left")
 
-                if max(ds_surface.contents.npoints) == 111375:
-                    try:
-                        ds_surface.fix_amm7_grid()
-                    except:
-                        pass
-                    ds_surface.subset(lon=[-19, 9], lat=[41, 64.3])
-
-                if vv in [ "pco2"]:
-                    ds_obs.run()
-                    if (
-                        len([x for x in ds_obs.years if x in ds_surface.years])
-                        == 0
-                    ):
-                        session_info["end_messages"] += [
-                            f"Unable to create matchup for gridded surface {vv}. There were no years in common between model and observation. The observational years are {min_obs_year} to {max_obs_year}."
-                        ]
-                        print(
-                            f"No years in common between model and observation for gridded surface {vv}"
-                        )
-                        continue
-                    ds_obs.subset(years=sim_years)
-                    ds_obs.merge("time")
-                    ds_obs.tmean("month", align="left")
-                    ds_surface.tmean("month", align="left")
-
                 if len(ds_obs) > 1:
                     ds_obs.merge("time")
                     ds_obs.run()
@@ -509,23 +475,6 @@ def gridded_matchup(
                 ds_mask.as_missing([-1e40, -1e20])
                 ds_mask.run()
                 ds_obs + ds_mask
-
-                # fix the co2 flux units
-                if vv == "co2flux":
-                    ds_obs.assign(model=lambda x: x.model * -0.365)
-                    ds_obs.set_units({"model": "mol/m2/yr"})
-                    ds_obs.set_units({"observation": "mol/m2/yr"})
-
-                # figure out if the temperature is in degrees C
-                if vv == "temperature":
-                    if ds_obs.to_xarray().model.max() > 100:
-                        ds_obs.assign(model=lambda x: x.model - 273.15)
-                    if ds_obs.to_xarray().observation.max() > 100:
-                        ds_obs.assign( observation=lambda x: x.observation - 273.15)
-                    # set the units
-                    ds_obs.set_units({"model": "degrees C"})
-                    ds_obs.set_units({"observation": "degrees C"})
-                # # now, we need to exclude data outside the lon/lat range with data
 
                 out_file = (
                     session_info["out_dir"]
