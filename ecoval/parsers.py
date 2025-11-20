@@ -350,6 +350,7 @@ class Validator:
             point_start = getattr(self, name).point_start
             point_end = getattr(self, name).point_end
             depths = getattr(self, name).depths
+            vertical = getattr(self, name).vertical
         except:
             orig_sources = dict()
             point = None,
@@ -358,9 +359,11 @@ class Validator:
             point_start = -1000
             point_end = 3000
             depths = None
+            vertical = False
             pass
 
         var = Variable()
+        var.vertical = vertical
         var.depths = depths
         var.gridded_start = start
         var.gridded_end = end
