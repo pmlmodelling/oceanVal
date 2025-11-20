@@ -108,6 +108,7 @@ def extract_units(df, sim_dir, n_dirs_down):
 
 # a list of valid variables for validation
 valid_vars = definitions.keys 
+# add some additionals
 
 session_warnings = Manager().list()
 
@@ -1366,6 +1367,8 @@ def matchup(
 
                     min_year = df_times.year.min()
                     max_year = df_times.year.max()
+                    session_info["min_year"] = min_year
+                    session_info["max_year"] = max_year
 
                     def point_match(
                         variable, layer="all", ds_depths=None, df_times=None
@@ -1421,6 +1424,14 @@ def matchup(
                                 ]
 
                             df = pd.concat([pd.read_feather(x) for x in paths])
+                            if "year" in df.columns:
+                                # find point_start
+                                point_start = definitions[variable].point_start
+                                point_end = definitions[variable].point_end
+                                df = df.query(
+                                    "year >= @point_start and year <= @point_end"
+                                ).reset_index(drop=True)
+
                             # remove source if it's in df
                             if "source" in df.columns:
                                 df = df.query("source == @source").reset_index(drop=True)
@@ -1758,6 +1769,23 @@ def matchup(
                                 )
                                 # read in the adhoc dict in mm_match
                                 ff1 = "/tmp/adhoc_dictionary_2.pkl"
+
+                                point_start = -5000
+                                point_end = 10000
+                                try:
+                                    point_start = definitions[variable].point_start
+                                    point_end = definitions[variable].point_end
+                                except:
+                                    pass
+
+                                min_year = session_info["min_year"]
+                                max_year = session_info["max_year"]
+
+                                if point_start > min_year:
+                                    min_year = point_start
+                                if point_end < max_year:
+                                    max_year = point_end
+
                                 with open(ff1, "rb") as f:
                                     adhoc_dict = pickle.load(f)
                                     ersem_variable = adhoc_dict["ersem_variable"]
@@ -1854,8 +1882,7 @@ def matchup(
         sim_end=sim_end,
         lon_lim=lon_lim,
         lat_lim=lat_lim,
-        times_dict=times_dict,
-        ds_thickness=thickness,
+        times_dict=times_dict
     )
 
     if len(session_info["end_messages"]) > 0:

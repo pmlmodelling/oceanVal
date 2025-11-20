@@ -315,7 +315,7 @@ class Validator:
     kd.model_variable = "auto"
     kd.point_dir = "auto"
     kd.gridded_dir = "auto"
-    kd.obs_var = "auto"
+    kd.obs_var = "KD490" 
     text = "Sea surface light attenuation is compared with KD490 from the Copernicus Marine Environment Monitoring Service (CMEMS) dataset OCEANCOLOUR_GLO_BGC_L4_MY_009_104."
     text += " Kd490 is a comparable but not identical measure of attenuation, Kd490 refers to attenuation at 490 nm, while the model has no spectral dependence."
     kd.verbose_description = text
@@ -389,7 +389,7 @@ class Validator:
                 raise ValueError(f"Attribute {attr} cannot be None")
         setattr(self, name, var)
     # 
-    def add_point_comparison(self, name, long_name, short_name, short_title, source, description, model_variable, obs_dir = "auto"): 
+    def add_point_comparison(self, name, long_name, short_name, short_title, source, description, model_variable, start = -1000, end = 3000, obs_dir = "auto"): 
         try:
             gridded_dir = getattr(self, name).gridded_dir   
             obs_var = getattr(self, name).obs_var
@@ -410,6 +410,14 @@ class Validator:
         var.long_name = long_name
         var.short_name = short_name
         var.short_title = short_title
+        var.point_start = start
+        var.point_end = end
+        # check these are int or can be cast to int
+        try:
+            var.point_start = int(var.point_start)
+            var.point_end = int(var.point_end)
+        except:
+            raise ValueError("start and end must be integers")
         # append source to the var.source
         # check if source key is in orig_source
         source = {source: description}
