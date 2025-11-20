@@ -535,8 +535,6 @@ def matchup(
     gridded = None
     point = None
 
-
-
     if isinstance(point_time_res, str):
         point_time_res = [point_time_res]
     if isinstance(point_time_res, list) is False:
@@ -549,7 +547,6 @@ def matchup(
         point = dict()
         point["all"] = []
         point["surface"] = []
-        point["bottom"] = []
     
     # if point is str, make it a list
     if isinstance(point, str):
@@ -563,7 +560,6 @@ def matchup(
         point = dict()
         point["all"] = point_new
         point["surface"] = []
-        point["bottom"] = []
     # loop through definition keys
     for key in definitions.keys:
         try:
@@ -591,8 +587,8 @@ def matchup(
     if isinstance(point, dict):
         # check keys are valid
         for key in point.keys():
-            if key not in ["all", "surface", "bottom"]:
-                raise ValueError("point dictionary keys must be 'all', 'surface' or 'bottom'")
+            if key not in ["all", "surface"]:
+                raise ValueError("point dictionary keys must be 'all', 'surface'")
         # check values are lists
         for key in point.keys():
             if isinstance(point[key], str):
@@ -603,7 +599,7 @@ def matchup(
             if not isinstance(point[key], list):
                 raise TypeError("point dictionary values must be lists or strings")
         # if any keys are absent, make them empty lists
-        for key in ["all", "surface", "bottom"]:
+        for key in ["all", "surface"]:
             if key not in point.keys():
                 point[key] = []
 
@@ -860,7 +856,7 @@ def matchup(
             point["surface"].append(vv)
     
 
-    var_chosen = gridded + point["all"] + point["surface"] + point["bottom"]
+    var_chosen = gridded + point["all"] + point["surface"]
     var_chosen = list(set(var_chosen))
 
     if end < 1998:
@@ -876,7 +872,7 @@ def matchup(
             os.mkdir("matched")
 
     invert_thickness = False
-    point_all = point["all"] + point["surface"] + point["bottom"]
+    point_all = point["all"] + point["surface"] 
     if len(point_all) > 0:
         print("Sorting out thickness")
         ds_depths = False
@@ -1137,7 +1133,7 @@ def matchup(
 
 
     # combine all variables into a list
-    all_vars = gridded +  point["all"] + point["surface"] + point["bottom"]
+    all_vars = gridded +  point["all"] + point["surface"] 
     all_vars = list(set(all_vars))
 
     df_variables = all_df.query("variable in @all_vars").reset_index(drop=True)
@@ -1224,7 +1220,7 @@ def matchup(
 
     df_mapping = all_df
 
-    point_all = point["all"] + point["surface"] + point["bottom"]
+    point_all = point["all"] + point["surface"] 
     if len(point_all) > 0:
         print("********************************")
         print("Matching up with observational point data")
@@ -1299,11 +1295,6 @@ def matchup(
                                     "variable == @point_variable"
                                 ).model_variable
                             )[0]
-
-                            if layer != "bottom":
-                                layer_select = "all"
-                            else:
-                                layer_select = "bottom"
 
                             # paths bottom
                             paths = glob.glob( f"{definitions[variable].point_dir}/**.feather")
@@ -1420,7 +1411,6 @@ def matchup(
                                 # for ww in w:
                                 #     if str(ww.message) not in session_warnings:
                                 #         session_warnings.append(str(ww.message))
-
 
                             valid_cols = [
                                 "lon",
