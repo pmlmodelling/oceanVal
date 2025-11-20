@@ -476,6 +476,10 @@ class Validator:
                 raise ValueError(f"Invalid columns {bad_cols} found in point data file {vv}")
             if "depth" in df.columns:
                 vertical = True
+            # lon/lat/observation *must* be in df
+            for req_col in ["lon", "lat", "observation"]:
+                if req_col not in df.columns:
+                    raise ValueError(f"Required column {req_col} not found in point data file {vv}")
 
         var.vertical = vertical
 
