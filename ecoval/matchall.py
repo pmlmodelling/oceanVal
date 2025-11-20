@@ -142,6 +142,7 @@ def mm_match(
 
     """
 
+
     if session_info["cache"]:
         try:
             ff_read = session_info["cache_mapping"].query("path == @ff & layer == @layer & variable == @variable").output
@@ -186,7 +187,8 @@ def mm_match(
             ds_contents = ds1.contents
             the_var = model_variable.split("+")[0]
             if list(ds_contents.query("variable == @the_var").nlevels)[0] > 1:
-                ds.cdo_command("topvalue")
+                if layer == "surface":
+                    ds.cdo_command("topvalue")
 
             if (
                 "year" in df_locs.columns
@@ -213,11 +215,18 @@ def mm_match(
             the_dict = {"model_variable": model_variable}
             session_info["adhoc"] = copy.deepcopy(the_dict)
 
+
             if len(df_locs) > 0:
                 ds.run()
                 df_ff = ds.match_points(
                     df_locs, depths=ds_depths, quiet=True, max_extrap = 0
                 )
+                if df_ff is not None:
+                    df_ff = df_ff.dropna().reset_index(drop=True)
+
+                # check if foo.nc exists
+                if not os.path.exists("foo.nc"):
+                    ds.to_nc("foo.nc", zip = True)
                 if df_ff is not None:
                     valid_vars = ["lon", "lat", "year", "month", "day", "depth"]
                     for vv in ds.variables:
@@ -476,7 +485,7 @@ def matchup(
     ask=True,
     out_dir="",
     exclude=[],
-    cache = True,
+    cache = False,
     n_check = None,
     **kwargs,
 ):
