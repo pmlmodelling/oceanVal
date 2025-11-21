@@ -356,10 +356,18 @@ def gridded_matchup(
                 lat_max = extent[3]
                 lat_min = extent[2]
 
+                extent = get_extent(ds_surface[0])
+                lon_max_model = extent[1]
+                lon_min_model = extent[0]
+                lat_max_model = extent[3]
+                lat_min_model = extent[2]   
+
                 lon_min = max(lon_min, lon_min_model)
                 lon_max = min(lon_max, lon_max_model)
                 lat_min = max(lat_min, lat_min_model)
                 lat_max = min(lat_max, lat_max_model)
+
+
                 if lon_min < -180:
                     lon_min = -180
                 if lon_max > 180:
