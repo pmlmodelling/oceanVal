@@ -180,7 +180,6 @@ def mm_match(ff, model_variable, df, df_times, ds_depths, variable, df_all, laye
                 if df_ff is not None:
                     df_ff = df_ff.dropna().reset_index(drop=True)
 
-                # check if foo.nc exists
                 if df_ff is not None:
                     valid_vars = ["lon", "lat", "year", "month", "day", "depth"]
                     for vv in ds.variables:
@@ -344,7 +343,6 @@ def extract_variable_mapping(folder, exclude=[], n_check=None):
         if n_check is not None and isinstance(n_check, int):
             options = random.sample(options, min(n_check, len(options)))
         if True:
-            # options = [x for x in options if "part" not in os.path.basename(x)]
             options = [x for x in options if "restart" not in os.path.basename(x)]
 
         if len([x for x in options if ".nc" in x]) > 0:
@@ -403,7 +401,6 @@ def extract_variable_mapping(folder, exclude=[], n_check=None):
             new_name = re.sub(r"\d{4,}", "**", new_name)
             # replace strings of the form _12. with _**.
             new_name = re.sub(r"\d{2,}", "**", new_name)
-            # new_name = re.sub(r"_\d{2,}\.", "_**.", new_name)
 
             all_df.append(
                 pd.DataFrame.from_dict(new_dict).melt().assign(pattern=new_name)
@@ -463,11 +460,6 @@ def matchup(
     end : int
         End year. Final year of the simulations to matchup.
         This must be supplied
-    gridded : str, or list
-        This defaults to ['chlorophyll', 'nitrate'].
-        This is a list of all gridded surface data to matchup.
-    point: list
-        List of all point variables to matchup for all depths. Default is [].
     cores : int
         Number of cores to use for parallel extraction and matchups of data.
         Default is 6, or the system cores if less than 6.
@@ -770,9 +762,6 @@ def matchup(
             error = f"The model variables specified do not appear to be in the simulation output for the following: {missing}. Please check the model_variable names and try again."
             raise ValueError(error)
 
-    
-
-
         # add in anything that is missing
         all_vars = valid_vars
 
@@ -832,12 +821,8 @@ def matchup(
     remove = []
 
     gridded = [x for x in gridded if x in vars_available]
-    # point = [x for x in point if x in valid_points]
-    # point = [x for x in point if x in vars_available]
-    # print(vars_available)
     for key in point.keys():
         point[key] = [x for x in point[key] if x in vars_available]
-        # point[key] = [x for x in point[key] if x in valid_points]
 
     for vv in point["all"]:
         if definitions[vv].vertical is False:
@@ -847,10 +832,6 @@ def matchup(
     var_chosen = gridded + point["all"] + point["surface"]
     var_chosen = list(set(var_chosen))
 
-    if end < 1998:
-        # kd
-        gridded.remove("kd")
-        print("kd is only available from 1998 onwards, removing from gridded variables")
     # create matched directory
     if not os.path.exists("matched"):
         if session_info["out_dir"] != "":
@@ -958,7 +939,6 @@ def matchup(
 
             ds_thickness.run()
             if invert_thickness:
-                # raise ValueError("inverted")
                 ds_thickness.invert_levels()
                 ds_thickness.run()
 
@@ -969,19 +949,11 @@ def matchup(
             ds_depths - ds_thickness
             ds_depths.run()
             ds_depths.rename({ds_depths.variables[0]: "depth"})
-            # if invert_thickness:
-            #    ds_depths.run()
-            #    ds_depths.invert_levels()
-            # ds_depths.to_nc("foo.nc")
             ds_depths.run()
             try:
                 ds_depths.fix_amm7_grid()
             except:
                 pass
-        # save as foo.nc
-        if os.path.exists("thickness.nc"):
-            os.remove("thickness.nc")
-        ds_depths.to_nc("thickness.nc", zip=True)
 
         for ww in w:
             if str(ww.message) not in session_warnings:
@@ -1004,8 +976,6 @@ def matchup(
         print(
             f"The following variables will be matched up with gridded surface data: {','.join(gridded)}"
         )
-
-    print("******************************")
 
     print("******************************")
     print(f"** Inferred mapping of model variable names from {sim_dir}")
