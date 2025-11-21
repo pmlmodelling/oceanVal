@@ -170,7 +170,6 @@ def mm_match(
             the_dict = {"model_variable": model_variable}
             session_info["adhoc"] = copy.deepcopy(the_dict)
 
-
             if len(df_locs) > 0:
                 ds.run()
                 df_ff = ds.match_points(
@@ -467,7 +466,7 @@ def matchup(
         If you use a large number of cores you may run into RAM issues, so keep an eye on things.
     thickness : str
         Path to a thickness file, i.e. cell vertical thickness or the name of the thickness variable. This only needs to be supplied if the variable is missing from the raw data.
-        If the e3t variable is in the raw data, it will be used, and thickness does not need to be supplied.
+        If the cell_thickness variable is in the raw data, it will be used, and thickness does not need to be supplied.
     n_dirs_down : int
         Number of levels down to look for netCDF files. Default is 2, ie. the files are of the format */*/*.nc.
     point_time_res : list or dict
@@ -840,7 +839,7 @@ def matchup(
         ds_depths = False
         with warnings.catch_warnings(record=True) as w:
             # extract the thickness dataset
-            e3t_found = False
+            cell_thickness_found = False
             if thickness is not None and os.path.exists(thickness):
                 ds_thickness = nc.open_data(thickness, checks=False)
                 invert_thickness = is_z_up(ds_thickness[0])
@@ -850,31 +849,31 @@ def matchup(
                             [
                                 x
                                 for x in ds_thickness.variables
-                                if "e3t" in x
+                                if "cell_thickness" in x
                             ]
                         )
                         == 0
                     ):
                         raise ValueError(
-                            "The thickness file has more than one variable and none include e3t. Please provide a single variable!"
+                            "The thickness file has more than one variable and none include cell_thickness. Please provide a single variable!"
                         )
-                ds_thickness.rename({ds_thickness.variables[0]: "e3t"})
-                e3t_found = True
-                thickness = "e3t"
+                ds_thickness.rename({ds_thickness.variables[0]: "cell_thickness"})
+                cell_thickness_found = True
+                thickness = "cell_thickness"
             else:
                 print(
                     "Vertical thickness is required for your matchups, but they are not supplied"
                 )
                 print("Searching through simulation output to find it")
                 if thickness is None:
-                    thickness = "e3t"
+                    raise ValueError("Please provide the name of the thickness variable")
                 for ff in random_files:
                     print("Checking file for thickness: " + ff)
                     # do this quietly
                     with warnings.catch_warnings(record=True) as w:
                         ds_thickness = nc.open_data(ff, checks=False)
                         if thickness in ds_thickness.variables:
-                            e3t_found = True
+                            cell_thickness_found = True
                             invert_thickness = is_z_up(ff, thickness)
                             break
                         else:
@@ -888,12 +887,12 @@ def matchup(
                                 )
                                 > 0
                             ):
-                                e3t_found = True
+                                cell_thickness_found = True
                                 invert_thickness = is_z_up(ff, thickness)
                                 break
 
-            if not e3t_found:
-                raise ValueError("Unable to find e3t")
+            if not cell_thickness_found:
+                raise ValueError("Unable to find cell_thickness")
 
             if os.path.exists(thickness) == False:
                 if len(ds_thickness.times) > 0:
@@ -911,7 +910,7 @@ def matchup(
             ds_thickness.subset(variables=var_sel)
             ds_thickness.as_missing(0)
             if len(ds_thickness.variables) > 1:
-                if "e3t" in ds_thickness.variables:
+                if "cell_thickness" in ds_thickness.variables:
                     ds_thickness.subset(variables=f"{thickness}*")
                 else:
                     ds_thickness.subset(variables=ds_thickness.variables[0])
