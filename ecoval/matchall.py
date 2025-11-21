@@ -22,10 +22,12 @@ from ecoval.utils import extension_of_directory
 from ecoval.parsers import generate_mapping
 from ecoval.gridded import gridded_matchup
 
-def is_z_up(ff, variable = None):
+
+def is_z_up(ff, variable=None):
     import netCDF4 as nc4
+
     try:
-        ds1 = nc.open_data(ff, checks = False)
+        ds1 = nc.open_data(ff, checks=False)
         if variable is None:
             var = ds1.variables[0]
         else:
@@ -41,26 +43,31 @@ def is_z_up(ff, variable = None):
             lat_name = x.name
         for x in ds[var].metpy.coordinates("time"):
             time_name = x.name
-        coords = [x for x in list(ds.coords) if x not in [lon_name, lat_name, time_name]]
+        coords = [
+            x for x in list(ds.coords) if x not in [lon_name, lat_name, time_name]
+        ]
         coords = [x for x in coords if "time" not in x.lower()]
 
         ds = nc4.Dataset(ff)
         if len(coords) == 1:
 
             z = ds.variables[coords[0]]
-            if hasattr(z, 'positive'):
-                if z.positive == 'down':
+            if hasattr(z, "positive"):
+                if z.positive == "down":
                     return False
                 else:
-                    return True 
-        raise ValueError("Could not determine if z-axis is down from the provided file.")
+                    return True
+        raise ValueError(
+            "Could not determine if z-axis is down from the provided file."
+        )
     except:
-        raise ValueError("Could not determine if z-axis is down from the provided file.")
-
+        raise ValueError(
+            "Could not determine if z-axis is down from the provided file."
+        )
 
 
 # a list of valid variables for validation
-valid_vars = definitions.keys 
+valid_vars = definitions.keys
 # add some additionals
 
 session_warnings = Manager().list()
@@ -69,23 +76,14 @@ nc.options(parallel=True)
 nc.options(progress=False)
 
 
-def mm_match(
-    ff,
-    model_variable,
-    df,
-    df_times,
-    ds_depths,
-    variable,
-    df_all,
-    layer = None
-):
+def mm_match(ff, model_variable, df, df_times, ds_depths, variable, df_all, layer=None):
     """
     Parameters
     -------------
     ff: str
         Path to file
     model_variable: str
-        Variable name in the simulation 
+        Variable name in the simulation
     df: pd.DataFrame
         Dataframe of observational data
     df_times: pd.DataFrame
@@ -97,7 +95,11 @@ def mm_match(
 
     if session_info["cache"]:
         try:
-            ff_read = session_info["cache_mapping"].query("path == @ff & layer == @layer & variable == @variable").output
+            ff_read = (
+                session_info["cache_mapping"]
+                .query("path == @ff & layer == @layer & variable == @variable")
+                .output
+            )
             # read this pickle file in
             with open(ff_read.values[0], "rb") as f:
                 df_ff = pickle.load(f)
@@ -135,7 +137,7 @@ def mm_match(
 
             ds.subset(variables=var_match)
             #
-            ds1 = nc.open_data(ds[0], checks = False)
+            ds1 = nc.open_data(ds[0], checks=False)
             ds_contents = ds1.contents
             the_var = model_variable.split("+")[0]
             if list(ds_contents.query("variable == @the_var").nlevels)[0] > 1:
@@ -166,18 +168,18 @@ def mm_match(
             ds.run()
 
             if len(var_match) > 1:
-                    ds.sum_all()
+                ds.sum_all()
             the_dict = {"model_variable": model_variable}
             session_info["adhoc"] = copy.deepcopy(the_dict)
 
             if len(df_locs) > 0:
                 ds.run()
                 df_ff = ds.match_points(
-                    df_locs, depths=ds_depths, quiet=True, max_extrap = 0
+                    df_locs, depths=ds_depths, quiet=True, max_extrap=0
                 )
                 if df_ff is not None:
                     df_ff = df_ff.dropna().reset_index(drop=True)
-                
+
                 # check if foo.nc exists
                 if df_ff is not None:
                     valid_vars = ["lon", "lat", "year", "month", "day", "depth"]
@@ -193,11 +195,13 @@ def mm_match(
                                 os.makedirs(cache_dir)
                             # create a random string
                             random_string = "".join(
-                                random.choices(string.ascii_lowercase + string.digits, k=10)
+                                random.choices(
+                                    string.ascii_lowercase + string.digits, k=10
+                                )
                             )
                             cache_file = (
                                 cache_dir
-                                + "output/"  
+                                + "output/"
                                 + "/matchup_"
                                 + layer
                                 + "_"
@@ -297,7 +301,7 @@ def get_time_res(x, folder=None):
 random_files = []
 
 
-def extract_variable_mapping(folder, exclude=[], n_check = None):
+def extract_variable_mapping(folder, exclude=[], n_check=None):
     """
     Find paths to netCDF files
     Parameters
@@ -351,6 +355,7 @@ def extract_variable_mapping(folder, exclude=[], n_check = None):
     print("Parsing model information from netCDF files")
 
     # remove any files from options if parts of exclude are in them
+    options_thickness = copy.deepcopy(options)
     for exc in exclude:
         options = [x for x in options if f"{exc}" not in os.path.basename(x)]
 
@@ -404,7 +409,10 @@ def extract_variable_mapping(folder, exclude=[], n_check = None):
                 pd.DataFrame.from_dict(new_dict).melt().assign(pattern=new_name)
             )
 
-    all_df = pd.concat(all_df).reset_index(drop=True)
+    try: 
+        all_df = pd.concat(all_df).reset_index(drop=True)
+    except:
+        raise ValueError("No netCDF files found with any of the model variables.")
 
     patterns = set(all_df.pattern)
     resolution_dict = dict()
@@ -437,8 +445,8 @@ def matchup(
     ask=True,
     out_dir="",
     exclude=[],
-    cache = False,
-    n_check = None,
+    cache=False,
+    n_check=None,
     **kwargs,
 ):
     """
@@ -455,14 +463,14 @@ def matchup(
     end : int
         End year. Final year of the simulations to matchup.
         This must be supplied
-    gridded : str, or list 
+    gridded : str, or list
         This defaults to ['chlorophyll', 'nitrate'].
-        This is a list of all gridded surface data to matchup. 
+        This is a list of all gridded surface data to matchup.
     point: list
         List of all point variables to matchup for all depths. Default is [].
     cores : int
         Number of cores to use for parallel extraction and matchups of data.
-        Default is 6, or the system cores if less than 6. 
+        Default is 6, or the system cores if less than 6.
         If you use a large number of cores you may run into RAM issues, so keep an eye on things.
     thickness : str
         Path to a thickness file, i.e. cell vertical thickness or the name of the thickness variable. This only needs to be supplied if the variable is missing from the raw data.
@@ -508,7 +516,7 @@ def matchup(
         point = dict()
         point["all"] = []
         point["surface"] = []
-    
+
     # if point is str, make it a list
     if isinstance(point, str):
         point = [point]
@@ -607,7 +615,16 @@ def matchup(
             ff_output = list(output_dir.values())[0]
             ff_layer = os.path.basename(ff).split("_")[1]
             ff_variable = os.path.basename(ff).split("_")[2]
-            mapping_df.append(pd.DataFrame({"variable": [ff_variable], "layer": [ff_layer], "path": [ff_path], "output": [ff_output]}))
+            mapping_df.append(
+                pd.DataFrame(
+                    {
+                        "variable": [ff_variable],
+                        "layer": [ff_layer],
+                        "path": [ff_path],
+                        "output": [ff_output],
+                    }
+                )
+            )
         if len(mapping_df) > 0:
             mapping_df = pd.concat(mapping_df).reset_index(drop=True)
         session_info["cache_mapping"] = mapping_df
@@ -615,7 +632,7 @@ def matchup(
     else:
         session_info["cache_dir"] = None
         session_info["cache"] = False
-    
+
     if not isinstance(ask, bool):
         raise TypeError("ask must be a boolean")
     if not isinstance(overwrite, bool):
@@ -642,7 +659,9 @@ def matchup(
     if cores == 6:
         if cores > os.cpu_count():
             cores = os.cpu_count()
-            print(f"Setting cores to {cores} as this is the number of cores available on your system")
+            print(
+                f"Setting cores to {cores} as this is the number of cores available on your system"
+            )
     nc.options(cores=cores)
 
     # check lon_lim and lat_lim are lists
@@ -664,10 +683,7 @@ def matchup(
     session_info["lon_lim"] = lon_lim
     session_info["lat_lim"] = lat_lim
 
-
-
     ds_depths = None
-
 
     if start is None:
         raise ValueError("Please provide a start year")
@@ -723,11 +739,11 @@ def matchup(
 
     all_df = None
 
-    var_choice = gridded 
+    var_choice = gridded
     var_choice = list(set(var_choice))
     if isinstance(gridded, str):
         var_choice = [gridded]
-    
+
     for vv in var_choice:
         if vv not in valid_vars and vv != "all":
             # suggest another variable based on similarity to valid_vars
@@ -744,12 +760,25 @@ def matchup(
                 )
 
     if all_df is None:
-        all_df = extract_variable_mapping(sim_dir, exclude=exclude, n_check = n_check)
+        # allways None
+        all_df = extract_variable_mapping(sim_dir, exclude=exclude, n_check=n_check)
+        # check if any model_variable is None
+        var_found = list(all_df.model_variable.unique())
+        missing = ",".join([x for x in var_choice if x not in var_found])
+        # 
+        if len(missing) > 0:
+            error = f"The model variables specified do not appear to be in the simulation output for the following: {missing}. Please check the model_variable names and try again."
+            raise ValueError(error)
+
+    
+
 
         # add in anything that is missing
         all_vars = valid_vars
 
-        missing_df = pd.DataFrame({"variable": all_vars}).assign( model_variable=None, pattern=None)
+        missing_df = pd.DataFrame({"variable": all_vars}).assign(
+            model_variable=None, pattern=None
+        )
 
         all_df = (
             pd.concat([all_df, missing_df])
@@ -783,14 +812,13 @@ def matchup(
     if len(session_info["lon_lim"]) != 2 or len(session_info["lat_lim"]) != 2:
         raise ValueError(
             "lon_lim and lat_lim must be lists of two floats, e.g. [-18, 9] and [42, 63]"
-        )   
+        )
 
     with warnings.catch_warnings(record=True) as w:
         lon_max = session_info["lon_lim"][1]
         lon_min = session_info["lon_lim"][0]
         lat_max = session_info["lat_lim"][1]
         lat_min = session_info["lat_lim"][0]
-
 
     vars_available = list(
         all_df
@@ -804,9 +832,9 @@ def matchup(
     remove = []
 
     gridded = [x for x in gridded if x in vars_available]
-    #point = [x for x in point if x in valid_points]
-    #point = [x for x in point if x in vars_available]
-    #print(vars_available)
+    # point = [x for x in point if x in valid_points]
+    # point = [x for x in point if x in vars_available]
+    # print(vars_available)
     for key in point.keys():
         point[key] = [x for x in point[key] if x in vars_available]
         # point[key] = [x for x in point[key] if x in valid_points]
@@ -815,7 +843,6 @@ def matchup(
         if definitions[vv].vertical is False:
             point["all"].remove(vv)
             point["surface"].append(vv)
-    
 
     var_chosen = gridded + point["all"] + point["surface"]
     var_chosen = list(set(var_chosen))
@@ -833,7 +860,7 @@ def matchup(
             os.mkdir("matched")
 
     invert_thickness = False
-    point_all = point["all"] + point["surface"] 
+    point_all = point["all"] + point["surface"]
     if len(point_all) > 0:
         print("Sorting out thickness")
         ds_depths = False
@@ -846,11 +873,7 @@ def matchup(
                 if len(ds_thickness.variables) != 1:
                     if (
                         len(
-                            [
-                                x
-                                for x in ds_thickness.variables
-                                if "cell_thickness" in x
-                            ]
+                            [x for x in ds_thickness.variables if "cell_thickness" in x]
                         )
                         == 0
                     ):
@@ -866,7 +889,9 @@ def matchup(
                 )
                 print("Searching through simulation output to find it")
                 if thickness is None:
-                    raise ValueError("Please provide the name of the thickness variable")
+                    raise ValueError(
+                        "Please provide the name of the thickness variable"
+                    )
                 for ff in random_files:
                     print("Checking file for thickness: " + ff)
                     # do this quietly
@@ -901,9 +926,7 @@ def matchup(
                     ds_thickness.subset(variables=f"{thickness}*")
             ds_thickness.run()
             var_sel = (
-                ds_thickness.contents.query(
-                    f"variable.str.contains('{thickness}')"
-                )
+                ds_thickness.contents.query(f"variable.str.contains('{thickness}')")
                 .query("nlevels > 1")
                 .variable
             )
@@ -915,15 +938,11 @@ def matchup(
                 else:
                     ds_thickness.subset(variables=ds_thickness.variables[0])
             ds_thickness.run()
-            print(
-                f"Thickness variable is {ds_thickness.variables[0]} from {ff}"
-            )
+            print(f"Thickness variable is {ds_thickness.variables[0]} from {ff}")
             #####
             # now output the bathymetry if it does not exists
 
-            ff_bath = (
-                session_info["out_dir"] + "matched/model_bathymetry.nc"
-            )
+            ff_bath = session_info["out_dir"] + "matched/model_bathymetry.nc"
             if not os.path.exists(ff_bath):
                 ds_bath = ds_thickness.copy()
                 ds_bath.vertical_sum()
@@ -931,7 +950,9 @@ def matchup(
 
             if invert_thickness and ignore_invert_check is False:
                 # user check
-                x = input( "The thickness data appears to have the sea surface at the bottom (i.e. increasing depth values down. DO NOT PROCEED IF THIS IS A NEMO SIMULATION. Is this correct? (y/n) ")
+                x = input(
+                    "The thickness data appears to have the sea surface at the bottom (i.e. increasing depth values down. DO NOT PROCEED IF THIS IS A NEMO SIMULATION. Is this correct? (y/n) "
+                )
                 if x.lower() == "n":
                     return None
 
@@ -948,10 +969,10 @@ def matchup(
             ds_depths - ds_thickness
             ds_depths.run()
             ds_depths.rename({ds_depths.variables[0]: "depth"})
-            #if invert_thickness:
+            # if invert_thickness:
             #    ds_depths.run()
             #    ds_depths.invert_levels()
-                # ds_depths.to_nc("foo.nc")
+            # ds_depths.to_nc("foo.nc")
             ds_depths.run()
             try:
                 ds_depths.fix_amm7_grid()
@@ -1043,7 +1064,6 @@ def matchup(
         all_df.to_csv(mapping, index=False)
         return None
 
-
     if session_info["out_dir"] != "":
         out = session_info["out_dir"] + "/matched/mapping.csv"
     else:
@@ -1061,7 +1081,7 @@ def matchup(
     all_df = all_df.query("variable in @var_chosen").reset_index(drop=True)
 
     final_extension = extension_of_directory(sim_dir)
-#    raise ValueError(all_df)
+    #    raise ValueError(all_df)
     path = glob.glob(sim_dir + final_extension + all_df.pattern[0])[0]
     with warnings.catch_warnings(record=True) as w:
         ds = nc.open_data(path, checks=False).to_xarray()
@@ -1074,9 +1094,8 @@ def matchup(
     lat_max = lat.max()
     lat_min = lat.min()
 
-
     # combine all variables into a list
-    all_vars = gridded +  point["all"] + point["surface"] 
+    all_vars = gridded + point["all"] + point["surface"]
     all_vars = list(set(all_vars))
 
     df_variables = all_df.query("variable in @all_vars").reset_index(drop=True)
@@ -1163,7 +1182,7 @@ def matchup(
 
     df_mapping = all_df
 
-    point_all = point["all"] + point["surface"] 
+    point_all = point["all"] + point["surface"]
     if len(point_all) > 0:
         print("********************************")
         print("Matching up with observational point data")
@@ -1240,7 +1259,9 @@ def matchup(
                             )[0]
 
                             # paths bottom
-                            paths = glob.glob( f"{definitions[variable].point_dir}/**.feather")
+                            paths = glob.glob(
+                                f"{definitions[variable].point_dir}/**.feather"
+                            )
 
                             # try finding source in definitions
                             source = definitions[variable].point_source
@@ -1263,7 +1284,9 @@ def matchup(
 
                             # remove source if it's in df
                             if "source" in df.columns:
-                                df = df.query("source == @source").reset_index(drop=True)
+                                df = df.query("source == @source").reset_index(
+                                    drop=True
+                                )
                             # if it exists, coerce year to int
                             if "year" in df.columns:
                                 df = df.assign(year=lambda x: x.year.astype(int))
@@ -1274,14 +1297,14 @@ def matchup(
                                 df = df.assign(day=lambda x: x.day.astype(int))
                             if layer == "surface":
                                 if "depth" in df.columns:
-                                    df = df.query("depth <= 5").reset_index(
-                                        drop=True
-                                    )
+                                    df = df.query("depth <= 5").reset_index(drop=True)
                                     # drop depth
                                     df = df.drop(columns=["depth"])
 
                             # extract point_time_res from dictionary
-                            point_time_res = copy.deepcopy(session_info["point_time_res"])
+                            point_time_res = copy.deepcopy(
+                                session_info["point_time_res"]
+                            )
                             for x in [
                                 x
                                 for x in ["year", "month", "day"]
@@ -1300,7 +1323,7 @@ def matchup(
 
                             sel_these = point_time_res
                             sel_these = [x for x in df.columns if x in sel_these]
-                            if "year" in df.columns: 
+                            if "year" in df.columns:
                                 paths = list(
                                     set(
                                         df.loc[:, sel_these]
@@ -1342,10 +1365,14 @@ def matchup(
                                 for ww in w:
                                     if str(ww.message) not in session_warnings:
                                         session_warnings.append(str(ww.message))
-                                lon_name = [x for x in list(ds_xr.coords) if "lon" in x][0]
+                                lon_name = [
+                                    x for x in list(ds_xr.coords) if "lon" in x
+                                ][0]
                                 lon_min = ds_xr[lon_name].values.min()
                                 lon_max = ds_xr[lon_name].values.max()
-                                lat_name = [x for x in list(ds_xr.coords) if "lat" in x][0]
+                                lat_name = [
+                                    x for x in list(ds_xr.coords) if "lat" in x
+                                ][0]
                                 lat_min = ds_xr[lat_name].values.min()
                                 lat_max = ds_xr[lat_name].values.max()
                                 df = df.query(
@@ -1365,7 +1392,6 @@ def matchup(
                                 "observation",
                             ]
                             select_these = [x for x in df.columns if x in valid_cols]
-
 
                             if len(df) == 0:
                                 print("No data for this variable")
@@ -1394,7 +1420,6 @@ def matchup(
 
                             pbar = tqdm(total=len(paths), position=0, leave=True)
                             results = dict()
-
 
                             for ff in paths:
                                 if grid_setup is False:
@@ -1471,7 +1496,7 @@ def matchup(
                                         ds_depths,
                                         point_variable,
                                         df_all,
-                                        layer
+                                        layer,
                                     ],
                                 )
 
@@ -1515,7 +1540,7 @@ def matchup(
                             df_all = df_all.rename(
                                 columns={change_this: "model"}
                             ).merge(df)
-                                # add model to name column names with frac in them
+                            # add model to name column names with frac in them
                             df_all = df_all.dropna().reset_index(drop=True)
                             # read in point_bottom data
 
@@ -1546,7 +1571,6 @@ def matchup(
                                 df_all = df_all.query(
                                     f"lat > {lat_lim[0]} and lat < {lat_lim[1]}"
                                 )
-
 
                             if len(df_all) > 0:
 
@@ -1626,19 +1650,21 @@ def matchup(
                         )
 
                     else:
-                        out = glob.glob(
-                            f"matched/point/all/{vv}/**_all_{vv}.csv"
-                        )
+                        out = glob.glob(f"matched/point/all/{vv}/**_all_{vv}.csv")
 
                     if len(out) > 0:
                         if session_info["overwrite"] is False:
                             continue
 
-                    print( f"Matching up model output of {key} {vv_variable} with in-situ observational data")
+                    print(
+                        f"Matching up model output of {key} {vv_variable} with in-situ observational data"
+                    )
 
-                    #try:
+                    # try:
                     if True:
-                        point_match(vv, ds_depths=ds_depths, df_times=df_times, layer=key)
+                        point_match(
+                            vv, ds_depths=ds_depths, df_times=df_times, layer=key
+                        )
                     # except:
                     #     pass
 
@@ -1671,7 +1697,7 @@ def matchup(
         sim_end=sim_end,
         lon_lim=lon_lim,
         lat_lim=lat_lim,
-        times_dict=times_dict
+        times_dict=times_dict,
     )
 
     if len(session_info["end_messages"]) > 0:
@@ -1699,4 +1725,4 @@ def matchup(
         os.remove(ff)
     import dill
 
-    dill.dump(definitions, file = open(ff, "wb"))
+    dill.dump(definitions, file=open(ff, "wb"))
