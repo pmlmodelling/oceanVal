@@ -4,18 +4,12 @@
 
 
 # %% tags=["remove-input", "remove-cell"]
-if layer_select == "bottom":
-    layer_long = "near-bottom"
 if layer_select == "surface":
     layer_long = "sea surface"
 if layer == "benthic":
     layer_long = "benthic"
 ff = glob.glob(f"../../matched/point/{layer}/{variable}/*_{variable}.csv")[0]
 
-if "ben" in variable.lower():
-    layer_select = "benthic"
-    layer_long = "benthic"
-    layer = "benthic"
 vv_source = os.path.basename(ff).split("_")[0]
 vv_source_raw = vv_source
 vv_source = vv_source.upper()
@@ -44,10 +38,6 @@ try:
 except:
     pass
 
-# if variable is benbio
-if variable == "benbio":
-    point_time_res = []
-
 if point_time_res is not None:
     if isinstance(point_time_res, str):
         point_time_res = [point_time_res]
@@ -64,7 +54,7 @@ if point_time_res is not None:
     grouping = [x for x in ["lon", "lat", "year", "depth", "day", "month"] if x in df.columns]
     df = df.groupby(grouping).mean().reset_index()
 
-if layer_select in ["surface", "benthic"]:
+if layer_select in ["surface"]:
     try:
         df = df.query("depth < 5").reset_index()
     except:
@@ -72,33 +62,17 @@ if layer_select in ["surface", "benthic"]:
 else:
     if layer != "bottom":
         df = df.query("bottom > 0").reset_index().drop(columns = "bottom")
-    else:
-        if "bottom" in df.columns:
-            df = df.drop(columns = "bottom")
 
-if variable == "ph":
-    df = df.query("observation > 4").reset_index(drop = True)
-# Danish part is always dubious
 df_locs = df.loc[:,["lon", "lat"]].drop_duplicates()
 # bin to 0.01 resolution
 df_raw = copy.deepcopy(df)
-if variable == "benbio":
-    df = df.assign(observation = lambda x: 1000 * 0.45 * x.observation) 
-if variable not in  ["benbio"]:
-    if "year" in point_time_res:
-        df = df.groupby(["lon", "lat", "year", "month"]).mean().reset_index()
-    else:
-        df = df.groupby(["lon", "lat",  "month"]).mean().reset_index()
-        if "year" in df.columns:
-            df = df.drop(columns = "year")
-        if "day" in df.columns:
-            df = df.drop(columns = "day")
+
+if "year" in point_time_res:
+    df = df.groupby(["lon", "lat", "year", "month"]).mean().reset_index()
 else:
-    df = df.groupby(["lon", "lat"]).mean().reset_index()
+    df = df.groupby(["lon", "lat",  "month"]).mean().reset_index()
     if "year" in df.columns:
         df = df.drop(columns = "year")
-    if "month" in df.columns:
-        df = df.drop(columns = "month")
     if "day" in df.columns:
         df = df.drop(columns = "day")
 
@@ -133,10 +107,6 @@ if True and available:
 # A function for generating the data source
 
 def data_source(vv_source, vv_name):
-    if vv_source == "NSBS":
-        return "the North Sea Benthos Survey (1986)"
-    if vv_source == "NSBS":
-        return "the North Sea Benthos Survey (1986)"
     return vv_source
 
 
@@ -144,34 +114,13 @@ def data_source(vv_source, vv_name):
 if available:
     intro = []
     
-    if vv_source == "ICES": 
-    
-        if layer_select == "bottom":
-            intro.append(f"Near-bottom values of {vv_name} were extracted from International Council for the Exploration of the Sea (ICES) bottle and CTD data.")
-            intro.append("The near-bottom was defined as observations **within 2m of the seabed**. This was interpolated to the observational grid using the GEBCO bathymetry dataset.")
-            intro.append("Model values were interpolated to the observational dataset's longitudes and latitudes using 3D interpolation.")
-        if layer_select in ["surface", "all"]:
-            if layer not in ["benthic"]:
-                intro.append(f"Values from the **top 5m** of the water column were extracted from International Council for the Exploration of the Sea (ICES) bottle and CTD data.")
-        if layer == "benthic":
-            intro.append("Benthic values were extracted from existing datasets")
-    else:
-        if layer_select == "bottom":
-            intro.append(f"This data was extracted from vertical profiles. The near-bottom value was defined as the value closest to the bottom, that was within 5m of the bottom. Bathymetry was estimated using GEBCO Bathymetry data.")
-        if layer_select == "surface":
-            if layer not in ["benthic"]:
-                intro.append(f"This data was extracted from vertical profiles. Values from the **top 5m** were extracted from the database. This was compared with the model values from the sea surface level.")
-        if variable in ["benbio"]:
-            intro.append("Biomass data for macrobenthos was downloaded from the North Sea Benthos Survey 1986.")
-    
-    
     if layer_select == "bottom":
-        intro.append("**Note:** this analysis has been restricted to observations on the shelf region.")
-    
-    
-    if variable == "pco2":
-        intro.append("The variable pCO2water_SST_wet was extracted from the SOCAT 2023 database.")
-        intro.append("Observational values were averaged for each day in the year.")
+        intro.append(f"This data was extracted from vertical profiles. The near-bottom value was defined as the value closest to the bottom, that was within 5m of the bottom. Bathymetry was estimated using GEBCO Bathymetry data.")
+    if layer_select == "surface":
+        if layer not in ["benthic"]:
+            intro.append(f"This data was extracted from vertical profiles. Values from the **top 5m** were extracted from the database. This was compared with the model values from the sea surface level.")
+    if variable in ["benbio"]:
+        intro.append("Biomass data for macrobenthos was downloaded from the North Sea Benthos Survey 1986.")
     
     
     df_mapping = pd.read_csv("../../matched/mapping.csv")
@@ -179,10 +128,7 @@ if available:
     
     import pickle
     try:
-        if variable == "benbio":
-            ff_dict = f"../../matched/point/surface/{variable}/matchup_dict.pkl"
-        else:
-            ff_dict = f"../../matched/point/{layer}/{variable}/matchup_dict.pkl"
+        ff_dict = f"../../matched/point/{layer}/{variable}/matchup_dict.pkl"
         with open(ff_dict, "rb") as f:
             matchup_dict = pickle.load(f)
             min_year = matchup_dict["start"]
@@ -253,12 +199,6 @@ bin_value <- function(x, bin_res) {
 xlim = c(min(df_locs$lon), max(df_locs$lon))
 ylim = c(min(df_locs$lat), max(df_locs$lat))
 
-
-
-if(variable == "temperature"){
-    if(str_detect(unit, "C"))
-     unit = "°C"
-}
 
 bin_value <- function(x, bin_res) {
 	floor((x + bin_res / 2) / bin_res + 0.5) * bin_res - bin_res / 2
@@ -344,12 +284,6 @@ p98 = quantile(df_map$value, 0.98)
 df_map$value = pmin(df_map$value, p98)
 
 world_map <- map_data("world")
-
-
-if(variable == "temperature"){
-    if(str_detect(unit, "C"))
-     unit = "°C"
-}
 
 
 Layer <- str_to_title(layer_long)
@@ -496,11 +430,6 @@ xlim = c(min(df$lon), max(df$lon))
 ylim = c(min(df$lat), max(df$lat))
 
 
-if(vv_name == "temperature"){
-    if(str_detect(unit, "C"))
-     unit = "°C"
-}
-
 bin_value <- function(x, bin_res) {
 	floor((x + bin_res / 2) / bin_res + 0.5) * bin_res - bin_res / 2
 }
@@ -564,7 +493,6 @@ title <- str_replace_all(title, "m-([0-9]+)", "m<sup>-\\1</sup>")
 
 
 # not for ben
-if(!str_detect(vv_name, "macrob")){
     plot_width <- 6.0
     if(df$month %>% n_distinct() < 9){
         plot_width <- 4.5
@@ -588,38 +516,6 @@ gg <- df %>%
     # set the legend title to bias
     labs(fill = title)
 
-}
-if(str_detect(vv_name, "macrob")){
-    # geom_tile approach
-
-gg <- df %>%
-# final six months of the year
-    mutate(lon = bin_value(lon, 0.5), lat = bin_value(lat, 0.5)) %>%
-    group_by(lon, lat) %>%
-    summarise(bias = mean(bias)) %>%
-    ggplot()+
-    geom_tile(aes(lon, lat, fill = bias))+
-    theme_dark(base_size = 24)+
-    # add colour scale. Minimum zero, label 100, ">100"
-    coord_fixed(xlim = xlim, ylim = ylim, ratio = 1.5, expand = FALSE) +
-    # move legend to the top. Make it 3 cm wide
-    # move legend title to the bottom and centre it
-    scale_fill_gradient2(low = "blue", high = "red",
-    limits = c(-bias_high, bias_high),
-                       guide = guide_colorbar(title.position = "bottom", title.hjust = 0.5, title.theme = ggtext::element_markdown(angle = 0, size = 20, family = "Helvetica"))
-                    #    guide = guide_colorbar(title.position = "bottom", title.hjust = 0.5, title.theme = element_text(angle = 0, size = 20, family = "Helvetica"))
-  )+
-    theme(
-    legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.width = unit(3.0, "cm"),
-    # legend.title = ggtext::element_markdown(),
-    legend.key.height = unit(1.0, "cm"))+
-    # set the legend title to bias
-    labs(fill = title)
-
-
-        # use ggtext to ensure things are superscripted
-        #theme(legend.title = element_markdown())
-}
 
 if (plot_month){
     #  option: figure out how many months are in the data
@@ -641,12 +537,7 @@ colour_lab <- str_replace(colour_lab, "O_2", "O<sub>2</sub>")
 colour_lab <- str_replace(colour_lab, "CO2", "CO<sub>2</sub>")
 
 #
-if(str_detect(vv_name, "macrob")){
-gg <- gg + labs(fill = colour_lab) 
-}
-if(!str_detect(vv_name, "macrob")){
 gg <- gg + labs(colour = title)
-}
 
 gg <- gg + 
     geom_polygon(data = world_map, aes(long, lat, group = group), fill = "grey70")
@@ -695,17 +586,9 @@ if("month" %in% colnames(df) & (concise == FALSE) & available){
 bin_value <- function(x, bin_res) {
 	floor((x + bin_res / 2) / bin_res + 0.5) * bin_res - bin_res / 2
 }
-# change the unit for pco2
-if(vv_name == "pco2"){
-    unit = "µatm"
-}
 
 library(tidyverse, warn.conflicts = FALSE)
 
-if(vv_name == "temperature"){
-    if(str_detect(unit, "C"))
-     unit = "°C"
-}
 
 x_lab <- str_glue("Model {vv_name} ({unit})")
 y_lab <- str_glue("Observed {vv_name} ({unit})")
@@ -772,13 +655,12 @@ gg
 
 # %% tags=["remove-input"]
 if available:
-    if variable not in [ "benbio"]:
-        if concise is False:
-            if layer_select == "surface":
-                md(f"**Figure {i_figure}**: Simulated versus observed {vv_name} in the top 5m of the water column. The blue curve is a linear regression fit to the data, and the black line represents 1-1 relationship between the simulation and observations. The data has been averaged per model grid cell.") 
-            if layer_select == "bottom":
-                md(f"**Figure {i_figure}**: Simulated versus observed {vv_name} near the bottom of the water column. The blue curve is a linear regression fit to the data, and the black line represents 1-1 relationship between the simulation and observations. The data has been averaged per model grid cell.") 
-            i_figure = i_figure + 1
+    if concise is False:
+        if layer_select == "surface":
+            md(f"**Figure {i_figure}**: Simulated versus observed {vv_name} in the top 5m of the water column. The blue curve is a linear regression fit to the data, and the black line represents 1-1 relationship between the simulation and observations. The data has been averaged per model grid cell.") 
+        if layer_select == "bottom":
+            md(f"**Figure {i_figure}**: Simulated versus observed {vv_name} near the bottom of the water column. The blue curve is a linear regression fit to the data, and the black line represents 1-1 relationship between the simulation and observations. The data has been averaged per model grid cell.") 
+        i_figure = i_figure + 1
 
 # %% tags=["remove-input"]
 # %%capture --no-display
