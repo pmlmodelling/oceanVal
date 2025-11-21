@@ -476,16 +476,16 @@ class Validator:
         var.point_source = list(source.keys())[0]   
         var.model_variable = model_variable
         var.point_dir = obs_dir
-        # find feather files in point_dir
-        point_files = [f for f in glob.glob(os.path.join(obs_dir, "*.feather"))] 
+        # find csv files in point_dir
+        point_files = [f for f in glob.glob(os.path.join(obs_dir, "*.csv"))] 
         # if no files exists, raise error
         if len(point_files) == 0:
-            raise ValueError(f"No feather files found in point directory {obs_dir}")
+            raise ValueError(f"No csv files found in point directory {obs_dir}")
         valid_vars = ["lon", "lat", "year", "month", "day", "depth", "observation", "source"]
         vertical = False
         for vv in point_files:
             # read in the first row
-            df = pd.read_feather(vv)
+            df = pd.read_csv(vv, nrows=1)
             # throw error something else is in there
             bad_cols = [col for col in df.columns if col not in valid_vars]
             if len(bad_cols) > 0:

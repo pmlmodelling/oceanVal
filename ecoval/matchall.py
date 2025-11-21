@@ -1230,7 +1230,7 @@ def matchup(
 
                             # paths bottom
                             paths = glob.glob(
-                                f"{definitions[variable].point_dir}/**.feather"
+                                f"{definitions[variable].point_dir}/**.csv"
                             )
 
                             # try finding source in definitions
@@ -1243,7 +1243,7 @@ def matchup(
                                     if f"{exc}" not in os.path.basename(x)
                                 ]
 
-                            df = pd.concat([pd.read_feather(x) for x in paths])
+                            df = pd.concat([pd.read_csv(x) for x in paths])
                             if "year" in df.columns:
                                 # find point_start
                                 point_start = definitions[variable].point_start
