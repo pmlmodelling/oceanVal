@@ -351,6 +351,7 @@ class Validator:
             point_end = getattr(self, name).point_end
             depths = getattr(self, name).depths
             vertical = getattr(self, name).vertical
+            old_model_variable = getattr(self, name).model_variable
         except:
             orig_sources = dict()
             point = None,
@@ -360,7 +361,12 @@ class Validator:
             point_end = 3000
             depths = None
             vertical = False
+            old_model_variable = None
             pass
+
+        if old_model_variable is not None and old_model_variable != model_variable:
+            if old_model_variable != "auto":
+                raise ValueError(f"Model variable for {name} already exists as {old_model_variable}, cannot change to {model_variable}")
 
         var = Variable()
         var.vertical = vertical
@@ -414,6 +420,7 @@ class Validator:
             orig_sources = getattr(self, name).sources
             gridded_start = getattr(self, name).gridded_start
             gridded_end = getattr(self, name).gridded_end
+            old_model_variable = getattr(self, name).model_variable 
         except:
             gridded_dir = "auto"
             obs_var = "auto"
@@ -422,7 +429,13 @@ class Validator:
             orig_sources = dict()
             gridded_start = -1000
             gridded_end = 3000
+            old_model_variable = None
             pass
+
+        if old_model_variable is not None and old_model_variable != model_variable:
+            if old_model_variable != "auto":
+                raise ValueError(f"Model variable for {name} already exists as {old_model_variable}, cannot change to {model_variable}")
+
 
         var = Variable()
         var.gridded_start = gridded_start
