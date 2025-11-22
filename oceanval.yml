@@ -1,4 +1,4 @@
-name: ecovalcore
+name: oceanval
 channels:
   - conda-forge
 dependencies:

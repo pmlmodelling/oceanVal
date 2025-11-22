@@ -3,9 +3,10 @@ import re
 import glob
 import os
 import pandas as pd
-from ecoval.parsers import Validator
+from oceanval.parsers import Validator
 definitions = Validator()
 tidy_info = {}
+
 def fix_basename(x):
     #annualmean_nitrate_nsbc.nc
     # 3 part names like above need the final part removed

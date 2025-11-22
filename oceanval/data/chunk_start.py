@@ -4,7 +4,7 @@ import re
 import warnings
 import calendar
 import copy
-import ecoval
+import oceanval
 ff  = "../../matched/definitions.pkl"
 import pickle
 with open(ff, "rb") as f:
@@ -25,7 +25,7 @@ from tqdm import tqdm
 import hvplot.pandas
 from plotnine import *
 from IPython.core.interactiveshell import InteractiveShell
-from ecoval.tidiers import tidy_info
+from oceanval.tidiers import tidy_info
 InteractiveShell.ast_node_interactivity = "all"
 
 try:
@@ -44,10 +44,8 @@ try:
 except:
     concise = False
 
-# from ecoval.tidiers import fix_basenay_paths
 # in one line
-#from ecoval.tidiers import fix_basename, fix_unit, fix_variable_name, df_display, tidy_summary_paths, md, md_basic
-from ecoval.tidiers import fix_basename, fix_unit, df_display, tidy_summary_paths, md, md_basic
+from oceanval.tidiers import fix_basename, fix_unit, df_display, tidy_summary_paths, md, md_basic
 
 warnings.filterwarnings('ignore')
 

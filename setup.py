@@ -4,14 +4,14 @@ import sys
 DESCRIPTION = "Fast and easy analysis of netCDF data in Python"
 LONG_DESCRIPTION = """
 
-**ecoval** is an automated ERSEM evaluation toolkit 
+**oceanval** is an automated ERSEM evaluation toolkit 
 
 
 """
 
 PROJECT_URLS = {
-    "Bug Tracker": "https://github.com/pmlmodelling/ecoval/issues",
-    "Source Code": "https://github.com/pmlmodelling/ecoval",
+    "Bug Tracker": "https://github.com/pmlmodelling/oceanVal/issues",
+    "Source Code": "https://github.com/pmlmodelling/oceanVal",
 }
 
 extras_require: dict() = dict()
@@ -21,7 +21,7 @@ extras_require["complete"] = ["geoviews", "rioxarray", "cfchecker", "geocube", "
 
 REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines()]
 
-setup(name='ecoval',
+setup(name='oceanval',
       version='0.2.0',
       description=DESCRIPTION,
       long_description=LONG_DESCRIPTION,
@@ -37,15 +37,15 @@ setup(name='ecoval',
     ],
 
       project_urls=PROJECT_URLS,
-      url = "https://github.com/pmlmodelling/nctoolkit",
+      url = "https://github.com/pmlmodelling/oceanVal",
       author='Robert Wilson',
       maintainer='Robert Wilson',
       author_email='rwi@pml.ac.uk',
       include_package_data=True,
       package_data={
-      'ecoval': ['data/*'] },
+      'oceanval': ['data/*'] },
 
-      packages = ["ecoval"],
+      packages = ["oceanval"],
       setup_requires=[
         'setuptools',
         'setuptools-git',

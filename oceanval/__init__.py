@@ -5,18 +5,21 @@ import subprocess
 import warnings
 import nctoolkit as nc
 import copy
-from ecoval.matchall import matchup
+from oceanval.matchall import matchup
 import dill
-from ecoval.fixers import tidy_name
-from ecoval.session import session_info
+from oceanval.fixers import tidy_name
+from oceanval.session import session_info
 import webbrowser
-from ecoval.chunkers import add_chunks
+from oceanval.chunkers import add_chunks
 import os
 import re
-from ecoval.fvcom import fvcom_preprocess
+from oceanval.fvcom import fvcom_preprocess
 import importlib
 
-from ecoval.parsers import Validator, definitions
+from oceanval.parsers import Validator, definitions
+
+add_point_comparison = definitions.add_point_comparison
+add_grided_comparison = definitions.add_gridded_comparison
 
 # loop through the keys and make sure all attributes are set
 #for key in definitions.keys:
@@ -201,7 +204,7 @@ def validate(
     fixed_scale : bool
         Whether to use a fixed scale for the seasonal plots. Default is False. If True, the minimum and maximum values are capped to cover the 2nd and 98th percentiles of both model and observations.
     test : bool
-        Default is False. Ignore, unless you are testing ecoval.
+        Default is False. Ignore, unless you are testing oceanval.
 
     Returns
     -------
@@ -725,7 +728,7 @@ except ImportError:
     from importlib_metadata import version as _version
 
 try:
-    __version__ = _version("ecoval")
+    __version__ = _version("oceanval")
 except Exception:
     __version__ = "999"
 

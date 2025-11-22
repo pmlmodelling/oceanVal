@@ -57,7 +57,7 @@ if lon_range > 340:
         global_grid = True
 
 if not global_grid:
-    data_path = str(importlib.resources.files("ecoval").joinpath("data/amm7_val_subdomains.nc"))
+    data_path = str(importlib.resources.files("oceanval").joinpath("data/amm7_val_subdomains.nc"))
     ds_regions = nc.open_data(data_path, checks = False)
     # pull this in from the package data
     
@@ -170,7 +170,7 @@ if time_name is not None:
     except:
         model_unit = ds_obs.contents.unit[0]
         model_unit = fix_unit(model_unit)
-    from ecoval.utils import get_extent
+    from oceanval.utils import get_extent
     raw_extent = get_extent(ds_annual[0])
     if np.abs(raw_extent[0] - df_model.lon.min()) > 3:
         # convert longitude to -180-180

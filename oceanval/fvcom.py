@@ -6,7 +6,7 @@ import numpy as np
 import subprocess
 import pandas as pd
 from tqdm import tqdm
-from ecoval.session import session_info
+from oceanval.session import session_info
 
 
 def bin_value(x, bin_res):

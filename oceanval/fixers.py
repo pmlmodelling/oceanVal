@@ -1,6 +1,6 @@
 import warnings
-from ecoval.parsers import Validator
-from ecoval.session import session_info
+from oceanval.parsers import Validator
+from oceanval.session import session_info
 
 
 # function to convert list to string with , separator, with an "and" at the end

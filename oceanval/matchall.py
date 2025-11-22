@@ -14,14 +14,14 @@ import random
 import warnings
 import pickle
 import xarray as xr
-import ecoval.parsers as parsers
-from ecoval.session import session_info
-from ecoval.parsers import Validator, definitions
+import oceanval.parsers as parsers
+from oceanval.session import session_info
+from oceanval.parsers import Validator, definitions
 from multiprocessing import Manager
 from tqdm import tqdm
-from ecoval.utils import extension_of_directory
-from ecoval.parsers import generate_mapping
-from ecoval.gridded import gridded_matchup
+from oceanval.utils import extension_of_directory
+from oceanval.parsers import generate_mapping
+from oceanval.gridded import gridded_matchup
 
 
 def is_z_up(ff, variable=None):
@@ -590,7 +590,7 @@ def matchup(
     if cache:
         if out_dir == "":
             out_dir = "./"
-        cache_dir = out_dir + "/.cache_ecoval/"
+        cache_dir = out_dir + "/.cache_oceanval/"
         if not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
         session_info["cache_dir"] = cache_dir

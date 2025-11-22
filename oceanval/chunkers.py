@@ -1,4 +1,4 @@
-from ecoval.matchall import matchup
+from oceanval.matchall import matchup
 import pandas as pd
 import glob
 import os
@@ -72,7 +72,7 @@ def add_chunks( dir=None):
                         chunk_file = chunk_file
 
 
-                data_path = importlib.resources.files("ecoval").joinpath(f"data/{chunk_file}")
+                data_path = importlib.resources.files("oceanval").joinpath(f"data/{chunk_file}")
 
                 # read the chunk file in line by line
 

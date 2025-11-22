@@ -4,11 +4,10 @@ import pandas as pd
 import os
 import glob
 import warnings
-from ecoval.session import session_info
+from oceanval.session import session_info
 
 session_info["keys"] = []
 
-bad_conc_vars = ["medium", "pod", "size"]
 
 def get_name(obj):
     namespace = globals()
