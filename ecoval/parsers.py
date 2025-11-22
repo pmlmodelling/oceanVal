@@ -369,6 +369,7 @@ class Validator:
                 raise ValueError(f"Model variable for {name} already exists as {old_model_variable}, cannot change to {model_variable}")
 
         var = Variable()
+        var.n_levels = 1
         var.vertical = vertical
         var.depths = depths
         var.gridded_start = start
@@ -382,6 +383,12 @@ class Validator:
         var.long_name = long_name
         var.short_name = short_name
         var.short_title = short_title
+        # check if this is c
+        if name in session_info["short_title"]:
+            if short_title != session_info["short_title"][name]:
+                raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
+        session_info["short_title"][name] = short_title
+
         source = {source: description}
         if list(source.keys())[0] in orig_sources:
             # ensure the value is the same
@@ -438,8 +445,13 @@ class Validator:
 
 
         var = Variable()
+        var.n_levels = 1
         var.gridded_start = gridded_start
         var.gridded_end = gridded_end
+        if name in session_info["short_title"]:
+            if short_title != session_info["short_title"][name]:
+                raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
+        session_info["short_title"][name] = short_title
 
         # depths must be a string and one of "surface" or "all"
         if not isinstance(depths, str):
@@ -537,7 +549,7 @@ def generate_mapping(ds):
 
     ds_contents_top = ds_contents.query("nlevels == 1").reset_index(drop=True)
     #ds_contents = ds_contents.query("nlevels > 1").reset_index(drop=True)
-    n_levels = ds_contents.nlevels.max()
+    n_levels = int(ds_contents.nlevels.max())
     if n_levels > session_info["n_levels"]:
         session_info["n_levels"] = n_levels
     # number of rows in ds_contents
@@ -546,17 +558,17 @@ def generate_mapping(ds):
 
     model_dict = {}
     for vv in candidate_variables:
-        vv_check = vv
-
-        if definitions[vv].model_variable != "auto":
-            variables = definitions[vv].model_variable.split("+")
-            include = True
-            for var in variables:
-                if var not in ds_contents.variable.values:
-                    include = False
-            if include:
-                model_dict[vv] = definitions[vv].model_variable
-                continue
+        variables = definitions[vv].model_variable.split("+")
+        include = True
+        for var in variables:
+            if var not in ds_contents.variable.values:
+                include = False
+        if include:
+            model_dict[vv] = definitions[vv].model_variable
+            n_levels = ds_contents.query("variable in @variables")["nlevels"].max()
+            if n_levels > definitions[vv].n_levels:
+                definitions[vv].n_levels = n_levels 
+            continue
 
     return model_dict
 

@@ -14,6 +14,7 @@ import random
 import warnings
 import pickle
 import xarray as xr
+import ecoval.parsers as parsers
 from ecoval.session import session_info
 from ecoval.parsers import Validator, definitions
 from multiprocessing import Manager
@@ -493,6 +494,7 @@ def matchup(
 
     """
 
+    # store short title
     gridded = None
     point = None
 
@@ -705,6 +707,16 @@ def matchup(
     else:
         session_info["out_dir"] = ""
 
+    ff = session_info["out_dir"] + "matched/short_titles.pkl"
+    if os.path.exists(ff):
+        with open(ff, "rb") as f:
+            short_titles = pickle.load(f)
+    else:
+        short_titles = dict()
+    session_info["short_title"] = short_titles | session_info["short_title"]
+
+    # raise ValueError(session_info["short_title"])
+
     if n_dirs_down is not None:
         session_info["levels_down"] = n_dirs_down
     else:
@@ -751,29 +763,29 @@ def matchup(
                     f"{vv} is not a valid variable. Please choose from {valid_vars}"
                 )
 
-    if all_df is None:
-        # allways None
-        all_df = extract_variable_mapping(sim_dir, exclude=exclude, n_check=n_check)
-        # check if any model_variable is None
-        var_found = list(all_df.model_variable.unique())
-        missing = ",".join([x for x in var_choice if x not in var_found])
-        # 
-        if len(missing) > 0:
-            error = f"The model variables specified do not appear to be in the simulation output for the following: {missing}. Please check the model_variable names and try again."
-            raise ValueError(error)
+    all_df = extract_variable_mapping(sim_dir, exclude=exclude, n_check=n_check)
+    print(all_df)
+    # check if any model_variable is None
+    var_found = list(all_df.variable.unique())
+    print(var_choice)
+    missing = ",".join([x for x in var_choice if x not in var_found])
+    # 
+    if len(missing) > 0:
+        error = f"The model variables specified do not appear to be in the simulation output for the following: {missing}. Please check the model_variable names and try again."
+        raise ValueError(error)
 
-        # add in anything that is missing
-        all_vars = valid_vars
+    # add in anything that is missing
+    all_vars = valid_vars
 
-        missing_df = pd.DataFrame({"variable": all_vars}).assign(
-            model_variable=None, pattern=None
-        )
+    missing_df = pd.DataFrame({"variable": all_vars}).assign(
+        model_variable=None, pattern=None
+    )
 
-        all_df = (
-            pd.concat([all_df, missing_df])
-            .groupby("variable")
-            .head(1)
-            .reset_index(drop=True)
+    all_df = (
+        pd.concat([all_df, missing_df])
+        .groupby("variable")
+        .head(1)
+        .reset_index(drop=True)
         )
     # check if the variables are in all_df
 
@@ -1560,6 +1572,12 @@ def matchup(
                                     except:
                                         pass
                                 df_all.to_csv(out, index=False)
+                                # save the definitions
+                                out_definitions = out.replace(
+                                    ".csv", "_definitions.pkl"
+                                )
+                                import dill
+                                dill.dump( definitions, file=open(out_definitions, "wb"))
 
                                 out1 = out.replace(
                                     os.path.basename(out), "matchup_dict.pkl"
@@ -1696,3 +1714,24 @@ def matchup(
     import dill
 
     dill.dump(definitions, file=open(ff, "wb"))
+
+    # output short titles
+    ff = session_info["out_dir"] + "matched/short_titles.pkl"
+    short_titles = session_info["short_title"]
+    with open(ff, "wb") as f:
+        pickle.dump(short_titles, f)
+    
+    # now add to the list of variables matched up
+    ff = session_info["out_dir"] + "matched/variables_matched.pkl"
+    if os.path.exists(ff):
+        with open(ff, "rb") as f:
+            variables_matched = pickle.load(f)
+    else:
+        variables_matched = []
+    for vv in list(df_mapping.variable):
+        if vv not in variables_matched:
+            variables_matched.append(vv)
+    with open(ff, "wb") as f:
+        pickle.dump(variables_matched, f)
+
+

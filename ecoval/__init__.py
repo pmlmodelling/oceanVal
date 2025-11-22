@@ -6,6 +6,7 @@ import warnings
 import nctoolkit as nc
 import copy
 from ecoval.matchall import matchup
+import dill
 from ecoval.fixers import tidy_name
 from ecoval.session import session_info
 import webbrowser
@@ -16,6 +17,7 @@ from ecoval.fvcom import fvcom_preprocess
 import importlib
 
 from ecoval.parsers import Validator, definitions
+
 # loop through the keys and make sure all attributes are set
 #for key in definitions.keys:
 for key in session_info["keys"]:
@@ -43,8 +45,10 @@ for key in session_info["keys"]:
 
 
 def fix_toc(concise = True):
+    short_titles = dill.load(open("matched/short_titles.pkl", "rb")) 
     paths = glob.glob(f"book/notebooks/*.ipynb")
-    variables = list(pd.read_csv("matched/mapping.csv").variable)
+    #variables = list(pd.read_csv("matched/mapping.csv").variable)
+    variables = dill.load(open("matched/variables_matched.pkl", "rb"))
     variables.sort()
 
     vv_dict = dict()
@@ -123,7 +127,7 @@ def fix_toc(concise = True):
         # key is the variable name, so is the section
         for vv in vv_dict.keys():
             # capitalize if not ph
-            vv_out = definitions[vv].short_title
+            vv_out = short_titles[vv]
 
             x = f.write(f"- caption: {vv_out}\n")
             x = f.write("  chapters:\n")
@@ -328,6 +332,8 @@ def validate(
         point_paths = [x for x in point_paths if "unit" not in os.path.basename(x)]
         # loop through the paths
         for pp in point_paths:
+            ff_def = pp.replace(".csv", "_definitions.pkl")
+            definitions = dill.load(open(ff_def, "rb"))
             vv = os.path.basename(pp).split("_")[2].replace(".csv", "")
             if variables != "all":
                 if True:
@@ -337,6 +343,7 @@ def validate(
             variable = vv
             layer = os.path.basename(pp).split("_")[1].replace(".csv", "")
             Variable = definitions[variable].short_name
+
             vv_file = pp
             vv_file_find = pp.replace("../../", "")
 
@@ -372,14 +379,21 @@ def validate(
                     # Replace the target string
                     out = f"book/notebooks/{source}_{layer}_{variable}.ipynb"
                     filedata = filedata.replace("point_variable", variable)
+                    n_levels = definitions[variable].n_levels
                     if layer != "all":
-                        filedata = filedata.replace(
-                            "Validation of point_layer", f"Validation of {layer}"
-                        )
+                        if n_levels > 1:
+                            filedata = filedata.replace(
+                                "Validation of point_layer", f"Validation of {layer}"
+                            )
+                        else:
+                            filedata = filedata.replace(
+                                "Validation of point_layer", f"Validation of "
+                            )
                     else:
                         filedata = filedata.replace(
                             "Validation of point_layer", f"Validation of "
                         )
+
                     filedata = filedata.replace("point_layer", layer)
                     filedata = filedata.replace("template_title", Variable)
 
@@ -419,6 +433,8 @@ def validate(
                     if not os.path.exists(
                         f"book/notebooks/{source}_{variable}.ipynb"
                     ):
+                        ff_def = glob.glob(f"matched/gridded/{variable}/*definitions*.pkl")[0]
+                        definitions = dill.load(open(ff_def, "rb"))
                         Variable = definitions[variable].short_name
     
                         file1 = importlib.resources.files(__name__).joinpath("data/gridded_template.ipynb")

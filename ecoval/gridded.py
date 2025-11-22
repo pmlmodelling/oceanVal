@@ -533,6 +533,10 @@ def gridded_matchup(
                     pickle.dump(the_dict, f)
 
                 ds_surface.to_nc(out_file, zip=True, overwrite=True)
+                out_file = out_file.replace(".nc", "_definitions.pkl")
+                # save definitions
+                with open(out_file, "wb") as f:
+                    pickle.dump(definitions, f)
 
             tidy_warnings(w)
 

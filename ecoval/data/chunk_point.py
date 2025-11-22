@@ -4,10 +4,12 @@
 
 
 # %% tags=["remove-input", "remove-cell"]
-if layer_select == "surface":
+n_levels = definitions[variable].n_levels
+if n_levels > 1: 
     layer_long = "sea surface"
-if layer == "benthic":
-    layer_long = "benthic"
+else:
+    layer_long = ""
+
 ff = glob.glob(f"../../matched/point/{layer}/{variable}/*_{variable}.csv")[0]
 
 vv_source = os.path.basename(ff).split("_")[0]
@@ -23,6 +25,8 @@ df = df.query(f"lon >= {lon_min} and lon <= {lon_max} and lat >= {lat_min} and l
 df = df.drop_duplicates().reset_index(drop = True)
 ff_dict = f"../../matched/point/{layer}/{variable}/matchup_dict.pkl"
 point_time_res = ["year", "month", "day"]
+point_time_res = [x for x in point_time_res if x in df.columns]
+
 point_years = None
 variable_formula = None
 try:
@@ -54,27 +58,24 @@ if point_time_res is not None:
     grouping = [x for x in ["lon", "lat", "year", "depth", "day", "month"] if x in df.columns]
     df = df.groupby(grouping).mean().reset_index()
 
-if layer_select in ["surface"]:
-    try:
-        df = df.query("depth < 5").reset_index()
-    except:
-        pass
-else:
-    if layer != "bottom":
-        df = df.query("bottom > 0").reset_index().drop(columns = "bottom")
+try:
+    df = df.query("depth < 5").reset_index()
+except:
+    pass
 
 df_locs = df.loc[:,["lon", "lat"]].drop_duplicates()
 # bin to 0.01 resolution
 df_raw = copy.deepcopy(df)
 
-if "year" in point_time_res:
-    df = df.groupby(["lon", "lat", "year", "month"]).mean().reset_index()
-else:
-    df = df.groupby(["lon", "lat",  "month"]).mean().reset_index()
-    if "year" in df.columns:
-        df = df.drop(columns = "year")
-    if "day" in df.columns:
-        df = df.drop(columns = "day")
+if len(point_time_res) > 0:
+    if "year" in point_time_res:
+        df = df.groupby(["lon", "lat", "year", "month"]).mean().reset_index()
+    else:
+        df = df.groupby(["lon", "lat",  "month"]).mean().reset_index()
+        if "year" in df.columns:
+            df = df.drop(columns = "year")
+        if "day" in df.columns:
+            df = df.drop(columns = "day")
 
 available = len(df_raw) > 10
 
@@ -114,17 +115,12 @@ def data_source(vv_source, vv_name):
 if available:
     intro = []
     
-    if layer_select == "bottom":
-        intro.append(f"This data was extracted from vertical profiles. The near-bottom value was defined as the value closest to the bottom, that was within 5m of the bottom. Bathymetry was estimated using GEBCO Bathymetry data.")
-    if layer_select == "surface":
-        if layer not in ["benthic"]:
-            intro.append(f"This data was extracted from vertical profiles. Values from the **top 5m** were extracted from the database. This was compared with the model values from the sea surface level.")
-    if variable in ["benbio"]:
-        intro.append("Biomass data for macrobenthos was downloaded from the North Sea Benthos Survey 1986.")
+    if n_levels > 1:
+        intro.append(f"This data was extracted from vertical profiles. Values from the **top 5m** were extracted from the database. This was compared with the model values from the sea surface level.")
+    else:
+        intro.append(f"This data was extracted from point measurements in the database.")
     
-    
-    df_mapping = pd.read_csv("../../matched/mapping.csv")
-    model_variable = list(df_mapping.query("variable == @variable").model_variable)[0]
+    model_variable = definitions[variable].model_variable    
     
     import pickle
     try:
@@ -204,7 +200,6 @@ bin_value <- function(x, bin_res) {
 	floor((x + bin_res / 2) / bin_res + 0.5) * bin_res - bin_res / 2
 }
 
-
 gg <- df_locs %>%
 # final six months of the year
     ggplot()+
@@ -236,8 +231,6 @@ if( min(df_locs$lon) < -13 ){
     theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
           axis.ticks.x = element_blank(), axis.ticks.y = element_blank(),
           axis.title.x = element_blank(), axis.title.y = element_blank()) +
-    # scale_x_continuous(breaks = seq(-15, 5, 5), labels = c("15°W", "10°W","5°W", "0°", "5°E"))+ 
-    # scale_y_continuous(breaks = seq(45, 60, 5), labels = c("45°N", "50°N", "55°N", "60°N"))+
     labs(x = "", y = "") 
 
     # move legen
@@ -247,16 +240,11 @@ gg
 
 # %% tags=["remove-input"]
 if available and not concise:
-    if layer_select == "surface":
-        if layer not in ["benthic"]:
-            md(f"**Figure {i_figure}:** Locations of matchups between simulated and observed {vv_name} in the top 5m of the water column.") 
-    if layer_select == "bottom":
-        md(f"**Figure {i_figure}:** Locations of matchups between simulated and observed {vv_name} near the bottom of the water column.")
-    if layer_select == "all":
-        if layer not in ["benthic"]:
-            md(f"**Figure {i_figure}:** Locations of matchups between simulated and observed {vv_name} throughout the water column.")
-    if layer == "benthic":
-        md(f"**Figure {i_figure}:** Locations of matchups between simulated and observed {vv_name} on the seafloor. The observational data is from {data_source(vv_source, vv_name)}.")    
+    if n_levels > 1 and layer_select != "all": 
+        md(f"**Figure {i_figure}:** Locations of matchups between simulated and observed {vv_name} in the top 5m of the water column.") 
+    else:
+        md(f"**Figure {i_figure}:** Locations of matchups between simulated and observed {vv_name}.") 
+
     i_figure = i_figure + 1
 
 # %% tags=["remove-input"]
@@ -285,7 +273,6 @@ df_map$value = pmin(df_map$value, p98)
 
 world_map <- map_data("world")
 
-
 Layer <- str_to_title(layer_long)
 name <- str_glue("{Layer} {vv_name} ({unit})")
 # ensure everything is superscripted where necessary
@@ -305,25 +292,17 @@ bin_value <- function(x, bin_res) {
 	floor((x + bin_res / 2) / bin_res + 0.5) * bin_res - bin_res / 2
 }
 
-if(str_detect(vv_name, "macrob")){
-    df_map <- df_map %>%
-        mutate(lon = bin_value(lon, 0.5), lat = bin_value(lat, 0.5)) %>%
-        group_by(lon, lat, variable) %>%
-        summarise(value = mean(value))
-
-}
 
 gg <- df_map %>%
     ggplot()+
-    geom_tile(aes(lon, lat, fill = value))+
+    geom_point(aes(lon, lat, colour = value))+
     theme_gray(base_size = 14)+
     coord_fixed(ratio = 1.5, xlim = c(min(df$lon), max(df$lon)), ylim = c(min(df$lat), max(df$lat)), expand = FALSE)+
     labs(color = variable)+
     # log10
-    scale_color_viridis_c()+
     theme(legend.position = "bottom", legend.title = element_markdown())  +
     facet_wrap(~variable)+
-      scale_fill_viridis_c(
+      scale_colour_viridis_c(
         # use unit for the label
         name = name,
                        guide = guide_colorbar(title.position = "bottom", title.hjust = 0.5, title.theme = element_markdown(angle = 0, size = 20, family = "Helvetica"))
@@ -332,8 +311,6 @@ gg <- df_map %>%
 
     legend.position = "bottom", legend.direction = "horizontal", legend.box = "horizontal", legend.key.width = unit(3.0, "cm"),
     legend.key.height = unit(1.0, "cm"))
-    # use ggtext to ensure things are superscripted
-    #theme(legend.title = element_markdown()) 
 
 
 
@@ -556,7 +533,7 @@ gg
 
 # %% tags=["remove-input"]
 if available:
-    if layer not in ["benthic"]:
+    if n_levels > 1 and layer_select != "all":
         md(f"**Figure {i_figure}**: Bias in {layer_long} {vv_name}. The bias is calculated as model - observation. The colour scale is from blue (negative bias) to red (positive bias). The colour scale is capped at the 98th percentile of the absolute bias. This is to avoid a few extreme outliers from dominating the colour scale. **Note:** values have been binned and averaged to the resolution of the model.") 
     else:
         md(f"**Figure {i_figure}**: Bias in {layer_long} {vv_name}. The bias is calculated as model - observation. The colour scale is from blue (negative bias) to red (positive bias). The colour scale is capped at the 98th percentile of the absolute bias. This is to avoid a few extreme outliers from dominating the colour scale.") 
@@ -581,7 +558,7 @@ if available:
 # %% tags=["remove-input"]
 # %%capture --no-display
 # %%R -i df -i concise -i vv_name -i unit -w 1000 -h 1200 -i available
-if("month" %in% colnames(df) & (concise == FALSE) & available){
+if(concise == FALSE & available){
 
 bin_value <- function(x, bin_res) {
 	floor((x + bin_res / 2) / bin_res + 0.5) * bin_res - bin_res / 2
@@ -607,6 +584,7 @@ x_lab <- str_replace(x_lab, "CO2", "CO<sub>2</sub>")
 y_lab <- str_replace(y_lab, "CO2", "CO<sub>2</sub>")
 
 
+if ("month" %in% colnames(df)){
 df <- df %>%
 # convert month number to name, e.g. 1=Jan
 # do not use a factor
@@ -618,9 +596,9 @@ df <- df %>%
     ungroup() %>%
     bind_rows(df)
 
-# convert month to factor
 df$month <- factor(df$month, levels = c("All months", month.abb))
 
+}
 # replace pco2 with pCO2 with superscript in x_lab
 x_lab <- str_replace_all(x_lab, "co2", "CO<sub>2</sub>")
 y_lab <- str_replace_all(y_lab, "co2", "CO<sub>2</sub>")
@@ -639,7 +617,6 @@ gg <- df %>%
 # final six months of the year
     ggplot()+
     geom_point(aes(model, observation))+
-    facet_wrap(~month)+
     theme_gray(base_size = 24)+
     labs(fill = title)+
     geom_abline()+
@@ -650,16 +627,21 @@ gg <- df %>%
 
     # move legen
 
+if ("month" %in% colnames(df)){
+    gg <- gg + 
+    facet_wrap(~month)
+}
 gg
 }
 
 # %% tags=["remove-input"]
 if available:
     if concise is False:
-        if layer_select == "surface":
+        if n_levels > 1: 
             md(f"**Figure {i_figure}**: Simulated versus observed {vv_name} in the top 5m of the water column. The blue curve is a linear regression fit to the data, and the black line represents 1-1 relationship between the simulation and observations. The data has been averaged per model grid cell.") 
-        if layer_select == "bottom":
-            md(f"**Figure {i_figure}**: Simulated versus observed {vv_name} near the bottom of the water column. The blue curve is a linear regression fit to the data, and the black line represents 1-1 relationship between the simulation and observations. The data has been averaged per model grid cell.") 
+        else:
+            if "year" not in df.columns:
+                md(f"**Figure {i_figure}**: Simulated versus observed {vv_name}. The blue curve is a linear regression fit to the data, and the black line represents 1-1 relationship between the simulation and observations. The data has been averaged per model grid cell and month.")
         i_figure = i_figure + 1
 
 # %% tags=["remove-input"]
@@ -712,13 +694,10 @@ if available:
     if concise:
         md(f"**Figure {i_figure}**: Model vs observed {vv_name} for {layer_long} values. The blue line is a linear regression model fit to the data.")
         i_figure += 1
-    if layer_select == "surface":
-        if layer not in ["benthic"]:
-            md(f"## Summary statistics for sea surface {vv_name}")
-        else:
-            md(f"## Summary statistics for {vv_name} in the sediment layer") 
+    if n_levels > 1: 
+        md(f"## Summary statistics for sea surface {vv_name}")
     else:
-        md(f"## Summary statistics for near-bottom {vv_name}")
+        md(f"## Summary statistics for {vv_name}") 
 
 # %% tags=["remove-input"]
 if available and not concise:
