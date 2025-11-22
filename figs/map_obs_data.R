@@ -191,5 +191,22 @@ ggsave("~/projects/ecoValCore/figs/map_gridded_data_globals.png", gg, width = 20
   
 
 
+library(tidyverse)
 
+
+arrow::read_feather("/data/thaumus2/scratch/common/ecovalcore/point/nws/all/pco2/socat23_pco2.feather") %>% 
+  filter(year == 2010) %>% 
+  filter(between(lon, -20, 9)) %>% 
+  filter(between(lat, 45, 65)) %>% 
+  ggplot(aes(lon, lat))+
+  geom_point()
+
+
+df <- read_csv("/data/proteus1/scratch/rwi/ecoval_testing/matched/point/nws/surface/oxygen/ices_surface_oxygen.csv")
+df
+df <- read_csv("/data/proteus1/scratch/rwi/ecoval_testing/matched/point/nws/bottom/oxygen/ices_bottom_oxygen.csv")
+df %>% 
+  filter(depth < 150) %>% 
+  ggplot(aes(lon, lat, colour = depth))+
+  geom_point()
 
