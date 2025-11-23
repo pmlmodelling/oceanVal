@@ -1,6 +1,6 @@
-# A marine ecosystem model validation using **oceanval**
+# An ocean model validation using **oceanval**
 
-Simulations were compared using the Python package **oceanval**.
+Simulations were validated using the Python package **oceanval**.
 
 You can find installation instructions for **oceanval** [here](https://github.com/pmlmodelling/oceanval).
 
