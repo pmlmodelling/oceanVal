@@ -413,7 +413,7 @@ gg2 = ggplot(df_obs)+
     labs(x = NULL, y = NULL, title = "Observation", fill = model_unit)
 
 
-gg1 <- gg1 +
+gg2 <- gg2 +
     # remove the x and y axis totally
     theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
           axis.ticks.x = element_blank(), axis.ticks.y = element_blank(),
