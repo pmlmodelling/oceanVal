@@ -1524,13 +1524,7 @@ def matchup(
                                 return False
 
                             df_all = pd.concat(df_all)
-                            if amm7:
-                                df_all = (
-                                    df_all.query("lon > -19")
-                                    .query("lon < 9")
-                                    .query("lat > 41")
-                                    .query("lat < 64.3")
-                                )
+
                             change_this = [
                                 x
                                 for x in df_all.columns
@@ -1552,6 +1546,12 @@ def matchup(
                             # add model to name column names with frac in them
                             df_all = df_all.dropna().reset_index(drop=True)
                             # read in point_bottom data
+                            # fix the observations based on obs_unit_multiplier
+                            multiplier = definitions[variable].obs_unit_multiplier
+                            if multiplier != 1:
+                                df_all = df_all.assign(
+                                    observation=lambda x: x.observation * multiplier
+                                )
 
                             grouping = copy.deepcopy(point_time_res)
                             grouping.append("lon")

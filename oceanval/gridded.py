@@ -333,6 +333,10 @@ def gridded_matchup(
                     max_year = max(year_sel)
                     ds_obs.subset(years=year_sel)
                     ds_model.subset(years=year_sel)
+
+                obs_unit_multiplier = definitions[vv].obs_unit_multiplier_gridded
+                if obs_unit_multiplier != 1:
+                    ds_obs *  obs_unit_multiplier
             
                 if bad_clim:
                     raise ValueError(f"Observational data for {vv} appears to not be a climatology, but the climatology argument is set to True. Please fix this!") 
