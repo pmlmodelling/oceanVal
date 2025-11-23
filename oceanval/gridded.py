@@ -584,77 +584,78 @@ def gridded_matchup(
                     pickle.dump(definitions, f)
 
 
+                if vertical_gridded:
 
-                if vertical_gridded is True:
-                    levels = ds_obs.levels
-                    if session_info["ds_depths"] != "z_level":
-                        ds_model.vertical_interp(levels, depths = session_info["ds_depths"])
+                    if vertical_gridded is True:
+                        levels = ds_obs.levels
+                        if session_info["ds_depths"] != "z_level":
+                            ds_model.vertical_interp(levels, depths = session_info["ds_depths"])
+                        else:
+                            ds_model.vertical_interp(levels , fixed = True)
+
+                    ds_obs.append(ds_model)
+
+                    if len(ds_model.times) > 12:
+                        ds_obs.merge("variable", match=["year", "month"])
                     else:
-                        ds_model.vertical_interp(levels , fixed = True)
+                        ds_obs.merge("variable", match="month")
 
-                ds_obs.append(ds_model)
+                    ds_obs.set_fill(-9999)
+                    ds_mask = ds_obs.copy()
+                    ds_mask.assign( mask_these=lambda x: -1e30 * ((isnan(x.observation) + isnan(x.model)) > 0), drop=True,)
+                    ds_mask.as_missing([-1e40, -1e20])
+                    ds_mask.run()
+                    ds_obs + ds_mask
 
-                if len(ds_model.times) > 12:
-                    ds_obs.merge("variable", match=["year", "month"])
-                else:
-                    ds_obs.merge("variable", match="month")
-
-                ds_obs.set_fill(-9999)
-                ds_mask = ds_obs.copy()
-                ds_mask.assign( mask_these=lambda x: -1e30 * ((isnan(x.observation) + isnan(x.model)) > 0), drop=True,)
-                ds_mask.as_missing([-1e40, -1e20])
-                ds_mask.run()
-                ds_obs + ds_mask
-
-                out_file = (
-                    session_info["out_dir"]
-                    + f"matched/gridded/{vv}/{vv_source}_{vv}_surface.nc"
-                )
-
-                # check directory exists for out_file
-                if not os.path.exists(os.path.dirname(out_file_vertical)):
-                    os.makedirs(os.path.dirname(out_file_vertical))
-                # remove the file if it exists
-                if os.path.exists(out_file_vertical):
-                    os.remove(out_file_vertical)
-                ds_obs.set_precision("F32")
-                ds_model = ds_obs.copy()
-
-                if lon_lim is not None and lat_lim is not None:
-                    ds_model.subset(lon=lon_lim, lat=lat_lim)
-
-                ds_model.run()
-                if (
-                    list(
-                        ds_model.contents.query(
-                            "variable == 'model'"
-                        ).long_name
-                    )[0]
-                    is None
-                ):
-                    ds_model.set_longnames({"model": f"Model {vv_name}"})
-
-                regrid_later = False
-                if is_latlon(ds_model[0]) is False:
-                    lons = session_info["lon_lim"]
-                    lats = session_info["lat_lim"]
-                    resolution = get_resolution(ds_model[0])
-                    lon_res = resolution[0]
-                    lat_res = resolution[1]
-                    ds_model.to_latlon(
-                        lon=lons, lat=lats, res=[lon_res, lat_res], method="bil"
+                    out_file = (
+                        session_info["out_dir"]
+                        + f"matched/gridded/{vv}/{vv_source}_{vv}_surface.nc"
                     )
 
-                # unit may need some fiddling
-                out1 = out_file.replace(
-                    os.path.basename(out_file), "matchup_dict.pkl"
-                )
-                the_dict = {"start": min_year, "end": max_year}
-                # write to pickle
-                with open(out1, "wb") as f:
-                    pickle.dump(the_dict, f)
+                    # check directory exists for out_file
+                    if not os.path.exists(os.path.dirname(out_file_vertical)):
+                        os.makedirs(os.path.dirname(out_file_vertical))
+                    # remove the file if it exists
+                    if os.path.exists(out_file_vertical):
+                        os.remove(out_file_vertical)
+                    ds_obs.set_precision("F32")
+                    ds_model = ds_obs.copy()
 
-                ds_model.to_nc(out_file_vertical, zip=True, overwrite=True)
+                    if lon_lim is not None and lat_lim is not None:
+                        ds_model.subset(lon=lon_lim, lat=lat_lim)
+
+                    ds_model.run()
+                    if (
+                        list(
+                            ds_model.contents.query(
+                                "variable == 'model'"
+                            ).long_name
+                        )[0]
+                        is None
+                    ):
+                        ds_model.set_longnames({"model": f"Model {vv_name}"})
+
+                    regrid_later = False
+                    if is_latlon(ds_model[0]) is False:
+                        lons = session_info["lon_lim"]
+                        lats = session_info["lat_lim"]
+                        resolution = get_resolution(ds_model[0])
+                        lon_res = resolution[0]
+                        lat_res = resolution[1]
+                        ds_model.to_latlon(
+                            lon=lons, lat=lats, res=[lon_res, lat_res], method="bil"
+                        )
+
+                    # unit may need some fiddling
+                    out1 = out_file.replace(
+                        os.path.basename(out_file), "matchup_dict.pkl"
+                    )
+                    the_dict = {"start": min_year, "end": max_year}
+                    # write to pickle
+                    with open(out1, "wb") as f:
+                        pickle.dump(the_dict, f)
+
+                    ds_model.to_nc(out_file_vertical, zip=True, overwrite=True)
                 out_file = out_file.replace(".nc", "_definitions.pkl")
                 # save definitions
                 with open(out_file, "wb") as f:
