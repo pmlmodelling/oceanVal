@@ -494,6 +494,11 @@ def matchup(
 
     """
 
+    if thickness == "z_level":
+        session_info["z_level"] = True
+    else:
+        session_info["z_level"] = False
+
     # store short title
     gridded = None
     point = None
@@ -854,7 +859,23 @@ def matchup(
 
     invert_thickness = False
     point_all = point["all"] + point["surface"]
+
+    # go through variables in definitions
+    thick_check = False
+    for vv in var_chosen:
+        # identifical if vertical_gridded is True
+        try:
+            if definitions[vv].vertical_gridded:
+                thick_check = True
+        except:
+            pass
     if len(point_all) > 0:
+        thick_check = True
+
+    if session_info["z_level"]:
+        thick_check = False
+
+    if thick_check:
         print("Sorting out thickness")
         ds_depths = False
         with warnings.catch_warnings(record=True) as w:
@@ -975,6 +996,12 @@ def matchup(
                 "You have asked for variables that require the specification of thickness"
             )
         print("Thickness is sorted out")
+
+        ds_depths.run()
+    if ds_depths is not None:
+        session_info["ds_depths"] = ds_depths[0]
+    else:
+        session_info["ds_depths"] = thickness
 
     session_info["invert"] = invert_thickness
 
