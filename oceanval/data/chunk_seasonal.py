@@ -56,9 +56,15 @@ if lon_range > 340:
     if lat_range > 160:
         global_grid = True
 
-if not global_grid:
-    data_path = str(importlib.resources.files("oceanval").joinpath("data/amm7_val_subdomains.nc"))
+
+data_path = str(importlib.resources.files("oceanval").joinpath(f"data/{sub_regions}_subdomains.nc"))
+
+regional = False
+
+if sub_regions in ["nwes", "global"]: 
     ds_regions = nc.open_data(data_path, checks = False)
+    if os.path.exists(data_path):
+        regional = True
     # pull this in from the package data
     
     ds_regions.as_missing(0)
@@ -82,15 +88,6 @@ if not global_grid:
     lon_max = lon.max()
     lat_min = lat.min()
     lat_max = lat.max()
-    regional = False
-    if lon_min > -30:
-        if lon_max < 15:
-            if lat_min > 35:
-                if lat_max < 70:
-                    regional = True
-                    nws = True
-if global_grid:
-    regional = False
 
 
 # %% tags=["remove-cell"]

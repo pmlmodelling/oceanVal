@@ -182,7 +182,8 @@ def validate(
     variables="all",
     model="ersem",
     fixed_scale = False,
-    test=False
+    test=False,
+    region = None
 ):
     # docstring
     """
@@ -210,6 +211,10 @@ def validate(
     -------
     None
     """
+    #  regioncan only be nwes or global
+    if region is not None:
+        if region not in ["nwes", "global"]:
+            raise ValueError("region must be either 'nwes' or 'global'")
     # if lon_lim  is not None, make sure it's a list
     if lon_lim is not None:
         if isinstance(lon_lim, list) == False:
@@ -459,6 +464,11 @@ def validate(
                             # make every letter a capital
                             source_capital = source.upper()
                             filedata = filedata.replace("source_title", source_capital)
+                            # change sub_regions_value to region
+                            if region is not None: 
+                                filedata = filedata.replace(
+                                    "sub_regions_value", str(region)
+                                )
 
                             # Write the file out again
                             with open(
@@ -513,53 +523,53 @@ def validate(
         i = i + 2
         i_pad = str(i).zfill(3)
 
-        shelf = False
-        # figure out if we need the shelf
-        try:
-            ds_regions = nc.open_data(f"{data_dir}/amm7_val_subdomains.nc")
-            ds_xr = ds_regions.to_xarray()
-            lon_size = len(ds_xr.lon)
-            lat_size = len(ds_xr.lat)
+        # shelf = False
+        # # figure out if we need the shelf
+        # try:
+        #     ds_regions = nc.open_data(f"{data_dir}/amm7_val_subdomains.nc")
+        #     ds_xr = ds_regions.to_xarray()
+        #     lon_size = len(ds_xr.lon)
+        #     lat_size = len(ds_xr.lat)
 
-            ensemble = nc.create_ensemble("matched")
-            ff = ensemble[0]
-            ds = nc.open_data(ff)
-            ds_xr = ds.to_xarray()
-            lon_size_ds = len(ds_xr.lon)
-            lat_size_ds = len(ds_xr.lat)
+        #     ensemble = nc.create_ensemble("matched")
+        #     ff = ensemble[0]
+        #     ds = nc.open_data(ff)
+        #     ds_xr = ds.to_xarray()
+        #     lon_size_ds = len(ds_xr.lon)
+        #     lat_size_ds = len(ds_xr.lat)
 
-            if lon_size_ds == lon_size:
-                if lat_size_ds == lat_size:
-                    shelf = True
-                else:
-                    shelf = False
-        except:
-            shelf = False
+        #     if lon_size_ds == lon_size:
+        #         if lat_size_ds == lat_size:
+        #             shelf = True
+        #         else:
+        #             shelf = False
+        # except:
+        #     shelf = False
 
-        # copy the summary notebook for the full domain
+        # # copy the summary notebook for the full domain
 
-        if shelf:
-            file1 = importlib.resources.files(__name__).joinpath("data/summary.ipynb")
-            if len(glob.glob(f"book/notebooks/*summary.ipynb")) == 0:
-                copyfile(file1, f"book/notebooks/{i_pad}_summary_shelf.ipynb")
-                # change domain_title to "Shelf"
-                with open(
-                    f"book/notebooks/{i_pad}_summary_shelf.ipynb", "r"
-                ) as file:
-                    filedata = file.read()
+        # if shelf:
+        #     file1 = importlib.resources.files(__name__).joinpath("data/summary.ipynb")
+        #     if len(glob.glob(f"book/notebooks/*summary.ipynb")) == 0:
+        #         copyfile(file1, f"book/notebooks/{i_pad}_summary_shelf.ipynb")
+        #         # change domain_title to "Shelf"
+        #         with open(
+        #             f"book/notebooks/{i_pad}_summary_shelf.ipynb", "r"
+        #         ) as file:
+        #             filedata = file.read()
 
-                # Replace the target string
-                filedata = filedata.replace("domain_title", "Shelf")
+        #         # Replace the target string
+        #         filedata = filedata.replace("domain_title", "Shelf")
 
-                # Write the file out again
-                with open(
-                    f"book/notebooks/{i_pad}_summary_shelf.ipynb", "w"
-                ) as file:
-                    file.write(filedata)
+        #         # Write the file out again
+        #         with open(
+        #             f"book/notebooks/{i_pad}_summary_shelf.ipynb", "w"
+        #         ) as file:
+        #             file.write(filedata)
 
-                i += 1
+        #         i += 1
 
-                i_pad = str(i).zfill(3)
+        #         i_pad = str(i).zfill(3)
 
         file1 = importlib.resources.files(__name__).joinpath("data/summary.ipynb")
         if len(glob.glob(f"book/notebooks/*summary.ipynb")) == 0:
