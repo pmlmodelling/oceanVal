@@ -19,7 +19,7 @@ import importlib
 from oceanval.parsers import Validator, definitions
 
 add_point_comparison = definitions.add_point_comparison
-add_grided_comparison = definitions.add_gridded_comparison
+add_gridded_comparison = definitions.add_gridded_comparison
 
 # loop through the keys and make sure all attributes are set
 #for key in definitions.keys:
