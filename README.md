@@ -218,5 +218,293 @@ def validate(
 | `r_warnings` | `bool` | `False` | Whether to show R warnings. Set to `True` only for debugging |
 | `test` | `bool` | `False` | Internal testing flag. **Ignore unless testing oceanval** |
 
+# Variable Configuration: add_gridded_comparison
+
+## Overview
+The `add_gridded_comparison` method allows you to configure gridded observational datasets for validation against model output. This method is part of the `Validator` class and enables you to define how gridded observations should be matched up with model data for validation purposes.
+
+## Function Signature
+```python
+definitions.add_gridded_comparison(
+    name,
+    long_name=None,
+    short_name=None,
+    short_title=None,
+    source=None,
+    description=None,
+    model_variable=None,
+    obs_dir="auto",
+    obs_var="auto",
+    start=-1000,
+    end=3000,
+    vertical=False,
+    climatology=None,
+    obs_unit_multiplier=1
+)
+```
+
+## Required Arguments
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `name` | `str` | **Required.** Unique identifier for the variable (e.g., "chlorophyll", "temperature") |
+| `climatology` | `bool` | **Required.** Whether the gridded observations are climatological data |
+
+## Variable Identification
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `long_name` | `str` | `None` | Descriptive name for the variable. If `None`, defaults to `name` |
+| `short_name` | `str` | `None` | Short identifier for the variable. If `None`, defaults to `name` |
+| `short_title` | `str` | `None` | Title for plots and reports. If `None`, defaults to `name.title()` |
+
+## Data Source Configuration
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `source` | `str` | `None` | **Required.** Source identifier for the observational dataset |
+| `description` | `str` | `None` | Description of the data source. If `None`, defaults to "Source for {source}" |
+| `obs_dir` | `str` | `"auto"` | Directory path containing gridded observational data |
+| `obs_var` | `str` | `"auto"` | Variable name in the observational NetCDF files |
+
+## Model Configuration
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `model_variable` | `str` | `None` | **Required.** Name of the corresponding variable in model output files |
+| `obs_unit_multiplier` | `float` | `1` | Multiplier to convert observational units to match model units |
+
+## Temporal Configuration
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `start` | `int` | `-1000` | Start year for temporal matching (inclusive) |
+| `end` | `int` | `3000` | End year for temporal matching (inclusive) |
+
+## Spatial Configuration
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `vertical` | `bool` | `False` | Whether the gridded data has vertical (depth) dimensions |
+
+## Usage Example
+
+```python
+import oceanval
+from oceanval.parsers import definitions
+
+# Add a chlorophyll gridded comparison
+definitions.add_gridded_comparison(
+    name="chlorophyll",
+    long_name="Chlorophyll-a concentration",
+    short_name="chl",
+    short_title="Chlorophyll-a",
+    source="SeaWiFS",
+    description="SeaWiFS satellite chlorophyll-a data",
+    model_variable="chl",
+    obs_dir="/path/to/seawifs/data",
+    obs_var="chlor_a",
+    start=1998,
+    end=2010,
+    vertical=False,
+    climatology=True,
+    obs_unit_multiplier=1.0
+)
+
+# Add a temperature comparison with depth
+definitions.add_gridded_comparison(
+    name="temperature",
+    long_name="Sea water temperature",
+    source="EN4",
+    model_variable="temp",
+    obs_dir="/path/to/en4/data",
+    vertical=True,
+    climatology=False
+)
+```
+
+## Important Notes
+
+- **Existing Variables**: If a variable with the same `name` already exists from a point comparison, this method will merge the gridded configuration with existing point configuration
+- **Source Keys**: Source identifiers cannot contain underscores (`_`)
+- **Model Variable Consistency**: If the variable already exists, the `model_variable` must match the existing one (unless it was set to `"auto"`)
+- **Directory Validation**: If `obs_dir` is not `"auto"`, the directory must exist
+- **Unit Conversion**: Use `obs_unit_multiplier` to convert observational units to match model units (e.g., if observations are in mg/m³ and model is in mmol/m³)
+
+## Error Handling
+
+The method includes comprehensive validation:
+- Ensures required arguments are provided
+- Validates data types for all parameters
+- Checks directory existence when specified
+- Prevents conflicts with existing variable definitions
+- Validates source key format (no underscores allowed)
+
+# Variable Configuration: add_point_comparison
+
+## Overview
+The `add_point_comparison` method allows you to configure point (in-situ) observational datasets for validation against model output. This method is part of the `Validator` class and enables you to define how point observations should be matched up with model data for validation purposes. Point observations are typically from moorings, research cruises, or other discrete measurement platforms.
+
+## Function Signature
+```python
+definitions.add_point_comparison(
+    name=None,
+    long_name=None,
+    depths=None,
+    short_name=None,
+    short_title=None,
+    source=None,
+    description=None,
+    model_variable=None,
+    start=-1000,
+    end=3000,
+    obs_dir="auto"
+)
+```
+
+## Required Arguments
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `name` | `str` | **Required.** Unique identifier for the variable (e.g., "chlorophyll", "temperature") |
+| `depths` | `str` | **Required.** Depth configuration. Must be either `"surface"` or `"all"` |
+
+## Variable Identification
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `long_name` | `str` | `None` | Descriptive name for the variable. If `None`, defaults to `name` |
+| `short_name` | `str` | `None` | Short identifier for the variable. If `None`, defaults to `name` |
+| `short_title` | `str` | `None` | Title for plots and reports. If `None`, defaults to `name.title()` |
+
+## Data Source Configuration
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `source` | `str` | `None` | **Required.** Source identifier for the observational dataset |
+| `description` | `str` | `None` | Description of the data source. If `None`, defaults to "Source for {source}" |
+| `obs_dir` | `str` | `"auto"` | Directory path containing point observational data (CSV files) |
+
+## Model Configuration
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `model_variable` | `str` | `None` | **Required.** Name of the corresponding variable in model output files |
+
+## Temporal Configuration
+
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `start` | `int` | `-1000` | Start year for temporal matching (inclusive) |
+| `end` | `int` | `3000` | End year for temporal matching (inclusive) |
+
+## Point Data File Requirements
+
+The CSV files in the observation directory must contain specific columns:
+
+### Required Columns
+- `lon`: Longitude coordinate
+- `lat`: Latitude coordinate  
+- `observation`: The measured value
+
+### Optional Columns
+- `year`: Year of observation
+- `month`: Month of observation
+- `day`: Day of observation
+- `depth`: Depth of observation (required if `depths="all"`)
+- `source`: Data source identifier
+
+### Invalid Columns
+Any columns not in the valid list (`lon`, `lat`, `year`, `month`, `day`, `depth`, `observation`, `source`) will cause an error.
+
+## Usage Examples
+
+### Surface Chlorophyll from Multiple Sources
+```python
+import oceanval
+from oceanval.parsers import definitions
+
+# Add surface chlorophyll point comparison
+definitions.add_point_comparison(
+    name="chlorophyll",
+    long_name="Chlorophyll-a concentration",
+    short_name="chl",
+    short_title="Chlorophyll-a",
+    depths="surface",
+    source="CPR",
+    description="Continuous Plankton Recorder chlorophyll data",
+    model_variable="chl",
+    obs_dir="/path/to/cpr/data",
+    start=1990,
+    end=2020
+)
+```
+
+### Temperature Profile Data
+```python
+# Add temperature comparison with all depths
+definitions.add_point_comparison(
+    name="temperature",
+    long_name="Sea water temperature", 
+    depths="all",
+    source="CTD",
+    description="CTD profile temperature measurements",
+    model_variable="temp",
+    obs_dir="/path/to/ctd/data",
+    start=2000,
+    end=2015
+)
+```
+
+### Combining with Existing Gridded Comparison
+```python
+# First add gridded comparison
+definitions.add_gridded_comparison(
+    name="salinity",
+    source="WOA",
+    model_variable="sal",
+    climatology=True
+)
+
+# Then add point comparison for the same variable
+definitions.add_point_comparison(
+    name="salinity",  # Same name merges with gridded config
+    depths="all",
+    source="Argo",
+    description="Argo float salinity measurements",
+    model_variable="sal",  # Must match existing model_variable
+    obs_dir="/path/to/argo/data"
+)
+```
+
+## Important Notes
+
+- **CSV File Validation**: All CSV files in the observation directory are automatically validated for proper column structure
+- **Existing Variables**: If a variable with the same `name` already exists from a gridded comparison, this method will merge the point configuration with existing gridded configuration
+- **Source Keys**: Source identifiers cannot contain underscores (`_`)
+- **Model Variable Consistency**: If the variable already exists, the `model_variable` must match the existing one (unless it was set to `"auto"`)
+- **Directory Validation**: If `obs_dir` is not `"auto"`, the directory must exist and contain at least one CSV file
+- **Vertical Detection**: The method automatically detects if data is vertical (3D) based on the presence of `depth` columns in CSV files
+- **Temporal Matching**: Point observations are matched to model output using exact day/month/year matching when available
+
+## Depth Configuration
+
+| Value | Description | Requirements |
+|-------|-------------|--------------|
+| `"surface"` | Only surface observations | CSV files should not contain `depth` column |
+| `"all"` | All depth levels | CSV files may contain `depth` column for 3D matching |
+
+## Error Handling
+
+The method includes comprehensive validation:
+- Ensures required arguments (`name`, `depths`) are provided
+- Validates `depths` parameter is either `"surface"` or `"all"`
+- Validates data types for all parameters
+- Checks directory existence and CSV file presence when specified
+- Validates CSV file structure and column names
+- Prevents conflicts with existing variable definitions
+- Validates source key format (no underscores allowed)
+- Ensures required columns (`lon`, `lat`, `observation`) are present in all CSV files
+
 
 
