@@ -769,10 +769,8 @@ def matchup(
                 )
 
     all_df = extract_variable_mapping(sim_dir, exclude=exclude, n_check=n_check)
-    print(all_df)
     # check if any model_variable is None
     var_found = list(all_df.variable.unique())
-    print(var_choice)
     missing = ",".join([x for x in var_choice if x not in var_found])
     # 
     if len(missing) > 0:
@@ -974,6 +972,11 @@ def matchup(
             if invert_thickness:
                 ds_thickness.invert_levels()
                 ds_thickness.run()
+            ds_thickness_sim = ds_thickness.copy()
+            # save as foo
+            if os.path.exists("foo.nc"):
+                os.remove("foo.nc")
+            ds_thickness.to_nc("foo.nc", zip=True)
 
             ds_depths = ds_thickness.copy()
 
@@ -1000,8 +1003,10 @@ def matchup(
         ds_depths.run()
     if ds_depths is not None:
         session_info["ds_depths"] = ds_depths[0]
+        session_info["ds_thickness"] = ds_thickness_sim[0]
     else:
         session_info["ds_depths"] = thickness
+        session_info["ds_thickness"] = None 
 
     session_info["invert"] = invert_thickness
 

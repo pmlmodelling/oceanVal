@@ -461,6 +461,10 @@ def validate(
                             filedata = filedata.replace("template_variable", variable)
                             filedata = filedata.replace("template_title", Variable)
                             filedata = filedata.replace("source_name", source)
+                            if region == "nwes":
+                                filedata = filedata.replace("zonal_height", "6000" )
+                            else:
+                                filedata = filedata.replace("zonal_height", "2000" )
                             # make every letter a capital
                             source_capital = source.upper()
                             filedata = filedata.replace("source_title", source_capital)

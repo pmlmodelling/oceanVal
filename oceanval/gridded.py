@@ -400,7 +400,6 @@ def gridded_matchup(
                 lat_min = max(lat_min, lat_min_model)
                 lat_max = min(lat_max, lat_max_model)
 
-
                 if lon_min < -180:
                     lon_min = -180
                 if lon_max > 180:
@@ -418,16 +417,16 @@ def gridded_matchup(
                 lons = [lon_min, lon_max]
                 lats = [lat_min, lat_max]
 
-                ds_model.subset(lon=lons, lat=lats)
-                ds_obs.subset(lon=lons, lat=lats)
 
                 n1 = ds_obs.contents.npoints[0]
                 n2 = ds_model.contents.npoints[0]
 
                 if n1 >= n2:
-                    ds_obs.regrid(ds_model, method="bil")
+                    regridding = "obs_to_model"
+                    # ds_obs.regrid(ds_model, method="bil")
                 else:
-                    ds_model.regrid(ds_obs, method="bil")
+                    regridding = "model_to_obs"
+                    # ds_model.regrid(ds_obs, method="bil")
 
                 ds_obs.rename({ds_obs.variables[0]: "observation"})
                 ds_model.merge("time")
@@ -511,6 +510,11 @@ def gridded_matchup(
                 ds_obs_surface = ds_obs.copy()
                 if vertical_gridded:
                     ds_obs_surface.cdo_command("topvalue")
+                if regridding == "obs_to_model":
+                    ds_obs_surface.regrid(ds_model_surface, method="bil")
+                else:
+                    ds_model_surface.regrid(ds_obs_surface, method="bil")
+
                 ds_obs_surface.append(ds_model_surface)
 
                 if len(ds_model_surface.times) > 12:
@@ -558,15 +562,15 @@ def gridded_matchup(
                     ds_model_surface.set_longnames({"model": f"Model {vv_name}"})
 
                 regrid_later = False
-                if is_latlon(ds_model_surface[0]) is False:
-                    lons = session_info["lon_lim"]
-                    lats = session_info["lat_lim"]
-                    resolution = get_resolution(ds_model_surface[0])
-                    lon_res = resolution[0]
-                    lat_res = resolution[1]
-                    ds_model_surface.to_latlon(
-                        lon=lons, lat=lats, res=[lon_res, lat_res], method="bil"
-                    )
+                #if is_latlon(ds_model_surface[0]) is False:
+                #    lons = session_info["lon_lim"]
+                #    lats = session_info["lat_lim"]
+                #    resolution = get_resolution(ds_model_surface[0])
+                #    lon_res = resolution[0]
+                #    lat_res = resolution[1]
+                #    ds_model_surface.to_latlon(
+                #        lon=lons, lat=lats, res=[lon_res, lat_res], method="bil"
+                #    )
 
                 # unit may need some fiddling
                 out1 = out_file.replace(
@@ -577,6 +581,7 @@ def gridded_matchup(
                 with open(out1, "wb") as f:
                     pickle.dump(the_dict, f)
 
+                ds_model_surface.subset(lon=lons, lat=lats)
                 ds_model_surface.to_nc(out_file, zip=True, overwrite=True)
                 out_file = out_file.replace(".nc", "_definitions.pkl")
                 # save definitions
@@ -589,10 +594,17 @@ def gridded_matchup(
                     if vertical_gridded is True:
                         levels = ds_obs.levels
                         if session_info["ds_depths"] != "z_level":
-                            ds_model.vertical_interp(levels, depths = session_info["ds_depths"])
+                            if os.path.exists("foo2.nc"):
+                                os.remove("foo2.nc")
+                            ds_model.to_nc("foo2.nc", zip=True)
+                            ds_model.vertical_interp(levels, thickness = session_info["ds_thickness"]) 
                         else:
                             ds_model.vertical_interp(levels , fixed = True)
 
+                    if regridding == "obs_to_model":
+                        ds_obs.regrid(ds_model, method="bil")
+                    else:
+                        ds_model.regrid(ds_obs, method="bil")
                     ds_obs.append(ds_model)
 
                     if len(ds_model.times) > 12:
@@ -636,15 +648,15 @@ def gridded_matchup(
                         ds_model.set_longnames({"model": f"Model {vv_name}"})
 
                     regrid_later = False
-                    if is_latlon(ds_model[0]) is False:
-                        lons = session_info["lon_lim"]
-                        lats = session_info["lat_lim"]
-                        resolution = get_resolution(ds_model[0])
-                        lon_res = resolution[0]
-                        lat_res = resolution[1]
-                        ds_model.to_latlon(
-                            lon=lons, lat=lats, res=[lon_res, lat_res], method="bil"
-                        )
+                    #if is_latlon(ds_model[0]) is False:
+                    #    lons = session_info["lon_lim"]
+                    #    lats = session_info["lat_lim"]
+                    #    resolution = get_resolution(ds_model[0])
+                    #    lon_res = resolution[0]
+                    #    lat_res = resolution[1]
+                    #    ds_model.to_latlon(
+                    #        lon=lons, lat=lats, res=[lon_res, lat_res], method="bil"
+                    #    )
 
                     # unit may need some fiddling
                     out1 = out_file.replace(
@@ -655,6 +667,7 @@ def gridded_matchup(
                     with open(out1, "wb") as f:
                         pickle.dump(the_dict, f)
 
+                    ds_model.subset(lon=lons, lat=lats) 
                     ds_model.to_nc(out_file_vertical, zip=True, overwrite=True)
                 out_file = out_file.replace(".nc", "_definitions.pkl")
                 # save definitions
