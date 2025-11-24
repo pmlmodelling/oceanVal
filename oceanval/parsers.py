@@ -62,7 +62,7 @@ class Validator:
     
     # add a method that let's user create a new Variable and add it to the definitions
     # 
-    def add_gridded_comparison(self, name, long_name = None, short_name = None, short_title = None, source = None, description = None, model_variable = None, obs_dir = "auto", obs_var = "auto" , start = -1000, end = 3000, vertical = False, climatology = None, obs_unit_multiplier = 1  ): 
+    def add_gridded_comparison(self, name, long_name = None, short_name = None, short_title = None, source = None, description = None, model_variable = None, obs_dir = None, obs_var = "auto" , start = -1000, end = 3000, vertical = False, climatology = None, obs_unit_multiplier = 1  ): 
         try:
             point_dir = getattr(self, name).point_dir
             point = getattr(self, name).point
@@ -75,6 +75,7 @@ class Validator:
             vertical_point = getattr(self, name).vertical
             old_model_variable = getattr(self, name).model_variable
             old_obs_unit_multiplier = getattr(self, name).obs_unit_multiplier_point
+            old_bin_res = getattr(self, name).bin_res
         except:
             orig_sources = dict()
             point = None,
@@ -86,6 +87,7 @@ class Validator:
             vertical_point = False
             old_model_variable = None
             old_obs_unit_multiplier = 1
+            old_bin_res = dict()
             pass
 
         if old_model_variable is not None and old_model_variable != model_variable:
@@ -93,9 +95,16 @@ class Validator:
                 raise ValueError(f"Model variable for {name} already exists as {old_model_variable}, cannot change to {model_variable}")
         
         var = Variable()
+        if source is None:
+            raise ValueError("Source must be supplied")
+        if model_variable is None:
+            raise ValueError("Model variable must be supplied")
         # climatology must be provideded
         if climatology is None:
             raise ValueError("Climatology must be provided for gridded comparison")
+        # obs_dir is needed
+        if obs_dir is None:
+            raise ValueError("obs_dir must be provided for gridded comparison")
         # must be boolean
         if not isinstance(climatology, bool):
             raise ValueError("Climatology must be a boolean value")
@@ -120,6 +129,7 @@ class Validator:
         var.point_source = point_source
         var.gridded = True
         var.long_name = long_name
+        var.bin_res = old_bin_res
         # if this is None set to Name
         assumed = []
         if var.long_name is None:
@@ -138,6 +148,7 @@ class Validator:
             if short_title != session_info["short_title"][name]:
                 raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
         session_info["short_title"][name] = var.short_title
+        # throw error if source is None
         if description is None:
             description = f"Source for {source}"
             assumed.append("description")
@@ -174,7 +185,7 @@ class Validator:
         if len(assumed) > 0:
             print(f"Warning: The following attributes were missing and were assumed for variable {name}: {assumed}")
     # 
-    def add_point_comparison(self, name = None, long_name = None, depths = None, short_name = None, short_title = None, source = None, description = None, model_variable = None, start = -1000, end = 3000, obs_dir = "auto"): 
+    def add_point_comparison(self, name = None, long_name = None, depths = None, short_name = None, short_title = None, source = None, description = None, model_variable = None, start = -1000, end = 3000, obs_dir = None, obs_unit_multiplier = 1, bin_res = None  ):
         try:
             gridded_dir = getattr(self, name).gridded_dir   
             obs_var = getattr(self, name).obs_var
@@ -205,12 +216,16 @@ class Validator:
                 raise ValueError(f"Model variable for {name} already exists as {old_model_variable}, cannot change to {model_variable}")
 
         var = Variable()
+
+
+
         var.climatology = old_climatology
         var.n_levels = 1
         var.gridded_start = gridded_start
         var.gridded_end = gridded_end
-        var.obs_unit_multiplier_point = old_obs_unit_multiplier
+        var.obs_unit_multiplier_gridded= old_obs_unit_multiplier
         # obs_unit_multiplier needs to be either an int or can be cast to int
+        var.obs_unit_multiplier_point= obs_unit_multiplier
         try:
             var.obs_unit_multiplier_point= float(var.obs_unit_multiplier_point)
         except:
@@ -307,6 +322,24 @@ class Validator:
         if gridded_dir != "auto":
             if not os.path.exists(gridded_dir):
                 raise ValueError(f"Gridded directory {gridded_dir} does not exist")
+
+        # if bin_res is supplied, ensure it is a 2 variable list
+        if bin_res is not None:
+            if not isinstance(bin_res, list) or len(bin_res) != 2:
+                raise ValueError("bin_res must be a list of two values: [spatial_resolution, depth_resolution]")
+        # ensure each element of bin_res is a number
+            for res in bin_res:
+                try:
+                    float(res)
+                except:
+                    raise ValueError("Each element of bin_res must be a number")
+        
+        # figure out if var.bin_res exists
+        try:
+            old_bin_res = getattr(self, name).bin_res
+        except:
+            var.bin_res = dict()
+            var.bin_res[source] = bin_res
 
         # ensure nothing is None
         for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_var]:

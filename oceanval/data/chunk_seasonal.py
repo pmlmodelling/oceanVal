@@ -70,7 +70,7 @@ if sub_regions in ["nwes", "global"]:
     ds_regions.as_missing(0)
     ds_regions.set_fill(-9999)
     ds_regions.run()
-    ds_regions.regrid(ds_model)
+    ds_regions.regrid(ds_model, method = "nn")
     regions_contents = ds_regions.contents
     
     # figure out if you can sensibly do a regional analysis for nws

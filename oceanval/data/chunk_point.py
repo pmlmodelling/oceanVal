@@ -218,8 +218,6 @@ if( min(df_locs$lon) < -13 ){
     theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
           axis.ticks.x = element_blank(), axis.ticks.y = element_blank(),
           axis.title.x = element_blank(), axis.title.y = element_blank()) +
-    # scale_x_continuous(breaks = seq(-15, 5, 5), labels = c("15°W", "10°W","5°W", "0°", "5°E"))+ 
-    # scale_y_continuous(breaks = seq(45, 60, 5), labels = c("45°N", "50°N", "55°N", "60°N"))+
     labs(x = "", y = "") 
 
 
