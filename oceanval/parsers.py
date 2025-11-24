@@ -153,6 +153,7 @@ class Validator:
             description = f"Source for {source}"
             assumed.append("description")
 
+        source_name = source
         source = {source: description}
         if list(source.keys())[0] in orig_sources:
             # ensure the value is the same
@@ -217,6 +218,7 @@ class Validator:
 
         var = Variable()
 
+        source_name = source
 
 
         var.climatology = old_climatology
@@ -234,7 +236,6 @@ class Validator:
         if name in session_info["short_title"]:
             if short_title != session_info["short_title"][name]:
                 raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
-        session_info["short_title"][name] = var.short_title
 
         # depths must be a string and one of "surface" or "all"
         if not isinstance(depths, str):
@@ -337,9 +338,10 @@ class Validator:
         # figure out if var.bin_res exists
         try:
             old_bin_res = getattr(self, name).bin_res
+            var.bin_res = old_bin_res | {source_name:bin_res}
         except:
-            var.bin_res = dict()
-            var.bin_res[source] = bin_res
+            new_dict = {source_name:bin_res} 
+            var.bin_res = new_dict 
 
         # ensure nothing is None
         for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_var]:
@@ -349,6 +351,7 @@ class Validator:
 
         for vv in assumed:
             print(f"Warning: The attribute {vv} was missing and was assumed for variable {name}")
+        session_info["short_title"][name] = var.short_title
     # 
 
 definitions = Validator()

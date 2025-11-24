@@ -94,6 +94,7 @@ def mm_match(ff, model_variable, df, df_times, ds_depths, variable, df_all, laye
 
     """
 
+
     if session_info["cache"]:
         try:
             ff_read = (
@@ -141,6 +142,7 @@ def mm_match(ff, model_variable, df, df_times, ds_depths, variable, df_all, laye
             ds1 = nc.open_data(ds[0], checks=False)
             ds_contents = ds1.contents
             the_var = model_variable.split("+")[0]
+
             if list(ds_contents.query("variable == @the_var").nlevels)[0] > 1:
                 if layer == "surface":
                     ds.cdo_command("topvalue")
@@ -168,6 +170,7 @@ def mm_match(ff, model_variable, df, df_times, ds_depths, variable, df_all, laye
             ds.as_missing(0)
             ds.run()
 
+
             if len(var_match) > 1:
                 ds.sum_all()
             the_dict = {"model_variable": model_variable}
@@ -175,6 +178,7 @@ def mm_match(ff, model_variable, df, df_times, ds_depths, variable, df_all, laye
 
             if len(df_locs) > 0:
                 ds.run()
+
                 df_ff = ds.match_points(
                     df_locs, depths=ds_depths, quiet=True, max_extrap=0
                 )
@@ -1552,7 +1556,7 @@ def matchup(
                             df_all = df_all.dropna().reset_index(drop=True)
                             # read in point_bottom data
                             # fix the observations based on obs_unit_multiplier
-                            multiplier = definitions[variable].obs_unit_multiplier
+                            multiplier = definitions[variable].obs_unit_multiplier_point
                             if multiplier != 1:
                                 df_all = df_all.assign(
                                     observation=lambda x: x.observation * multiplier
