@@ -13,7 +13,7 @@ jellyfish
 geopandas
 holoviews
 plotnine
-jupyter-book
+jupyter-book==1.0.4
 seawater
 cmocean
 numpydoc
