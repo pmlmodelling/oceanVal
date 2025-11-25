@@ -14,7 +14,7 @@ You first need to register the observational datasets you want to use for valida
 This involves specifying the location of the data files and any necessary metadata.
 You can register both gridded and in-situ observational datasets using the `oceanval.add_point_comprison` and `oceanval.add_gridded_comparison` functions. 
 
-**Setting up point (in-situ) observational data**:
+**Setting up point (in-situ) observational data**
 
 To register an in-situ observational dataset, you will need to specify the following:
 
@@ -49,7 +49,8 @@ An example is shown below:
 
 
 
-**Setting up gridded observational data**:
+**Setting up gridded observational data**
+
 To register a gridded observational dataset, you will need to specify the following:
 
 - `name`: A name for the dataset, e.g. "temperature". This is so that oceanVal can keep track of things.
