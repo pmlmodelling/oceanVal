@@ -33,14 +33,12 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
-    "sphinx_rtd_theme",
     "nbsphinx",
     'sphinx.ext.todo',
     'sphinx.ext.githubpages',
 ]
 
-html_theme = "sphinx_rtd_theme"
-#html_theme = "haiku"
+html_theme = "haiku"
 #html_theme = "nature"
 
 
