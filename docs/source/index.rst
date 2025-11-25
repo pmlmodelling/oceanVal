@@ -15,6 +15,10 @@ Documentation
 
    installing 
 
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
    :caption: Data handling
 
    obs_data
