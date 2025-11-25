@@ -1,6 +1,9 @@
 Compatible data
 ============
 
+oceanVal is designed to validate ocean model simulations using two types of observational data: gridded observations and in-situ observations.
+
+This data will need to be in specific formats. However, it should be easy to convert your data into these formats.
 
 Simulation output
 ---------------------------
@@ -23,12 +26,7 @@ For example, files could be named YYYY/MM/model_output_YYYYMMDD.nc. oceanVal wil
 
 
 
-Observational data formats
----------------------------
 
-oceanVal is designed to validate two types of observational data: gridded observations and in-situ observations.
-
-This data will need to be in specific formats. However, it should be easy to convert your data into these formats.
 
 Gridded observational data
 ---------------------------

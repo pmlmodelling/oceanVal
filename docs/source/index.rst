@@ -12,6 +12,7 @@ Documentation
    :caption: Getting Started
 
    installing.rst 
+   how_to_use.rst 
 
 
 .. toctree::
