@@ -1,4 +1,4 @@
-Installation
+Installation and a quick example
 ============
 
 You will need to use Conda to use oceanVal. The first step is to create a new environment::
@@ -11,12 +11,42 @@ Once you have done that, install the development version from GitHub::
    $ pip install git+https://github.com/pmlmodelling/oceanval.git
 
 
+A short example
+-------------------
+
+If you want to quickly understand what oceanVal can do, you can run the following example in a Python script or Jupyter notebook::
+
+
+.. code:: ipython3
+
+   import os
+   url = "http://noresg.nird.sigma2.no/thredds/fileServer/esg_dataroot/cmor/CMIP6/CMIP/NCC/NorESM2-LM/historical/r3i1p1f1/Omon/tos/gn/v20190920/tos_Omon_NorESM2-LM_historical_r3i1p1f1_gn_201001-201412.nc"
+   # download this file
+   out = os.path.basename(url)
+   if not os.path.exists(out):
+       os.system(f"wget {url} -O {out}")
+   import oceanval
+   oceanval.add_gridded_comparison(
+       name = "temperature",
+       source = "NOAA",
+       model_variable = "tos",
+       climatology = False,
+       obs_path = "https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc" ,
+       thredds = True
+   )
+   import oceanval
+   oceanval.matchup(sim_dir = ".",
+                  start = 2014, end = 2014,
+                  n_dirs_down = 0,
+                  cores = 1,
+                  lon_lim = [-180, 180], lat_lim = [-90, 90],
+                  ask = False
+                  )
+   
+   oceanval.validate(concise = False, region = "global")
 
 
 
+This quick example will compare sea surface temperature for 2014 from a global climate model simulation with an observational dataset.
 
-
-
-
-
-
+Note: this is just an example of the use of oceanVal, not a rigorous way to validate a climate model.

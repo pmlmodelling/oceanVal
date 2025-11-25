@@ -1,11 +1,11 @@
 How to use oceanVal
 =====================
 
-Validating simulations using oceanVal involves three main steps:
+Validating simulations using oceanVal involves three steps:
 
-    1. Register the observational datasets you want to use for validation.
-    2. Matchup the model simulation output with the observational datasets.
-    3. Calculate validation statistics and generate plots. 
+    1. Register the observational datasets you want to use for validation
+    2. Matchup the model simulation output with the observational datasets
+    3. Calculate validation statistics, generate plots and create an html summary of the performance of the simulation
 
 Step 1: Register observational datasets
 ------------------------------------
@@ -61,6 +61,8 @@ To register a gridded observational dataset, you will need to specify the follow
 - `obs_variable`: A string specifying the name of the variable in the observational data files.
 - `climatology`: A boolean indicating whether the observational data is a climatology. 
 
+Note: if you do not provide `obs_variable`, oceanVal will assume there is only one variable in the observational data files, and will use that variable for validation. 
+
 The following optional parameters can also be specified:
 
 - `source_info`: Additional information about the source of the data (e.g. publication details)
@@ -87,6 +89,11 @@ An example is shown below:
         climatology=False,
     )
 
+
+**Be consistent**
+
+If you are registering the same variable separate for point and gridded data, make sure you are giving the same `short_name`, `long_name` and `short_title` for both datasets. This will ensure that plots and statistics are labelled consistently.
+You will get an error if you are inconsistent.
 
 
 
@@ -132,6 +139,9 @@ An example is shown below:
         lat_lim=[20, 60],
         thickness="cell_thickness",
     )
+
+**Note**: If you are validating a simulation with only monthly resolution, then you probably want to set the `point_time_res` parameter to `["year", "month"]` when matching up in-situ observations.
+This will result in day of year being ignored when matching up observations with the simulation output. If you use the default for `point_time_res`, then very few matchups will be found, as the day of year in the observations will almost never match that in the simulation output. 
 
 Step 3: Calculate validation statistics and generate html summary
 --------------------------------------
