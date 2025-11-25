@@ -676,11 +676,11 @@ def matchup(
 
     if lon_lim is None:
         raise ValueError(
-            "Please provide lon_lim as a list of two floats [lon_min, lon_max]. Sensible values for the AMM7 area lon_lim = [-18,9] and lat_lim = [42, 63]"
+            "Please provide lon_lim as a list of two floats [lon_min, lon_max]"
         )
     if lat_lim is None:
         raise ValueError(
-            "Please provide lon_lim as a list of two floats [lon_min, lon_max]. Sensible values for the AMM7 area lon_lim = [-18,9] and lat_lim = [42, 63]"
+            "Please provide lon_lim as a list of two floats [lon_min, lon_max]."
         )
 
     if lon_lim is not None or lat_lim is not None:
@@ -996,10 +996,6 @@ def matchup(
             ds_depths.run()
             ds_depths.rename({ds_depths.variables[0]: "depth"})
             ds_depths.run()
-            try:
-                ds_depths.fix_amm7_grid()
-            except:
-                pass
 
         for ww in w:
             if str(ww.message) not in session_warnings:
@@ -1378,13 +1374,6 @@ def matchup(
                                 ds_grid.subset(variables=ds_grid.variables[0])
                                 ds_grid.top()
                                 ds_grid.subset(time=0)
-                                amm7 = False
-                                if max(ds_grid.contents.npoints) == 111375:
-                                    amm7 = True
-                                    try:
-                                        ds_grid.fix_amm7_grid()
-                                    except:
-                                        pass
                                 ds_xr = ds_grid.to_xarray()
                                 for ww in w:
                                     if str(ww.message) not in session_warnings:
@@ -1456,11 +1445,6 @@ def matchup(
 
                                         if session_info["as_missing"] is not None:
                                             ds_grid.as_missing(session_info["as_missing"])
-                                        if max(ds_grid.contents.npoints) == 111375:
-                                            try:
-                                                ds_grid.fix_amm7_grid()
-                                            except:
-                                                pass
                                         df_grid = (
                                             ds_grid.to_dataframe().reset_index()
                                             # .dropna()
