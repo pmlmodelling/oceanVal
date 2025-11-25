@@ -134,7 +134,7 @@ class Validator:
             point_start = -1000
             point_end = 3000
             depths = None
-            vertical_point = False
+            vertical_point = None
             old_model_variable = None
             old_obs_multiplier = 1
             old_binning = dict()
