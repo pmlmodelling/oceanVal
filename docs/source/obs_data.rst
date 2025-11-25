@@ -17,10 +17,10 @@ Files should be CF-compliant as far as possible. Most ocean model output files a
 
 **Vertical grids**: oceanVal can handle both z-level and files where the vertical grid varies, but where the cell thickness is stored in the simulation output. 
 
-**Folder structure**: oceanVal requires that simulation files are stored in a folder with a consistent and logically file naming convention.
+**Folder structure**: oceanVal requires that simulation files are stored in a folder with a consistent and logical file naming convention.
 For example, files could be named YYYY/MM/model_output_YYYYMMDD.nc. oceanVal will automatically identify the naming convention of files and match up to the appropriate files. 
 
-**Time requirements**: oceanVal requires at least a single year of model output.
+**Time requirements**: oceanVal requires at least a single year of model output. The simulation output time resolution can be daily or monthly.
 
 
 
@@ -33,7 +33,7 @@ Gridded observational data
 
 If you want to validate your model against gridded observational data (e.g. satellite data), then the data should be in a NetCDF format.
 
-Observations can either be contained in a single NetCDF file or multiple files.
+Observations can either be contained in a single NetCDF file or multiple files. If multiple files are provided, oceanVal will merge them.
 
 oceanVal requires files to be CF-compliant. However, gridded observational products almost always are, so there should be no compatiability issues.
 
@@ -52,10 +52,11 @@ The CSV file can contain the following columns, with required columns (lon/lat/o
 - year: Year of the observation
 - month: Month of the observation (1-12)
 - day: Day of the observation (1-31)
-- **observation**: Value of the observation (units should match those of the model output)
+- **observation**: Value of the observation (ideally units should match those of the model output)
 
+If you supply anything other than these columns, oceanVal will throw an error. 
 The depth variable is required if you are validating against subsurface model data.
 
-If you are validating against surface model data only, then the depth variable is optional. If is supplied, only the top 5m will be used for surface validation. 
+If you are validating against surface simulation data only, then the depth variable is optional. If is supplied, only the top 5m will be used for surface validation. 
 
 oceanVal will check if you have supplied the required columns and will raise an error if any are missing.
