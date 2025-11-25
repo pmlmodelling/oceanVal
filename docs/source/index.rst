@@ -8,19 +8,17 @@ Documentation
 
 
 .. toctree::
-   :maxdepth: 2
-   :hidden:
+   :maxdepth: 1
    :caption: Getting Started
 
-   installing 
+   installing.rst 
 
 
 .. toctree::
-   :maxdepth: 2
-   :hidden:
+   :maxdepth: 1
    :caption: Data handling
 
-   obs_data
+   obs_data.rst
 
 
 
@@ -28,11 +26,10 @@ Documentation
 
 
 .. toctree::
-   :maxdepth: 2
-   :hidden:
+   :maxdepth: 1
    :caption: Help & reference
 
-   api
+   api.rst
    
 
 
