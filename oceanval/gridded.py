@@ -241,7 +241,11 @@ def gridded_matchup(
 
                 ds_model.subset(variables=selection)
                 if vertical_gridded is False:
-                    ds_model.cdo_command("topvalue")
+                    ds_zz = nc.open_data(ds_model[0], checks = False)
+                    ds_zz.subset(variables=selection)
+                    ds_zz.run()
+                    if ds_zz.contents.nlevels.values[0] > 1:
+                        ds_model.cdo_command("topvalue")
                 ds_model.as_missing(0)
                 ds_model.subset(years=sim_years)
                 ds_model.tmean(
@@ -301,10 +305,14 @@ def gridded_matchup(
                     vv_file = nc.create_ensemble(dir_var)
                     vv_file = [x for x in vv_file if "annual" not in x]
 
-                ds_obs = nc.open_data(
-                    vv_file,
-                    checks=False,
-                )
+                thredds = definitions[vv].thredds
+                if thredds:
+                    ds_obs = nc.open_thredds(vv_file, checks=False)
+                else:
+                    ds_obs = nc.open_data(
+                        vv_file,
+                        checks=False,
+                    )
                 bad_clim = False
 
                 try:
@@ -331,8 +339,13 @@ def gridded_matchup(
                     sim_years = year_sel
                     min_year = min(year_sel)
                     max_year = max(year_sel)
+                    print(year_sel)
                     ds_obs.subset(years=year_sel)
                     ds_model.subset(years=year_sel)
+                    ds_obs.run()
+                # save ds_obs as foo.nc
+
+#                ds_obs.to_nc("foo.nc", zip =True)
 
                 obs_unit_multiplier = definitions[vv].obs_multiplier_gridded
                 if obs_unit_multiplier != 1:
@@ -450,9 +463,13 @@ def gridded_matchup(
 
                 ds_obs.run()
                 ds_model.run()
+                print(ds_obs[0])
 
                 if vertical_gridded is False:
-                    ds_obs.cdo_command("topvalue")
+                    contents = ds_model.contents
+                    nlevels = contents.nlevels[0]
+                    if nlevels > 1:
+                        ds_obs.cdo_command("topvalue")
                 try:
                     n_times = len(ds_obs.times)
                 except:
@@ -506,10 +523,16 @@ def gridded_matchup(
                 # now do the surface
                 ds_model_surface = ds_model.copy()
                 if vertical_gridded:
-                    ds_model_surface.cdo_command("topvalue")
+                    contents = ds_model_surface.contents
+                    nlevels = contents.nlevels[0]
+                    if nlevels > 1:
+                        ds_model_surface.cdo_command("topvalue")
                 ds_obs_surface = ds_obs.copy()
                 if vertical_gridded:
-                    ds_obs_surface.cdo_command("topvalue")
+                    contents = ds_obs_surface.contents
+                    nlevels = contents.nlevels[0]
+                    if nlevels > 1: 
+                        ds_obs_surface.cdo_command("topvalue")
                 if regridding == "obs_to_model":
                     ds_obs_surface.regrid(ds_model_surface, method="bil")
                 else:
