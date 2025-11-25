@@ -344,9 +344,6 @@ def gridded_matchup(
                     ds_obs.subset(years=year_sel)
                     ds_model.subset(years=year_sel)
                     ds_obs.run()
-                # save ds_obs as foo.nc
-
-#                ds_obs.to_nc("foo.nc", zip =True)
 
                 obs_unit_multiplier = definitions[vv].obs_multiplier_gridded
                 if obs_unit_multiplier != 1:
@@ -615,9 +612,6 @@ def gridded_matchup(
                     if vertical_gridded is True:
                         levels = ds_obs.levels
                         if session_info["ds_depths"] != "z_level":
-                            if os.path.exists("foo2.nc"):
-                                os.remove("foo2.nc")
-                            ds_model.to_nc("foo2.nc", zip=True)
                             ds_model.vertical_interp(levels, thickness = session_info["ds_thickness"]) 
                         else:
                             ds_model.vertical_interp(levels , fixed = True)

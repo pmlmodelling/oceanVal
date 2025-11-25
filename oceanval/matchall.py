@@ -983,10 +983,6 @@ def matchup(
                 ds_thickness.invert_levels()
                 ds_thickness.run()
             ds_thickness_sim = ds_thickness.copy()
-            # save as foo
-            if os.path.exists("foo.nc"):
-                os.remove("foo.nc")
-            ds_thickness.to_nc("foo.nc", zip=True)
 
             ds_depths = ds_thickness.copy()
 
