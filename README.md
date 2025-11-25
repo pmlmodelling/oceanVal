@@ -1,4 +1,3 @@
-![GitHub Testing](https://github.com/pmlmodelling/ecoval/actions/workflows/python-app-daily.yml/badge.svg)
 
 # oceanVal 
 Marine ecosystem model validation made easy in Python
