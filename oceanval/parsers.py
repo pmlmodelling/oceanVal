@@ -71,7 +71,7 @@ class Validator:
                                source_info = None, 
                                model_variable = None, 
                                obs_dir = None, 
-                               obs_var = "auto", 
+                               obs_variable = "auto", 
                                start = -1000, 
                                end = 3000, 
                                vertical = False, 
@@ -99,7 +99,7 @@ class Validator:
 
         obs_dir (str): Directory of the observations
 
-        obs_var (str): Observation variable name
+        obs_variable (str): Observation variable name
 
         start (int): Start depth of the variable
 
@@ -216,10 +216,10 @@ class Validator:
         var.gridded_source = list(source.keys())[0]
         var.model_variable = model_variable
         var.point_dir = point_dir
-        # add obs_var, ensure it's a string
-        var.obs_var = obs_var
-        if not isinstance(var.obs_var, str):
-            raise ValueError("obs_var must be a string")
+        # add obs_variable, ensure it's a string
+        if not isinstance(obs_variable, str):
+            raise ValueError("obs_variable must be a string")
+        var.obs_variable = obs_variable
         # check this exists
         gridded_dir = obs_dir
         var.gridded_dir = gridded_dir
@@ -228,7 +228,7 @@ class Validator:
                 raise ValueError(f"Gridded directory {gridded_dir} does not exist")
 
         # ensure nothing is None
-        for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_var, var.gridded_source]:
+        for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_variable, var.gridded_source]:
             if attr is None:
                 raise ValueError(f"Attribute {attr} cannot be None")
         setattr(self, name, var)
@@ -286,7 +286,7 @@ class Validator:
 
         try:
             gridded_dir = getattr(self, name).gridded_dir   
-            obs_var = getattr(self, name).obs_var
+            obs_variable = getattr(self, name).obs_variable
             gridded = getattr(self, name).gridded
             gridded_source = getattr(self, name).gridded_source
             orig_sources = getattr(self, name).sources
@@ -299,7 +299,7 @@ class Validator:
             vertical_gridded = getattr(self, name).vertical_gridded
         except:
             gridded_dir = "auto"
-            obs_var = "auto"
+            obs_variable = "auto"
             gridded_source = "auto"
             gridded = False
             orig_sources = dict()
@@ -408,10 +408,7 @@ class Validator:
 
         var.vertical = vertical
 
-        var.obs_var = obs_var
-        # add obs_var, ensure it's a string
-        if not isinstance(var.obs_var, str):
-            raise ValueError("obs_var must be a string")
+        var.obs_variable = obs_variable
         # check this exists
         point_dir = obs_dir
         if point_dir != "auto":
@@ -441,7 +438,7 @@ class Validator:
             var.binning = binning 
 
         # ensure nothing is None
-        for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_var]:
+        for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable]:
             if attr is None:
                 raise ValueError(f"Attribute {attr} cannot be None")
         setattr(self, name, var)

@@ -349,8 +349,8 @@ def gridded_matchup(
                     except:
                         pass
                 
-                if definitions[vv].obs_var != "auto":
-                    ds_obs.subset(variables=definitions[vv].obs_var)
+                if definitions[vv].obs_variable != "auto":
+                    ds_obs.subset(variables=definitions[vv].obs_variable)
                     ds_obs.run()
 
                 obs_years = ds_obs.years
