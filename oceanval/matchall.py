@@ -1076,12 +1076,7 @@ def matchup(
         x = input()
 
     if x.lower() == "n":
-        length = 8
-        letters = string.ascii_lowercase
-        result_str = "".join(random.choice(letters) for i in range(length))
-        mapping = "mapping_" + result_str + ".csv"
-        print(f"Inferred mapping saved as {mapping}")
-        all_df.to_csv(mapping, index=False)
+        print("Please adjust your variable names and try again")
         return None
 
     if session_info["out_dir"] != "":
