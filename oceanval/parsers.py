@@ -78,8 +78,11 @@ class Validator:
                                climatology = None, 
                                obs_multiplier = 1  ): 
         """
+
         Add a gridded comparison variable to the Validator
+
         Parameters:
+
         name (str): Name of the variable
         long_name (str): Long name of the variable
         short_name (str): Short name of the variable
@@ -94,6 +97,7 @@ class Validator:
         vertical (bool): Whether the variable is vertical
         climatology (bool): Whether to use climatology
         obs_multiplier (float): Multiplier for the observation
+
         """
 
         try:
@@ -234,8 +238,11 @@ class Validator:
                              obs_multiplier = 1, 
                              binning = None  ):
         """
+
         Add a point comparison variable to the Validator
+
         Parameters:
+
         name (str): Name of the variable
         long_name (str): Long name of the variable
         vertical (bool): Whether the variable is vertical
@@ -249,6 +256,7 @@ class Validator:
         obs_dir (str): Directory of the observations
         obs_multiplier (float): Multiplier for the observation, if needed to convert units
         binning (list): Binning information [spatial_resolution, depth_resolution]
+
         """
 
         try:
