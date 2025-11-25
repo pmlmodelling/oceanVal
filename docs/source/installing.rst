@@ -20,12 +20,19 @@ If you want to quickly understand what oceanVal can do, you can run the followin
 .. code:: ipython3
 
    import os
+
    url = "http://noresg.nird.sigma2.no/thredds/fileServer/esg_dataroot/cmor/CMIP6/CMIP/NCC/NorESM2-LM/historical/r3i1p1f1/Omon/tos/gn/v20190920/tos_Omon_NorESM2-LM_historical_r3i1p1f1_gn_201001-201412.nc"
+
    # download this file
+
    out = os.path.basename(url)
+
    if not os.path.exists(out):
+
        os.system(f"wget {url} -O {out}")
+
    import oceanval
+
    oceanval.add_gridded_comparison(
        name = "temperature",
        source = "NOAA",
@@ -34,7 +41,9 @@ If you want to quickly understand what oceanVal can do, you can run the followin
        obs_path = "https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc" ,
        thredds = True
    )
+
    import oceanval
+
    oceanval.matchup(sim_dir = ".",
                   start = 2014, end = 2014,
                   n_dirs_down = 0,
