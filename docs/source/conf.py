@@ -34,11 +34,10 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     'sphinx.ext.todo',
-    "sphinx_rtd_theme",
     'sphinx.ext.githubpages',
 ]
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_book_theme"
 #html_theme = "furo"
 
 
