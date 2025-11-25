@@ -34,11 +34,12 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     'sphinx.ext.todo',
+    "sphinx_rtd_theme",
     'sphinx.ext.githubpages',
 ]
 
-#html_theme = "haiku"
-html_theme = "furo"
+html_theme = "sphinx_rtd_theme"
+#html_theme = "furo"
 
 
 # Add any paths that contain templates here, relative to this directory.
