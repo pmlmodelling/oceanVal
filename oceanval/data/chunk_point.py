@@ -60,6 +60,8 @@ if point_time_res is not None:
 
 try:
     df = df.query("depth < 5").reset_index()
+    grouping = [x for x in ["lon", "lat", "year", "day", "month"] if x in df.columns]
+    df = df.groupby(grouping).mean().reset_index()
 except:
     pass
 
@@ -169,6 +171,7 @@ if available:
         md_markdown(f"The following model output was used to compare with observational values: **{model_variable}**.")
     if bin_res is not None:
         md_markdown(f"**Note**: the observational and model data were binned to a resolution of {bin_res[0]}° longitude by {bin_res[1]}° latitude and climatological monthly averages were calculated before analysis. This was carried out to reduce the influence of spatial bias on the validation statistics.") 
+    md("**Note**: Individual vertical profiles with more than one observation in the top 5m were averaged to give a single observation for that profile.")
 
 # %% tags=["remove-cell"]
 # bottom 1% of observations

@@ -164,15 +164,23 @@ class Validator:
             obs_multiplier  = float(obs_multiplier)
         except:
             raise ValueError("obs_multiplier must be a number")
-        if name in session_info["short_title"]:
-            if short_title is not None:
-                if short_title != session_info["short_title"][name]:
-                    raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
 
         assumed = []
+
+        if long_name is None:
+            long_name = name
+            assumed.append("long_name")
+        if short_name is None:
+            short_name = name
+            assumed.append("short_name")
+        if short_title is None:
+            short_title = name.title()
+            assumed.append("short_title")
+
         if source_info is None:
             source_info = f"Source for {source}"
             assumed.append("source_info")
+
         source = {source: source_info}
         if list(source.keys())[0] in orig_sources:
             # ensure the value is the same
@@ -193,6 +201,11 @@ class Validator:
         if not isinstance(thredds, bool):
             raise ValueError("thredds must be a boolean value")
 
+        if name in session_info["short_title"]:
+            if short_title is not None:
+                if short_title != session_info["short_title"][name]:
+                    raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
+        
         var.thredds = thredds
         var.climatology = climatology
         var.obs_multiplier_point = old_obs_multiplier
@@ -211,10 +224,6 @@ class Validator:
         var.long_name = long_name
         var.binning = old_binning
         # if this is None set to Name
-        assumed = []
-        if var.long_name is None:
-            var.long_name = name
-            assumed.append("long_name")
         var.short_name = short_name
         if var.short_name is None:
             var.short_name = name
@@ -225,7 +234,6 @@ class Validator:
             assumed.append("short_title")
         # check if this is c
         session_info["short_title"][name] = var.short_title
-        # throw error if source is None
 
         source_name = source
         var.sources = orig_sources | source
@@ -336,9 +344,6 @@ class Validator:
             obs_multiplier= float(obs_multiplier)
         except:
             raise ValueError("obs_multiplier must be a number")
-        if name in session_info["short_title"]:
-            if short_title != session_info["short_title"][name]:
-                raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
         # vertical must be a boolean
         if not isinstance(vertical, bool):
             raise ValueError("vertical must be a boolean value")
@@ -355,6 +360,19 @@ class Validator:
         if source_info is None:
             source_info = f"Source for {source}"
             assumed.append("source_info")
+        if long_name is None:
+            long_name = name
+            assumed.append("long_name")
+        if short_name is None:
+            short_name = name
+            assumed.append("short_name")
+        if short_title is None:
+            short_title = name.title()
+            assumed.append("short_title")
+
+        if name in session_info["short_title"]:
+            if short_title != session_info["short_title"][name]:
+                raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
 
         source = {source: source_info}
         if list(source.keys())[0] in orig_sources:
@@ -369,6 +387,7 @@ class Validator:
         if len(point_files) == 0:
             raise ValueError(f"No csv files found in point directory {obs_path}")
         valid_vars = ["lon", "lat", "year", "month", "day", "depth", "observation", "source"]
+        vertical_option = False
         for vv in point_files:
             # read in the first row
             df = pd.read_csv(vv, nrows=1)
@@ -377,11 +396,14 @@ class Validator:
             if len(bad_cols) > 0:
                 raise ValueError(f"Invalid columns {bad_cols} found in point data file {vv}")
             if "depth" in df.columns:
-                vertical = True
+                vertical = vertical_option
             # lon/lat/observation *must* be in df
             for req_col in ["lon", "lat", "observation"]:
                 if req_col not in df.columns:
                     raise ValueError(f"Required column {req_col} not found in point data file {vv}")
+        if vertical_option is False:
+            if vertical:
+                raise ValueError("vertical is set to True but no depth column found in point data files. You cannot vertically validate this data.")
         # if binning is supplied, ensure it is a 2 variable list
         if binning is not None:
             if not isinstance(binning, list) or len(binning) != 2:
