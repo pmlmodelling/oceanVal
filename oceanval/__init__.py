@@ -175,13 +175,12 @@ def fix_toc_comparison():
 
 
 def validate(
-    title="Automated model evaluation",
     lon_lim=None,
     lat_lim=None,
     concise = True,
     variables="all",
     fixed_scale = False,
-    region = None
+    region = None,
     test=False,
 ):
     # docstring
@@ -190,8 +189,6 @@ def validate(
 
     Parameters
     ----------
-    title : str
-        The title of the book. Default is "Automated model evaluation"
     lon_lim : list or None
         The longitude limits for the validation. Default is None
     lat_lim : list or None
@@ -288,14 +285,6 @@ def validate(
             copyfile(data_path, f"book/notebooks/001_methods.ipynb")
         # open this file and replace model_name with model
 
-        # Replace the target string
-        if model is not None:
-            with open(f"book/notebooks/000_info.ipynb", "r") as file:
-                filedata = file.read()
-
-            # Write the file out again
-            with open(f"book/notebooks/000_info.ipynb", "w") as file:
-                file.write(filedata)
 
         data_path = importlib.resources.files(__name__).joinpath("data/_toc.yml")
 
@@ -314,13 +303,10 @@ def validate(
 
         data_path = importlib.resources.files(__name__).joinpath("data/_config.yml")
         out = f"book/" + os.path.basename(data_path)
-        # change project_title in _config.yml to title
 
         with open(data_path, "r") as file:
             filedata = file.read()
 
-        # Replace the target string
-        filedata = filedata.replace("title:", f"title: {title}")
 
         # Write the file out again
         with open(out, "w") as file:
