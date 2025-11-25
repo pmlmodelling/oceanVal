@@ -24,6 +24,7 @@ To register an in-situ observational dataset, you will need to specify the follo
 - `obs_dir`: The path to the directory containing the observational data files.
 
 The following optional parameters can also be specified:
+
 - `source_info`: Additional information about the source of the data (e.g. publication details)
 - `short_name`: A short name for the observational variable (e.g. "temp" for temperature)
 - `short_title`: A short title for plots (e.g. "Nitrate Concentration")
@@ -143,3 +144,5 @@ You can do this as follows:
 
     oceanval.validate()
 This must be run in the same directory where the matchup files were created.
+
+This will then generate and open an html page that can be viewed in a web browser.
