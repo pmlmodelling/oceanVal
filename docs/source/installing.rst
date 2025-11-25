@@ -14,7 +14,7 @@ Once you have done that, install the development version from GitHub::
 A short example
 -------------------
 
-If you want to quickly understand what oceanVal can do, you can run the following example in a Python script or Jupyter notebook:
+If you want to quickly understand what oceanVal can do, you can run the following example in a Python script or Jupyter notebook. It should take a couple of minutes to run. 
 
 
 .. code:: ipython3
