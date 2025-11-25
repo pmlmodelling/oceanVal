@@ -339,7 +339,6 @@ def gridded_matchup(
                     sim_years = year_sel
                     min_year = min(year_sel)
                     max_year = max(year_sel)
-                    print(year_sel)
                     ds_obs.subset(years=year_sel)
                     ds_model.subset(years=year_sel)
                     ds_obs.run()
@@ -463,7 +462,6 @@ def gridded_matchup(
 
                 ds_obs.run()
                 ds_model.run()
-                print(ds_obs[0])
 
                 if vertical_gridded is False:
                     contents = ds_model.contents
