@@ -36,7 +36,8 @@ The following optional parameters can also be specified:
 
 An example is shown below:
 
-```python
+.. code:: ipython3
+
     oceanval.add_point_comparison(
         name="nitrate",
         source = "ICES",
@@ -45,7 +46,6 @@ An example is shown below:
         model_variable="temp",
         obs_dir="/path/to/obs_data/",
     )
-```
 
 
 
@@ -71,7 +71,7 @@ The following optional parameters can also be specified:
 
 An example is shown below:
 
-```python
+.. code:: ipython3
     oceanval.add_gridded_comparison(
         name="oxygen",
         source = "CMEMS",
@@ -115,7 +115,8 @@ The following optional parameters can also be specified:
 - 
 
 An example is shown below:
-```python
+
+.. code:: ipython3
     oceanval.matchup(
         sim_dir="/path/to/simulation/output/",
         start=2000,
@@ -133,7 +134,6 @@ Once you have matched up the model simulation output with the observations, you 
 
 You can do this as follows:
 
-```python
+.. code:: ipython3
     oceanval.validate()
-``
 This must be run in the same directory where the matchup files were created.
