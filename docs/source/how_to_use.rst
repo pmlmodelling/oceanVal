@@ -51,6 +51,7 @@ An example is shown below:
 
 **Setting up gridded observational data**:
 To register a gridded observational dataset, you will need to specify the following:
+
 - `name`: A name for the dataset, e.g. "temperature". This is so that oceanVal can keep track of things.
 - `source`: The source of the observational data (e.g. "CMEMS"). 
 - `model_variable`: A string specifying the name of the model variable to compare against the observations.
@@ -92,6 +93,7 @@ Step 2: Matchup model output with observations
 Once you have registered your observational datasets, you can matchup the model simulation output with the observations using the `oceanval.matchup` function.
 
 You will need to specify the following:
+
 - `sim_dir`: The path to the directory containing the model simulation output files.
 - `start`: The first year of the simulation to use for validation. 
 - `end`: The last year of the simulation to use for validation.
