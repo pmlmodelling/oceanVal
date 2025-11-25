@@ -334,7 +334,7 @@ def gridded_matchup(
                     ds_obs.subset(years=year_sel)
                     ds_model.subset(years=year_sel)
 
-                obs_unit_multiplier = definitions[vv].obs_unit_multiplier_gridded
+                obs_unit_multiplier = definitions[vv].obs_multiplier_gridded
                 if obs_unit_multiplier != 1:
                     ds_obs *  obs_unit_multiplier
             

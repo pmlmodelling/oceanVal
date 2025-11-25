@@ -1556,7 +1556,7 @@ def matchup(
                             df_all = df_all.dropna().reset_index(drop=True)
                             # read in point_bottom data
                             # fix the observations based on obs_unit_multiplier
-                            multiplier = definitions[variable].obs_unit_multiplier_point
+                            multiplier = definitions[variable].obs_multiplier_point
                             if multiplier != 1:
                                 df_all = df_all.assign(
                                     observation=lambda x: x.observation * multiplier

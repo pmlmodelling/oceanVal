@@ -76,7 +76,26 @@ class Validator:
                                end = 3000, 
                                vertical = False, 
                                climatology = None, 
-                               obs_unit_multiplier = 1  ): 
+                               obs_multiplier = 1  ): 
+        """
+        Add a gridded comparison variable to the Validator
+        Parameters:
+        name (str): Name of the variable
+        long_name (str): Long name of the variable
+        short_name (str): Short name of the variable
+        short_title (str): Short title of the variable
+        source (str): Source of the variable
+        source_info (str): Source information of the variable
+        model_variable (str): Model variable name
+        obs_dir (str): Directory of the observations
+        obs_var (str): Observation variable name
+        start (int): Start depth of the variable
+        end (int): End depth of the variable
+        vertical (bool): Whether the variable is vertical
+        climatology (bool): Whether to use climatology
+        obs_multiplier (float): Multiplier for the observation
+        """
+
         try:
             point_dir = getattr(self, name).point_dir
             point = getattr(self, name).point
@@ -88,7 +107,7 @@ class Validator:
             depths = getattr(self, name).depths
             vertical_point = getattr(self, name).vertical_point
             old_model_variable = getattr(self, name).model_variable
-            old_obs_unit_multiplier = getattr(self, name).obs_unit_multiplier_point
+            old_obs_multiplier = getattr(self, name).obs_multiplier_point
             old_binning = getattr(self, name).binning
         except:
             orig_sources = dict()
@@ -100,7 +119,7 @@ class Validator:
             depths = None
             vertical_point = False
             old_model_variable = None
-            old_obs_unit_multiplier = 1
+            old_obs_multiplier = 1
             old_binning = dict()
             pass
 
@@ -123,12 +142,12 @@ class Validator:
         if not isinstance(climatology, bool):
             raise ValueError("Climatology must be a boolean value")
         var.climatology = climatology
-        var.obs_unit_multiplier_gridded = obs_unit_multiplier
+        var.obs_multiplier_gridded = obs_multiplier
         try:
-            var.obs_unit_multiplier_gridded = float(var.obs_unit_multiplier_gridded)
+            var.obs_multiplier_gridded = float(var.obs_multiplier_gridded)
         except:
-            raise ValueError("obs_unit_multiplier must be a number")
-        var.obs_unit_multiplier_point = old_obs_unit_multiplier
+            raise ValueError("obs_multiplier must be a number")
+        var.obs_multiplier_point = old_obs_multiplier
 
         var.n_levels = 1
         var.vertical_gridded = vertical
@@ -212,8 +231,26 @@ class Validator:
                              start = -1000, 
                              end = 3000, 
                              obs_dir = None, 
-                             obs_unit_multiplier = 1, 
+                             obs_multiplier = 1, 
                              binning = None  ):
+        """
+        Add a point comparison variable to the Validator
+        Parameters:
+        name (str): Name of the variable
+        long_name (str): Long name of the variable
+        vertical (bool): Whether the variable is vertical
+        short_name (str): Short name of the variable
+        short_title (str): Short title of the variable
+        source (str): Source of the variable
+        source_info (str): Source information of the variable
+        model_variable (str): Model variable name
+        start (int): Start depth of the variable
+        end (int): End depth of the variable
+        obs_dir (str): Directory of the observations
+        obs_multiplier (float): Multiplier for the observation, if needed to convert units
+        binning (list): Binning information [spatial_resolution, depth_resolution]
+        """
+
         try:
             gridded_dir = getattr(self, name).gridded_dir   
             obs_var = getattr(self, name).obs_var
@@ -225,7 +262,7 @@ class Validator:
             old_model_variable = getattr(self, name).model_variable 
             # old climatology
             old_climatology = getattr(self, name).climatology
-            old_obs_unit_multiplier = getattr(self, name).obs_unit_multiplier_gridded
+            old_obs_multiplier = getattr(self, name).obs_multiplier_gridded
             vertical_gridded = getattr(self, name).vertical_gridded
         except:
             gridded_dir = "auto"
@@ -237,7 +274,7 @@ class Validator:
             gridded_end = 3000
             old_model_variable = None
             old_climatology = None
-            old_obs_unit_multiplier = 1
+            old_obs_multiplier = 1
             vertical_gridded = False
             pass
 
@@ -254,13 +291,12 @@ class Validator:
         var.n_levels = 1
         var.gridded_start = gridded_start
         var.gridded_end = gridded_end
-        var.obs_unit_multiplier_gridded= old_obs_unit_multiplier
-        # obs_unit_multiplier needs to be either an int or can be cast to int
-        var.obs_unit_multiplier_point= obs_unit_multiplier
+        var.obs_multiplier_gridded= old_obs_multiplier
+        var.obs_multiplier_point= obs_multiplier
         try:
-            var.obs_unit_multiplier_point= float(var.obs_unit_multiplier_point)
+            var.obs_multiplier_point= float(var.obs_multiplier_point)
         except:
-            raise ValueError("obs_unit_multiplier must be a number")
+            raise ValueError("obs_multiplier must be a number")
 
         if name in session_info["short_title"]:
             if short_title != session_info["short_title"][name]:
