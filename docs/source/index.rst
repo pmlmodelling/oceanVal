@@ -14,10 +14,11 @@ Documentation
    :hidden:
    :caption: Getting Started
 
-
    installing 
+
+   :caption: Data handling
+
    obs_data
-   examples 
 
 
 
