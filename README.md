@@ -1,3 +1,4 @@
+[![Documentation Status](https://readthedocs.org/projects/oceanval/badge/?version=latest)](https://oceanval.readthedocs.io/en/latest/?badge=latest)
 
 # oceanVal 
 Marine ecosystem model validation made easy in Python
