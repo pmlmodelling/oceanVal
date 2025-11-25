@@ -124,7 +124,7 @@ The following optional parameters can also be specified:
 - `out_dir`: The path to the directory where matchup files should be saved. If not specified, matchup files will be saved in the execution directory.
 - `point_time_res`: The time resolution for the point (in-situ) observation matchup. This defaults ["year", "month", "day"] for totally precise matchups. Set to ["month", "day"], if you want to compare climatological simulation output with observations.
 - `n_check`: The number of files to check when identifying the file naming convention. oceanVal checks all files in a random subdirectory. Set n_check for a random subset in cases where all simulation files are in a single directory. 
-- 
+- `as_missing`: A float or list of floats providing a range , i.e [min, max], specifying values to be treated as missing in the model output.
 
 An example is shown below:
 
@@ -154,5 +154,13 @@ You can do this as follows:
 
     oceanval.validate()
 This must be run in the same directory where the matchup files were created.
+
+The following options are available:
+
+- `variables`: A list of variable names to validate. This must match those supplied as `name`. If not specified, all registered variables will be validated. 
+- `title`: A title for the html summary page. 
+- `lon_lim`: The longitude limits for the validation region (e.g. [-180, 180]).
+- `lat_lim`: The latitude limits for the validation region (e.g. [-90, 90]).
+- `region`: A string specifying the region being validated. Only "global" and "nwes" (northwest European Shelf are currently available).
 
 This will then generate and open an html page that can be viewed in a web browser.
