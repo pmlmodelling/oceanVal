@@ -62,7 +62,21 @@ class Validator:
     
     # add a method that let's user create a new Variable and add it to the definitions
     # 
-    def add_gridded_comparison(self, name, long_name = None, short_name = None, short_title = None, source = None, source_info = None, model_variable = None, obs_dir = None, obs_var = "auto" , start = -1000, end = 3000, vertical = False, climatology = None, obs_unit_multiplier = 1  ): 
+    def add_gridded_comparison(self, 
+                               name, 
+                               long_name = None, 
+                               short_name = None, 
+                               short_title = None, 
+                               source = None, 
+                               source_info = None, 
+                               model_variable = None, 
+                               obs_dir = None, 
+                               obs_var = "auto", 
+                               start = -1000, 
+                               end = 3000, 
+                               vertical = False, 
+                               climatology = None, 
+                               obs_unit_multiplier = 1  ): 
         try:
             point_dir = getattr(self, name).point_dir
             point = getattr(self, name).point
@@ -72,7 +86,7 @@ class Validator:
             point_start = getattr(self, name).point_start
             point_end = getattr(self, name).point_end
             depths = getattr(self, name).depths
-            vertical_point = getattr(self, name).vertical
+            vertical_point = getattr(self, name).vertical_point
             old_model_variable = getattr(self, name).model_variable
             old_obs_unit_multiplier = getattr(self, name).obs_unit_multiplier_point
             old_binning = getattr(self, name).binning
@@ -118,7 +132,7 @@ class Validator:
 
         var.n_levels = 1
         var.vertical_gridded = vertical
-        var.vertical = vertical_point
+        var.vertical_point = vertical_point
         var.depths = depths
         var.gridded_start = start
         var.gridded_end = end
@@ -186,7 +200,20 @@ class Validator:
         if len(assumed) > 0:
             print(f"Warning: The following attributes were missing and were assumed for variable {name}: {assumed}")
     # 
-    def add_point_comparison(self, name = None, long_name = None, depths = None, short_name = None, short_title = None, source = None, source_info = None, model_variable = None, start = -1000, end = 3000, obs_dir = None, obs_unit_multiplier = 1, binning = None  ):
+    def add_point_comparison(self, 
+                             name = None, 
+                             long_name = None, 
+                             vertical = False, 
+                             short_name = None, 
+                             short_title = None, 
+                             source = None, 
+                             source_info = None, 
+                             model_variable = None, 
+                             start = -1000, 
+                             end = 3000, 
+                             obs_dir = None, 
+                             obs_unit_multiplier = 1, 
+                             binning = None  ):
         try:
             gridded_dir = getattr(self, name).gridded_dir   
             obs_var = getattr(self, name).obs_var
@@ -199,6 +226,7 @@ class Validator:
             # old climatology
             old_climatology = getattr(self, name).climatology
             old_obs_unit_multiplier = getattr(self, name).obs_unit_multiplier_gridded
+            vertical_gridded = getattr(self, name).vertical_gridded
         except:
             gridded_dir = "auto"
             obs_var = "auto"
@@ -210,6 +238,7 @@ class Validator:
             old_model_variable = None
             old_climatology = None
             old_obs_unit_multiplier = 1
+            vertical_gridded = False
             pass
 
         if old_model_variable is not None and old_model_variable != model_variable:
@@ -237,12 +266,6 @@ class Validator:
             if short_title != session_info["short_title"][name]:
                 raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
 
-        # depths must be a string and one of "surface" or "all"
-        if not isinstance(depths, str):
-            raise ValueError("depths must be a string")
-        if depths not in ["surface", "all"]:
-            raise ValueError("depths must be one of 'surface' or 'all'")
-        var.depths = depths
 
         var.point = True
         var.gridded = gridded
@@ -251,6 +274,12 @@ class Validator:
         if var.long_name is None:
             var.long_name = name
             assumed.append("long_name")
+
+        # vertical must be a boolean
+        if not isinstance(vertical, bool):
+            raise ValueError("vertical must be a boolean value")
+        var.vertical_point = vertical
+        var.vertical_gridded = vertical_gridded 
 
         var.short_name = short_name
         if var.short_name is None:

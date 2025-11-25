@@ -535,13 +535,13 @@ def matchup(
     # loop through definition keys
     for key in definitions.keys:
         try:
-            if definitions[key].depths == "surface":
+            if definitions[key].vertical_point is False:
                 if key not in point["surface"]:
                     point["surface"].append(key)
         except:
             pass
         try:
-            if definitions[key].depths == "all":
+            if definitions[key].vertical_point is True:
                 if key not in point["all"]:
                     point["all"].append(key)
         except:
@@ -844,7 +844,7 @@ def matchup(
         point[key] = [x for x in point[key] if x in vars_available]
 
     for vv in point["all"]:
-        if definitions[vv].vertical is False:
+        if definitions[vv].vertical_point is False:
             point["all"].remove(vv)
             point["surface"].append(vv)
 
