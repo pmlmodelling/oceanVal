@@ -46,7 +46,7 @@ In-situ observational data
 
 If you want to validate your model against in-situ observational data (e.g. from research cruises or moorings), then the data should be in CSV format.
 
-The CSV file can contain the following columns, with required columns in bold:
+The CSV file can contain the following columns, with required columns (lon/lat/observation) in bold:
 
 - **lon**: Longitude of the observation (decimal degrees)
 - **lat**: Latitude of the observation (decimal degrees)
