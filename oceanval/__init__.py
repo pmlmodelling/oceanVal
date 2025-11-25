@@ -180,10 +180,9 @@ def validate(
     lat_lim=None,
     concise = True,
     variables="all",
-    model="ersem",
     fixed_scale = False,
-    test=False,
     region = None
+    test=False,
 ):
     # docstring
     """
@@ -199,11 +198,10 @@ def validate(
         The latitude limits for the validation. Default is None
     variables : str or list
         The variables to run the model evaluation for. Default is "all"
-    model : str
-        The name of the model. This is only for providing model info and a schematic.
-        The only option right now is "ersem".
     fixed_scale : bool
         Whether to use a fixed scale for the seasonal plots. Default is False. If True, the minimum and maximum values are capped to cover the 2nd and 98th percentiles of both model and observations.
+    region : str or None
+        The region being validated. Must be either "nwes" (northwest European Shelf) or "global". Default is None.
     test : bool
         Default is False. Ignore, unless you are testing oceanval.
 
@@ -294,7 +292,6 @@ def validate(
         if model is not None:
             with open(f"book/notebooks/000_info.ipynb", "r") as file:
                 filedata = file.read()
-            filedata = filedata.replace("model_name", model)
 
             # Write the file out again
             with open(f"book/notebooks/000_info.ipynb", "w") as file:
