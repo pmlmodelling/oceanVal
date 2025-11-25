@@ -84,18 +84,31 @@ class Validator:
         Parameters:
 
         name (str): Name of the variable
+
         long_name (str): Long name of the variable
+
         short_name (str): Short name of the variable
+
         short_title (str): Short title of the variable
+
         source (str): Source of the variable
+
         source_info (str): Source information of the variable
+
         model_variable (str): Model variable name
+
         obs_dir (str): Directory of the observations
+
         obs_var (str): Observation variable name
+
         start (int): Start depth of the variable
+
         end (int): End depth of the variable
+
         vertical (bool): Whether the variable is vertical
+
         climatology (bool): Whether to use climatology
+
         obs_multiplier (float): Multiplier for the observation
 
         """
@@ -244,18 +257,30 @@ class Validator:
         Parameters:
 
         name (str): Name of the variable
+
         long_name (str): Long name of the variable
+
         vertical (bool): Whether the variable is vertical
+
         short_name (str): Short name of the variable
+
         short_title (str): Short title of the variable
+
         source (str): Source of the variable
+
         source_info (str): Source information of the variable
+
         model_variable (str): Model variable name
+
         start (int): Start depth of the variable
+
         end (int): End depth of the variable
+
         obs_dir (str): Directory of the observations
+
         obs_multiplier (float): Multiplier for the observation, if needed to convert units
-        binning (list): Binning information [spatial_resolution, depth_resolution]
+
+        binning (list): Binning information [lon_resolution, lat_resolution]
 
         """
 
