@@ -8,7 +8,7 @@ Documentation
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
    :caption: Getting Started
 
@@ -16,7 +16,7 @@ Documentation
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
    :caption: Data handling
 
@@ -28,7 +28,7 @@ Documentation
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
    :caption: Help & reference
 
