@@ -335,7 +335,7 @@ def validate(
 
         # loop through the point matchups and generate notebooks
 
-        point_paths = glob.glob("matched/point/**/**/**.csv")
+        point_paths = glob.glob("matched/point/**/**/**/**.csv")
         point_paths = [x for x in point_paths if "paths.csv" not in x]
         point_paths = [x for x in point_paths if "unit" not in os.path.basename(x)]
         # loop through the paths
@@ -403,6 +403,7 @@ def validate(
                         )
 
                     filedata = filedata.replace("point_layer", layer)
+                    filedata = filedata.replace("point_obs_source", source)
                     filedata = filedata.replace("template_title", Variable)
 
                     # Write the file out again

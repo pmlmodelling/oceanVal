@@ -10,7 +10,7 @@ if n_levels > 1:
 else:
     layer_long = ""
 
-ff = glob.glob(f"../../matched/point/{layer}/{variable}/*_{variable}.csv")[0]
+ff = glob.glob(f"../../matched/point/{layer}/{variable}/{point_source}/*_{variable}.csv")[0]
 
 vv_source = os.path.basename(ff).split("_")[0]
 vv_source_raw = vv_source
@@ -67,6 +67,9 @@ df_locs = df.loc[:,["lon", "lat"]].drop_duplicates()
 # bin to 0.01 resolution
 df_raw = copy.deepcopy(df)
 
+
+
+
 if len(point_time_res) > 0:
     if "year" in point_time_res:
         df = df.groupby(["lon", "lat", "year", "month"]).mean().reset_index()
@@ -77,32 +80,24 @@ if len(point_time_res) > 0:
         if "day" in df.columns:
             df = df.drop(columns = "day")
 
+grouping = ["lon", "lat", "year", "month"]
+if bin_res is not None:
+    lon_res = bin_res[0]
+    lat_res = bin_res[1]
+    # round to nearest bin_res using bin_value
+    df = (
+        df
+        .assign(
+            lon = lambda x: bin_value(x.lon, lon_res),
+            lat = lambda x: bin_value(x.lat, lat_res)
+        )
+    )
+    grouping = [x for x in grouping if x in df.columns]
+    df = df.groupby(grouping).mean().reset_index()
+
+
 available = len(df_raw) > 10
 
-
-# %% tags=["remove-input"]
-if True and available:
-    ff = "../../matched/model_grid.nc"
-    if not os.path.exists(ff):  
-        ff = "../../matched/model_bathymetry.nc"
-    import nctoolkit as nc
-    ds_coords = nc.open_data(ff)
-    ds_coords.rename({ds_coords.variables[0]: "e3t"})
-    ds_coords.assign(lon_model = lambda x: lon(x.e3t), lat_model = lambda x: lat(x.e3t))
-    ds_coords.drop(variables = "e3t")
-    ds_coords.run()
-    ds_coords.regrid(df_raw.loc[:,["lon", "lat"]].drop_duplicates(), method = "nearest")
-    df_coords = ds_coords.to_dataframe().reset_index()
-    df = df.merge(df_coords, on = ["lon", "lat"], how = "left")
-    if variable not in  [ "benbio"]:
-        grouping = [x for x in ["lon_model", "lat_model", "year", "month"] if x in df.columns]
-        df = df.groupby(grouping).mean().reset_index()
-    else:
-        df = df.groupby(["lon_model", "lat_model"]).mean().reset_index()
-    # drop lon/lat
-    df = df.drop(columns = ["lon", "lat"])
-    df = df.rename(columns = {"lon_model": "lon", "lat_model": "lat"})
-    # only the surface top 5 m
 
 # %% tags=["remove-input", "remove-cell"]
 # A function for generating the data source
@@ -172,6 +167,8 @@ if available:
         md_markdown(f"The following model output was used to compare with observational values: **{variable_formula}**.")
     else:
         md_markdown(f"The following model output was used to compare with observational values: **{model_variable}**.")
+    if bin_res is not None:
+        md_markdown(f"**Note**: the observational and model data were binned to a resolution of {bin_res[0]}° longitude by {bin_res[1]}° latitude and climatological monthly averages were calculated before analysis. This was carried out to reduce the influence of spatial bias on the validation statistics.") 
 
 # %% tags=["remove-cell"]
 # bottom 1% of observations
@@ -793,10 +790,47 @@ if available:
     # include commas in the number of observations
     df_table["Number of observations"] = df_table["Number of observations"].apply(lambda x: "{:,}".format(x))
 
-    df_display(df_table)
+    # Now, we need to add the number of observations in df to df_table
+    # a dataframe with them
+
+    df_agg_numbers = (
+        df
+        .groupby("month")
+        .size()
+        .reset_index(name="n_observations")
+    )
+    # add total number of observations
+    if bin_res is not None:
+        total_n = len(df)
+        df_agg_numbers = pd.concat([df_agg_numbers, pd.DataFrame({"month": ["All"], "n_observations": [total_n]})])
+        # df_agg_numbers
+        df_agg_numbers = df_agg_numbers.rename(columns={"month": "Time period", "n_observations": "Number of observations"})
+        # convert month number to name
+        df_agg_numbers["Time period"] = df_agg_numbers["Time period"].apply(lambda x: calendar.month_abbr[x] if x != "All" else "All")
+        # include
+        df_agg_numbers["Agg_Number"] = df_agg_numbers["Number of observations"].apply(lambda x: "{:,}".format(x))   
+        # drop Number of observations
+        df_agg_numbers = df_agg_numbers.drop(columns=["Number of observations"])
+        df_agg_numbers = df_agg_numbers.merge(df_table, on = "Time period")
+        # Number of observations is Agg_number with  (Number of observations))
+        df_agg_numbers = df_agg_numbers.assign(**{"Number of observations": lambda x: x.Agg_Number + " (" + x["Number of observations"] + ")"})
+        df_agg_numbers = df_agg_numbers.drop(columns=["Agg_Number"])
+        # put All first
+        df_agg_numbers = pd.concat([df_agg_numbers[df_agg_numbers["Time period"] == "All"], df_agg_numbers[df_agg_numbers["Time period"] != "All"]])
+
+        df_display(df_agg_numbers)
+    else:
+        df_display(df_table)
+
+
 
 # %% tags=["remove-input"]
-md(f"**Table {i_table}:** Average bias ({unit}) and root-mean square deviation ({unit}) for the model's {layer_long} {vv_name} for each month. The bias is calculated as model - observation. The average bias is calculated as the mean of the monthly biases.")
+if bin_res is not None:
+    final_text = " Numbers in brackets show the number of raw unbinned observations."
+else:
+    final_text = ""
+
+md(f"**Table {i_table}:** Average bias ({unit}) and root-mean square deviation ({unit}) for the model's {layer_long} {vv_name} for each month. The bias is calculated as model - observation. The average bias is calculated as the mean of the monthly biases. {final_text}")
 i_table += 1
 
 

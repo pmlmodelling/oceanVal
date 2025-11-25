@@ -1572,9 +1572,9 @@ def matchup(
                             df_all = df_all.groupby(grouping).mean().reset_index()
 
                             if session_info["out_dir"] != "":
-                                out = f"{session_info['out_dir']}/matched/point/{layer}/{variable}/{source}_{layer}_{variable}.csv"
+                                out = f"{session_info['out_dir']}/matched/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
                             else:
-                                out = f"matched/point/{layer}/{variable}/{source}_{layer}_{variable}.csv"
+                                out = f"matched/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
 
                             # create directory for out if it does not exists
                             if not os.path.exists(os.path.dirname(out)):
@@ -1648,9 +1648,9 @@ def matchup(
                                     pickle.dump(the_dict, f)
 
                                 if session_info["out_dir"] != "":
-                                    out_unit = f"{session_info['out_dir']}/matched/point/{layer}/{variable}/{source}_{layer}_{variable}_unit.csv"
+                                    out_unit = f"{session_info['out_dir']}/matched/point/{layer}/{variable}/{source}{source}_{layer}_{variable}_unit.csv"
                                 else:
-                                    out_unit = f"matched/point/{layer}/{variable}/{source}_{layer}_{variable}_unit.csv"
+                                    out_unit = f"matched/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}_unit.csv"
                                 ds = nc.open_data(paths[0], checks=False)
                                 ds_contents = ds.contents
                                 model_variable = model_variable.split("+")[0]
