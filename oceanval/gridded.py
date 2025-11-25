@@ -147,7 +147,8 @@ def gridded_matchup(
                 ds_grid = nc.open_data(paths[0], checks=False)
                 ds_grid.subset(variables=selection[0], time=0)
                 ds_grid.top()
-                ds_grid.as_missing(0)
+                if session_info["as_missing"] is not None:
+                    ds_grid.as_missing(session_info["as_missing"])
                 df_grid = ds_grid.to_dataframe().reset_index().dropna()
                 columns = [
                     x for x in df_grid.columns if "lon" in x or "lat" in x
@@ -246,7 +247,8 @@ def gridded_matchup(
                     ds_zz.run()
                     if ds_zz.contents.nlevels.values[0] > 1:
                         ds_model.cdo_command("topvalue")
-                ds_model.as_missing(0)
+                if session_info["as_missing"] is not None:
+                    ds_model.as_missing(session_info["as_missing"])
                 ds_model.subset(years=sim_years)
                 ds_model.tmean(
                     ["year", "month"], align="left"
@@ -520,17 +522,15 @@ def gridded_matchup(
 
                 # now do the surface
                 ds_model_surface = ds_model.copy()
-                if vertical_gridded:
-                    contents = ds_model_surface.contents
-                    nlevels = contents.nlevels[0]
-                    if nlevels > 1:
-                        ds_model_surface.cdo_command("topvalue")
+                contents = ds_model_surface.contents
+                nlevels = contents.nlevels[0]
+                if nlevels > 1:
+                    ds_model_surface.cdo_command("topvalue")
                 ds_obs_surface = ds_obs.copy()
-                if vertical_gridded:
-                    contents = ds_obs_surface.contents
-                    nlevels = contents.nlevels[0]
-                    if nlevels > 1: 
-                        ds_obs_surface.cdo_command("topvalue")
+                contents = ds_obs_surface.contents
+                nlevels = contents.nlevels[0]
+                if nlevels > 1: 
+                    ds_obs_surface.cdo_command("topvalue")
                 if regridding == "obs_to_model":
                     ds_obs_surface.regrid(ds_model_surface, method="bil")
                 else:

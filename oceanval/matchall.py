@@ -167,7 +167,8 @@ def mm_match(ff, model_variable, df, df_times, ds_depths, variable, df_all, laye
                 if len(ff_indices) == 0:
                     return None
                 ds.subset(time=ff_indices)
-            ds.as_missing(0)
+            if session_info["as_missing"] is not None:
+                ds.as_missing(session_info["as_missing"])
             ds.run()
 
 
@@ -449,6 +450,7 @@ def matchup(
     exclude=[],
     cache=False,
     n_check=None,
+    as_missing=None,
     **kwargs,
 ):
     """
@@ -488,6 +490,8 @@ def matchup(
         If True, the user will be asked if they are happy with the matchups. Default is True.
     out_dir : str
         Path to output directory. Default is "", so the output will be saved in the current directory.
+    as_missing : float or list
+        Value(s) to treat as missing in the model data. Default is None.
     kwargs: dict
         Additional arguments
 
@@ -497,6 +501,7 @@ def matchup(
     Data will be stored in the matched directory.
 
     """
+    session_info["as_missing"] = as_missing
 
     if thickness == "z_level":
         session_info["z_level"] = True
@@ -947,7 +952,8 @@ def matchup(
                 .variable
             )
             ds_thickness.subset(variables=var_sel)
-            ds_thickness.as_missing(0)
+            if session_info["as_missing"] is not None:
+                ds_thickness.as_missing(session_info["as_missing"])
             if len(ds_thickness.variables) > 1:
                 if "cell_thickness" in ds_thickness.variables:
                     ds_thickness.subset(variables=f"{thickness}*")
@@ -1448,7 +1454,8 @@ def matchup(
                                         ds_grid.subset(variables=var)
                                         ds_grid.top()
 
-                                        ds_grid.as_missing(0)
+                                        if session_info["as_missing"] is not None:
+                                            ds_grid.as_missing(session_info["as_missing"])
                                         if max(ds_grid.contents.npoints) == 111375:
                                             try:
                                                 ds_grid.fix_amm7_grid()
