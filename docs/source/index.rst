@@ -7,7 +7,6 @@ Documentation
 -------------
 **Getting Started**
 
-* :doc:`installing`
 
 .. toctree::
    :maxdepth: 1
@@ -24,7 +23,6 @@ Documentation
 
 **Help & reference**
 
-* :doc:`api`
 
 .. toctree::
    :maxdepth: 1
