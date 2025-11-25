@@ -8,13 +8,13 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'ecoval'
-copyright = '2024, Robert Wilson'
+project = 'oceanval'
+copyright = '2025, Robert Wilson'
 author = 'Robert Wilson'
 
 # The short X.Y version
 # The full version, including alpha/beta/rc tags
-version = '0.0.3'
+version = '0.0.2'
 
 
 # -- General configuration ---------------------------------------------------

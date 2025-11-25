@@ -1,4 +1,4 @@
-ecoVal: Automated marine ecosystem model validation 
+oceanVal: Automated marine ecosystem model validation 
 =======================================================
 
 Automatic validation of marine ecosystem models in Python. 

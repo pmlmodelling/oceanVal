@@ -1,4 +1,4 @@
-.. currentmodule:: ecoval
+.. currentmodule:: oceanval
 
 
 ####################
@@ -13,10 +13,5 @@ Matchups and validation
 
    matchup 
    validate 
-   rebuild_validation
-   compare_validations
-   compare_simulations
-   list_observational_data
-   check_simulation
 
 

@@ -2,13 +2,13 @@
 Package info
 =======================================================
 
-ecoval was created by Robert Wilson at Plymouth Marine Laboratory (PML).
+oceanVal was created by Robert Wilson at Plymouth Marine Laboratory (PML).
 
 
 Bugs and issues
 ------------------
 
-If you identify bugs or issues with the package please raise an issue at PML's Marine Systems Modelling group's GitHub page `here <https://github.com/pmlmodelling/ecoval/issues>`__ or contact nctoolkit's creator at rwi@pml.ac.uk.
+If you identify bugs or issues with the package please raise an issue at PML's Marine Systems Modelling group's GitHub page `here <https://github.com/pmlmodelling/oceanval/issues>`__ or contact nctoolkit's creator at rwi@pml.ac.uk.
 
 
 Contributions welcome
