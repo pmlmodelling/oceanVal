@@ -5,7 +5,6 @@ Automatic validation of marine ecosystem models in Python.
 
 Documentation
 -------------
-**Getting Started**
 
 
 .. toctree::
