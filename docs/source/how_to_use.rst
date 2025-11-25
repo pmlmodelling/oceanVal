@@ -1,5 +1,5 @@
 How to use oceanVal
- =====================
+=====================
 
 Validating simulations using oceanVal involves three main steps:
 
