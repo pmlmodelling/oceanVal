@@ -53,5 +53,6 @@ If you want to quickly understand what oceanVal can do, you can run the followin
 
 
 This quick example will compare sea surface temperature for 2014 from a global climate model simulation with an observational dataset.
+An html page should open in your browser showing how the two compare.
 
 Note: this is just an example of the use of oceanVal, not a rigorous way to validate a climate model.
