@@ -70,13 +70,15 @@ class Validator:
                                source = None, 
                                source_info = None, 
                                model_variable = None, 
-                               obs_dir = None, 
+                               obs_path = None, 
                                obs_variable = "auto", 
                                start = -1000, 
                                end = 3000, 
                                vertical = False, 
                                climatology = None, 
-                               obs_multiplier = 1  ): 
+                               obs_multiplier = 1,
+                               thredds = False
+                                   ): 
         """
 
         Add a gridded comparison variable to the Validator
@@ -97,7 +99,7 @@ class Validator:
 
         model_variable (str): Model variable name
 
-        obs_dir (str): Directory of the observations
+        obs_path (str): Directory or path of the observations
 
         obs_variable (str): Observation variable name
 
@@ -152,20 +154,49 @@ class Validator:
         # climatology must be provideded
         if climatology is None:
             raise ValueError("Climatology must be provided for gridded comparison")
-        # obs_dir is needed
-        if obs_dir is None:
-            raise ValueError("obs_dir must be provided for gridded comparison")
+        # obs_path is needed
+        if obs_path is None:
+            raise ValueError("obs_path must be provided for gridded comparison")
         # must be boolean
         if not isinstance(climatology, bool):
             raise ValueError("Climatology must be a boolean value")
-        var.climatology = climatology
-        var.obs_multiplier_gridded = obs_multiplier
         try:
-            var.obs_multiplier_gridded = float(var.obs_multiplier_gridded)
+            obs_multiplier  = float(obs_multiplier)
         except:
             raise ValueError("obs_multiplier must be a number")
-        var.obs_multiplier_point = old_obs_multiplier
+        if name in session_info["short_title"]:
+            if short_title is not None:
+                if short_title != session_info["short_title"][name]:
+                    raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
 
+        assumed = []
+        if source_info is None:
+            source_info = f"Source for {source}"
+            assumed.append("source_info")
+        source = {source: source_info}
+        if list(source.keys())[0] in orig_sources:
+            # ensure the value is the same
+            if orig_sources[list(source.keys())[0]] != source[list(source.keys())[0]]:
+                raise ValueError(f"Source {list(source.keys())[0]} already exists with a different value")
+        # ensure the sourc key does not included "_"
+        if "_" in list(source.keys())[0]:
+            raise ValueError("Source key cannot contain '_'")
+        if not isinstance(obs_variable, str):
+            raise ValueError("obs_variable must be a string")
+
+        gridded_dir = obs_path
+        if gridded_dir != "auto":
+            if thredds is False:
+                if not os.path.exists(gridded_dir):
+                    raise ValueError(f"Gridded directory {gridded_dir} does not exist")
+        # thredds must be boolean
+        if not isinstance(thredds, bool):
+            raise ValueError("thredds must be a boolean value")
+
+        var.thredds = thredds
+        var.climatology = climatology
+        var.obs_multiplier_point = old_obs_multiplier
+        var.obs_multiplier_gridded = obs_multiplier
         var.n_levels = 1
         var.vertical_gridded = vertical
         var.vertical_point = vertical_point
@@ -174,7 +205,6 @@ class Validator:
         var.gridded_end = end
         var.point_start = point_start
         var.point_end = point_end
-
         var.point = point
         var.point_source = point_source
         var.gridded = True
@@ -194,38 +224,19 @@ class Validator:
             var.short_title = name.title()
             assumed.append("short_title")
         # check if this is c
-        if name in session_info["short_title"]:
-            if short_title != session_info["short_title"][name]:
-                raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
         session_info["short_title"][name] = var.short_title
         # throw error if source is None
-        if source_info is None:
-            source_info = f"Source for {source}"
-            assumed.append("source_info")
 
         source_name = source
-        source = {source: source_info}
-        if list(source.keys())[0] in orig_sources:
-            # ensure the value is the same
-            if orig_sources[list(source.keys())[0]] != source[list(source.keys())[0]]:
-                raise ValueError(f"Source {list(source.keys())[0]} already exists with a different value")
-        # ensure the sourc key does not included "_"
-        if "_" in list(source.keys())[0]:
-            raise ValueError("Source key cannot contain '_'")
         var.sources = orig_sources | source
         var.gridded_source = list(source.keys())[0]
         var.model_variable = model_variable
         var.point_dir = point_dir
         # add obs_variable, ensure it's a string
-        if not isinstance(obs_variable, str):
-            raise ValueError("obs_variable must be a string")
         var.obs_variable = obs_variable
         # check this exists
-        gridded_dir = obs_dir
+        gridded_dir = obs_path
         var.gridded_dir = gridded_dir
-        if gridded_dir != "auto":
-            if not os.path.exists(gridded_dir):
-                raise ValueError(f"Gridded directory {gridded_dir} does not exist")
 
         # ensure nothing is None
         for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_variable, var.gridded_source]:
@@ -247,7 +258,7 @@ class Validator:
                              model_variable = None, 
                              start = -1000, 
                              end = 3000, 
-                             obs_dir = None, 
+                             obs_path = None, 
                              obs_multiplier = 1, 
                              binning = None  ):
         """
@@ -276,7 +287,7 @@ class Validator:
 
         end (int): End depth of the variable
 
-        obs_dir (str): Directory of the observations
+        obs_path (str): Directory of the observations
 
         obs_multiplier (float): Multiplier for the observation, if needed to convert units
 
@@ -297,6 +308,7 @@ class Validator:
             old_climatology = getattr(self, name).climatology
             old_obs_multiplier = getattr(self, name).obs_multiplier_gridded
             vertical_gridded = getattr(self, name).vertical_gridded
+            thredds = getattr(self, name).thredds
         except:
             gridded_dir = "auto"
             obs_variable = "auto"
@@ -309,6 +321,7 @@ class Validator:
             old_climatology = None
             old_obs_multiplier = 1
             vertical_gridded = False
+            thredds = False
             pass
 
         if old_model_variable is not None and old_model_variable != model_variable:
@@ -319,6 +332,67 @@ class Validator:
 
         source_name = source
 
+        try:
+            obs_multiplier= float(obs_multiplier)
+        except:
+            raise ValueError("obs_multiplier must be a number")
+        if name in session_info["short_title"]:
+            if short_title != session_info["short_title"][name]:
+                raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
+        # vertical must be a boolean
+        if not isinstance(vertical, bool):
+            raise ValueError("vertical must be a boolean value")
+
+        # check these are int or can be cast to int
+        try:
+            start = int(start)
+            end = int(end)
+        except:
+            raise ValueError("start and end must be integers")
+
+
+        assumed = []
+        if source_info is None:
+            source_info = f"Source for {source}"
+            assumed.append("source_info")
+
+        source = {source: source_info}
+        if list(source.keys())[0] in orig_sources:
+            # ensure the value is the same
+            if orig_sources[list(source.keys())[0]] != source[list(source.keys())[0]]:
+                raise ValueError(f"Source {list(source.keys())[0]} already exists with a different value")
+        # ensure the sourc key does not included "_"
+        if "_" in list(source.keys())[0]:
+            raise ValueError("Source key cannot contain '_'")
+        point_files = [f for f in glob.glob(os.path.join(obs_path, "*.csv"))] 
+        # if no files exists, raise error
+        if len(point_files) == 0:
+            raise ValueError(f"No csv files found in point directory {obs_path}")
+        valid_vars = ["lon", "lat", "year", "month", "day", "depth", "observation", "source"]
+        for vv in point_files:
+            # read in the first row
+            df = pd.read_csv(vv, nrows=1)
+            # throw error something else is in there
+            bad_cols = [col for col in df.columns if col not in valid_vars]
+            if len(bad_cols) > 0:
+                raise ValueError(f"Invalid columns {bad_cols} found in point data file {vv}")
+            if "depth" in df.columns:
+                vertical = True
+            # lon/lat/observation *must* be in df
+            for req_col in ["lon", "lat", "observation"]:
+                if req_col not in df.columns:
+                    raise ValueError(f"Required column {req_col} not found in point data file {vv}")
+        # if binning is supplied, ensure it is a 2 variable list
+        if binning is not None:
+            if not isinstance(binning, list) or len(binning) != 2:
+                raise ValueError("binning must be a list of two values: [spatial_resolution, depth_resolution]")
+        # ensure each element of binning is a number
+            for res in binning:
+                try:
+                    float(res)
+                except:
+                    raise ValueError("Each element of binning must be a number")
+        
 
         var.climatology = old_climatology
         var.n_levels = 1
@@ -326,27 +400,13 @@ class Validator:
         var.gridded_end = gridded_end
         var.obs_multiplier_gridded= old_obs_multiplier
         var.obs_multiplier_point= obs_multiplier
-        try:
-            var.obs_multiplier_point= float(var.obs_multiplier_point)
-        except:
-            raise ValueError("obs_multiplier must be a number")
-
-        if name in session_info["short_title"]:
-            if short_title != session_info["short_title"][name]:
-                raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
-
-
         var.point = True
         var.gridded = gridded
-        assumed = []
         var.long_name = long_name
         if var.long_name is None:
             var.long_name = name
             assumed.append("long_name")
 
-        # vertical must be a boolean
-        if not isinstance(vertical, bool):
-            raise ValueError("vertical must be a boolean value")
         var.vertical_point = vertical
         var.vertical_gridded = vertical_gridded 
 
@@ -361,56 +421,21 @@ class Validator:
             assumed.append("short_title")
         var.point_start = start
         var.point_end = end
-        # check these are int or can be cast to int
-        try:
-            var.point_start = int(var.point_start)
-            var.point_end = int(var.point_end)
-        except:
-            raise ValueError("start and end must be integers")
         # append source to the var.source
         # check if source key is in orig_source
-        if source_info is None:
-            source_info = f"Source for {source}"
-            assumed.append("source_info")
-        source = {source: source_info}
-        if list(source.keys())[0] in orig_sources:
-            # ensure the value is the same
-            if orig_sources[list(source.keys())[0]] != source[list(source.keys())[0]]:
-                raise ValueError(f"Source {list(source.keys())[0]} already exists with a different value")
-        # ensure the sourc key does not included "_"
-        if "_" in list(source.keys())[0]:
-            raise ValueError("Source key cannot contain '_'")
         var.sources = orig_sources | source 
         var.gridded_source = gridded_source
         var.point_source = list(source.keys())[0]   
         var.model_variable = model_variable
-        var.point_dir = obs_dir
+        var.point_dir = obs_path
         # find csv files in point_dir
-        point_files = [f for f in glob.glob(os.path.join(obs_dir, "*.csv"))] 
-        # if no files exists, raise error
-        if len(point_files) == 0:
-            raise ValueError(f"No csv files found in point directory {obs_dir}")
-        valid_vars = ["lon", "lat", "year", "month", "day", "depth", "observation", "source"]
-        vertical = False
-        for vv in point_files:
-            # read in the first row
-            df = pd.read_csv(vv, nrows=1)
-            # throw error something else is in there
-            bad_cols = [col for col in df.columns if col not in valid_vars]
-            if len(bad_cols) > 0:
-                raise ValueError(f"Invalid columns {bad_cols} found in point data file {vv}")
-            if "depth" in df.columns:
-                vertical = True
-            # lon/lat/observation *must* be in df
-            for req_col in ["lon", "lat", "observation"]:
-                if req_col not in df.columns:
-                    raise ValueError(f"Required column {req_col} not found in point data file {vv}")
+        var.thredds = thredds
 
         var.vertical = vertical
 
         var.obs_variable = obs_variable
         # check this exists
-        point_dir = obs_dir
+        point_dir = obs_path
         if point_dir != "auto":
             if not os.path.exists(point_dir):
                 raise ValueError(f"Point directory {point_dir} does not exist")
@@ -419,17 +444,6 @@ class Validator:
             if not os.path.exists(gridded_dir):
                 raise ValueError(f"Gridded directory {gridded_dir} does not exist")
 
-        # if binning is supplied, ensure it is a 2 variable list
-        if binning is not None:
-            if not isinstance(binning, list) or len(binning) != 2:
-                raise ValueError("binning must be a list of two values: [spatial_resolution, depth_resolution]")
-        # ensure each element of binning is a number
-            for res in binning:
-                try:
-                    float(res)
-                except:
-                    raise ValueError("Each element of binning must be a number")
-        
         # figure out if var.binning exists
         try:
             old_binning = getattr(self, name).binning
