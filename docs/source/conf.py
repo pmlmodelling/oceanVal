@@ -37,8 +37,8 @@ extensions = [
     'sphinx.ext.githubpages',
 ]
 
-html_theme = "haiku"
-#html_theme = "nature"
+#html_theme = "haiku"
+html_theme = "nature"
 
 
 # Add any paths that contain templates here, relative to this directory.
