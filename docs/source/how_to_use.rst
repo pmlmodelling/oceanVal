@@ -72,6 +72,7 @@ The following optional parameters can also be specified:
 An example is shown below:
 
 .. code:: ipython3
+
     oceanval.add_gridded_comparison(
         name="oxygen",
         source = "CMEMS",
@@ -81,7 +82,7 @@ An example is shown below:
         obs_variable="O2_concentration",
         obs_dir="/path/to/obs_data/",
         climatology=False,
-)
+    )
 
 
 
@@ -117,6 +118,7 @@ The following optional parameters can also be specified:
 An example is shown below:
 
 .. code:: ipython3
+
     oceanval.matchup(
         sim_dir="/path/to/simulation/output/",
         start=2000,
@@ -125,7 +127,7 @@ An example is shown below:
         lon_lim=[-80, 0],
         lat_lim=[20, 60],
         thickness="cell_thickness",
-)
+    )
 
 Step 3: Calculate validation statistics and generate html summary
 --------------------------------------
@@ -135,5 +137,6 @@ Once you have matched up the model simulation output with the observations, you 
 You can do this as follows:
 
 .. code:: ipython3
+
     oceanval.validate()
 This must be run in the same directory where the matchup files were created.
