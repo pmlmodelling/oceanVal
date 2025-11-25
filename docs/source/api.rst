@@ -13,5 +13,8 @@ Matchups and validation
 
    matchup 
    validate 
+   definitions.add_point_comparison
+   definitions.add_gridded_comparison
+
 
 
