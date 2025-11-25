@@ -1,0 +1,740 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Sea surface temperature validation using gridded observations from NOAA &#8212; Automated model evaluation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/001_NOAA_temperature';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Full domain summary statistics of model performance" href="002_summary.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/pml_logo.jpg" class="logo__image only-light" alt="Automated model evaluation - Home"/>
+    <script>document.write(`<img src="../_static/pml_logo.jpg" class="logo__image only-dark" alt="Automated model evaluation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../intro.html">
+                    An ocean model validation using oceanval
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="000_info.html">Model run information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="001_methods.html">Methods</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Summaries</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="002_summary.html">Full domain summary statistics of model performance</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Temperature</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Sea surface temperature validation using gridded observations from NOAA</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/notebooks/001_NOAA_temperature.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Sea surface temperature validation using gridded observations from NOAA</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="sea-surface-temperature-validation-using-gridded-observations-from-noaa">
+<h1>Sea surface temperature validation using gridded observations from NOAA<a class="headerlink" href="#sea-surface-temperature-validation-using-gridded-observations-from-noaa" title="Link to this heading">#</a></h1>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p><strong>Matchup procedure</strong>: The model and observations were matched up as follows. First, the model dataset was cropped by a small amount to make sure cells close to the boundary were removed. The model was then regridded to the observational grid if the observational grid was coarser using nearest neighbour. Only grid cells with model and observational data were maintained. The following model output was used to compare with the observational values: <strong>tos</strong>.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<h2 class="rubric" id="baseline-climatologies-of-sea-surface-temperature">Baseline climatologies of sea surface temperature</h2>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p>Climatologies of model and observational sea surface temperature are shown in the figures below. The model climatology is calculated using the year <strong>2014</strong>.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<img alt="../_images/ee9c4d7230e4e350a1192e22e26879ce705b0899c704b6170af78aedb34efb7c.png" src="../_images/ee9c4d7230e4e350a1192e22e26879ce705b0899c704b6170af78aedb34efb7c.png" />
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p><strong>Figure 1</strong>: Annual average surface temperature from the model (2014) and observations. Data is limited to the 2<sup>nd</sup> and 98<sup>th</sup> percentile of the combined model and observational data. Arrows indicate that values can exceed the colourbar limits.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<h2 class="rubric" id="assessing-model-bias-for-surface-temperature">Assessing model bias for surface temperature</h2>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p>Figure 2 shows the average bias of surface temperature simulated by the model. A positive bias indicates that the model overestimates the observation, while a negative bias indicates that the model overpredicts the observation.</p>
+<p>The spatial average bias of surface temperature is 0.66 degC. Overall, the model overestimates the observations in 74.5% of the model domain.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<img alt="../_images/66c49504e4c7ec71ff34ea2a3c456b8efdb4dccdb0e6e130fb82618fc322f7ae.png" src="../_images/66c49504e4c7ec71ff34ea2a3c456b8efdb4dccdb0e6e130fb82618fc322f7ae.png" />
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p><strong>Figure 2</strong>: Bias of surface temperature from the model. A positive bias indicates that the model overestimates the observation. For clarity, the colourbar is limited to the 2<sup>nd</sup> and 98<sup>th</sup> percentile of the data.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<h2 class="rubric" id="can-the-model-reproduce-seasonality-of-sea-surface-temperature">Can the model reproduce seasonality of sea surface temperature?</h2>
+<p>The ability of the model to reproduce seasonality of sea surface temperature was assessed by comparing the modelled and observed seasonal cycle of temperature. First, we derive a monthly climatology for the model data. Then, we calculate the Pearson correlation coefficient between the modelled and observed temperature at each grid cell.</p>
+<p>Note: we are only assessing the ability of the model to reproduce the ability of the model to reproduce seasonal changes, not long-term trends.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<img alt="../_images/85c6471c9754616a514dd81f95ec861ca5ca3ce585cefd6a454630494cceab67.png" src="../_images/85c6471c9754616a514dd81f95ec861ca5ca3ce585cefd6a454630494cceab67.png" />
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p><strong>Figure 3</strong>: Seasonal temporal correlation between model and observations for surface temperature. This is the Pearson correlation coefficient between climatological monthly mean values in the model and observations.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p>The seasonal cycles of simulated and observed temperature are compared in Figure 4 below. This figure shows the model and observation average in each month of the year, and the differences between the two each month</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<img alt="../_images/ed4af8ce6ba82dc0f353cac2fc52d547a889c0a7fca5b72bdf0c52de62f90a56.png" src="../_images/ed4af8ce6ba82dc0f353cac2fc52d547a889c0a7fca5b72bdf0c52de62f90a56.png" />
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<img alt="../_images/cd71cad80ea6f1c863ef3b98e843201987e3fde8d415dc2298381bcdc1b5645f.png" src="../_images/cd71cad80ea6f1c863ef3b98e843201987e3fde8d415dc2298381bcdc1b5645f.png" />
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p><strong>Figure 4</strong>: Monthly mean surface temperature for the model, observation and the difference between model and observations. For clarity, the maximum values are capped to the 98<sup>th</sup> percentiles.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<h2 class="rubric" id="regional-assessment-of-model-performance-for-sea-surface-temperature">Regional assessment of model performance for sea surface temperature</h2>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p>We assessed the regional performance of the model by comparing the model with observations in a number of regions. The regions considered are mapped below.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<img alt="../_images/96ea43268aef417a3b626f3cb5ba4498cba9a6d8db198d89c09704175316ed5d.png" src="../_images/96ea43268aef417a3b626f3cb5ba4498cba9a6d8db198d89c09704175316ed5d.png" />
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p><strong>Figure 5</strong>: Regions used for validation of sea surface temperature.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p>Time series were constructed comparing the monthly mean of the spatial average sea surface temperature in each region. The spatial average was calculated using the mean of all grid cells within each region, accounting for grid cell area.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<img alt="../_images/12388668e95754438183ba81368fb5861cc16f5b48915f77a497efeb44940c70.png" src="../_images/12388668e95754438183ba81368fb5861cc16f5b48915f77a497efeb44940c70.png" />
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p><strong>Figure 6</strong>: Seasonal cycle of sea surface temperature for model and observations for each region. The spatial average is taken over the region.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p>The table below shows the average bias of sea surface temperature in each region. The bias is calculated as the modelled value minus the observed value. A positive bias indicates that the model overestimates the observed value, while a negative bias indicates that the model underestimates the observed value.</p>
+<div class="output text_html"><style type="text/css">
+</style>
+<table id="T_6f3ce">
+  <thead>
+    <tr>
+      <th id="T_6f3ce_level0_col0" class="col_heading level0 col0" >Region</th>
+      <th id="T_6f3ce_level0_col1" class="col_heading level0 col1" >Spatial correlation</th>
+      <th id="T_6f3ce_level0_col2" class="col_heading level0 col2" >Temporal correlation</th>
+      <th id="T_6f3ce_level0_col3" class="col_heading level0 col3" >Bias</th>
+      <th id="T_6f3ce_level0_col4" class="col_heading level0 col4" >RMSD</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="T_6f3ce_row0_col0" class="data row0 col0" >Atlantic</td>
+      <td id="T_6f3ce_row0_col1" class="data row0 col1" >0.99</td>
+      <td id="T_6f3ce_row0_col2" class="data row0 col2" >0.93</td>
+      <td id="T_6f3ce_row0_col3" class="data row0 col3" >1.02</td>
+      <td id="T_6f3ce_row0_col4" class="data row0 col4" >1.87</td>
+    </tr>
+    <tr>
+      <td id="T_6f3ce_row1_col0" class="data row1 col0" >North Atlantic</td>
+      <td id="T_6f3ce_row1_col1" class="data row1 col1" >0.99</td>
+      <td id="T_6f3ce_row1_col2" class="data row1 col2" >0.93</td>
+      <td id="T_6f3ce_row1_col3" class="data row1 col3" >0.82</td>
+      <td id="T_6f3ce_row1_col4" class="data row1 col4" >1.70</td>
+    </tr>
+    <tr>
+      <td id="T_6f3ce_row2_col0" class="data row2 col0" >Pacific</td>
+      <td id="T_6f3ce_row2_col1" class="data row2 col1" >0.98</td>
+      <td id="T_6f3ce_row2_col2" class="data row2 col2" >0.76</td>
+      <td id="T_6f3ce_row2_col3" class="data row2 col3" >0.42</td>
+      <td id="T_6f3ce_row2_col4" class="data row2 col4" >1.79</td>
+    </tr>
+    <tr>
+      <td id="T_6f3ce_row3_col0" class="data row3 col0" >South Atlantic</td>
+      <td id="T_6f3ce_row3_col1" class="data row3 col1" >0.99</td>
+      <td id="T_6f3ce_row3_col2" class="data row3 col2" >0.94</td>
+      <td id="T_6f3ce_row3_col3" class="data row3 col3" >1.23</td>
+      <td id="T_6f3ce_row3_col4" class="data row3 col4" >2.02</td>
+    </tr>
+    <tr>
+      <td id="T_6f3ce_row4_col0" class="data row4 col0" >Southern Ocean</td>
+      <td id="T_6f3ce_row4_col1" class="data row4 col1" >0.92</td>
+      <td id="T_6f3ce_row4_col2" class="data row4 col2" >0.88</td>
+      <td id="T_6f3ce_row4_col3" class="data row4 col3" >0.85</td>
+      <td id="T_6f3ce_row4_col4" class="data row4 col4" >1.30</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p><strong>Table 1</strong>: Summary of performance of the model sea surface temperature in each region. The bias (°C) column represents the spatial average of the annual mean modelled value minus the observed value. The temporal correlation column represents the spatial mean of the temporal correlation between the model and observations per grid cell. The spatial correlation column represents the spatial correlation between the model and observations.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<h2 class="rubric" id="can-the-model-reproduce-spatial-patterns-of-sea-surface-temperature">Can the model reproduce spatial patterns of sea surface temperature?</h2>
+<p>The ability of the model to reproduce spatial patterns of sea surface temperature was assessed by comparing the modelled and observed temperature at each grid cell. We calculated the Pearson correlation coefficient between the modelled and observed temperature at each grid cell.</p>
+<p>This was carried out monthly and using the annual mean in each grid cell</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<div class="output text_html"><style type="text/css">
+</style>
+<table id="T_735cf">
+  <thead>
+    <tr>
+      <th id="T_735cf_level0_col0" class="col_heading level0 col0" >Time period</th>
+      <th id="T_735cf_level0_col1" class="col_heading level0 col1" ><em>r</em></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="T_735cf_row0_col0" class="data row0 col0" >Annual mean</td>
+      <td id="T_735cf_row0_col1" class="data row0 col1" >0.99</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row1_col0" class="data row1 col0" >Jan</td>
+      <td id="T_735cf_row1_col1" class="data row1 col1" >0.99</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row2_col0" class="data row2 col0" >Feb</td>
+      <td id="T_735cf_row2_col1" class="data row2 col1" >0.99</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row3_col0" class="data row3 col0" >Mar</td>
+      <td id="T_735cf_row3_col1" class="data row3 col1" >0.99</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row4_col0" class="data row4 col0" >Apr</td>
+      <td id="T_735cf_row4_col1" class="data row4 col1" >0.99</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row5_col0" class="data row5 col0" >May</td>
+      <td id="T_735cf_row5_col1" class="data row5 col1" >0.99</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row6_col0" class="data row6 col0" >Jun</td>
+      <td id="T_735cf_row6_col1" class="data row6 col1" >0.99</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row7_col0" class="data row7 col0" >Jul</td>
+      <td id="T_735cf_row7_col1" class="data row7 col1" >0.98</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row8_col0" class="data row8 col0" >Aug</td>
+      <td id="T_735cf_row8_col1" class="data row8 col1" >0.98</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row9_col0" class="data row9 col0" >Sep</td>
+      <td id="T_735cf_row9_col1" class="data row9 col1" >0.98</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row10_col0" class="data row10 col0" >Oct</td>
+      <td id="T_735cf_row10_col1" class="data row10 col1" >0.99</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row11_col0" class="data row11 col0" >Nov</td>
+      <td id="T_735cf_row11_col1" class="data row11 col1" >0.99</td>
+    </tr>
+    <tr>
+      <td id="T_735cf_row12_col0" class="data row12 col0" >Dec</td>
+      <td id="T_735cf_row12_col1" class="data row12 col1" >0.99</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<p><strong>Table 2</strong>: Pearson correlation coefficient between modelled and observed sea surface temperature at each grid cell. The correlation was calculated monthly and using the annual mean in each grid cell.</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+<div class="cell tag_remove-input docutils container">
+<div class="cell_output docutils container">
+<h2 class="rubric" id="data-sources-for-validation-of-temperature">Data Sources for validation of temperature</h2>
+<p>Source for NOAA</p>
+</div>
+</div>
+<div class="cell tag_remove-input docutils container">
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./notebooks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="002_summary.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Full domain summary statistics of model performance</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Robert Wilson | Plymouth Marine Laboratory
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright Plymouth Marine Laboratory.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
