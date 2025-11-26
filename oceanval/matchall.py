@@ -1556,6 +1556,11 @@ def matchup(
                                 df_all = df_all.assign(
                                     observation=lambda x: x.observation * multiplier
                                 )
+                            adder = definitions[variable].obs_adder_point
+                            if adder != 0:
+                                df_all = df_all.assign(
+                                    observation=lambda x: x.observation + adder
+                                )
 
                             grouping = copy.deepcopy(point_time_res)
                             grouping.append("lon")

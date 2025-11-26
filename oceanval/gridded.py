@@ -239,7 +239,7 @@ def gridded_matchup(
                     paths = new_paths
 
                 ds_model = nc.open_data(paths, checks=False)
-
+                ds_model.subset(years=sim_years)
                 ds_model.subset(variables=selection)
                 if vertical_gridded is False:
                     ds_zz = nc.open_data(ds_model[0], checks = False)
@@ -249,14 +249,10 @@ def gridded_matchup(
                         ds_model.cdo_command("topvalue")
                 if session_info["as_missing"] is not None:
                     ds_model.as_missing(session_info["as_missing"])
-                ds_model.subset(years=sim_years)
+                ds_model.merge("time")
                 ds_model.tmean(
                     ["year", "month"], align="left"
                 )
-
-                if vv_source == "glodap":
-                    ds_model.merge("time")
-                    ds_model.tmean(align="left")
 
                 # the code below needs to be simplifed
                 # essentially anything with a + in the mapping should be split out
@@ -288,10 +284,6 @@ def gridded_matchup(
                             )
 
                         ds_model.run()
-                        ds_model.tmean(["year", "month"], align="left")
-                        ds_model.merge("time")
-                        ds_model.subset(years=sim_years)
-                        ds_model.run()
 
             tidy_warnings(w)
 
@@ -305,7 +297,6 @@ def gridded_matchup(
                     vv_file = dir_var
                 else:
                     vv_file = nc.create_ensemble(dir_var)
-                    vv_file = [x for x in vv_file if "annual" not in x]
 
                 thredds = definitions[vv].thredds
                 if thredds:
@@ -348,6 +339,9 @@ def gridded_matchup(
                 obs_unit_multiplier = definitions[vv].obs_multiplier_gridded
                 if obs_unit_multiplier != 1:
                     ds_obs *  obs_unit_multiplier
+                obs_adder = definitions[vv].obs_adder_gridded
+                if obs_adder != 0:
+                    ds_obs + obs_adder
             
                 if bad_clim:
                     raise ValueError(f"Observational data for {vv} appears to not be a climatology, but the climatology argument is set to True. Please fix this!") 
@@ -372,11 +366,7 @@ def gridded_matchup(
 
             with warnings.catch_warnings(record=True) as w:
                 if len(obs_years) == 1:
-                    ds_model.merge("time")
                     ds_model.tmean("month", align="left")
-                else:
-                    ds_model.merge("time")
-                    ds_model.tmean(["year", "month"], align="left")
 
                 if len(ds_obs) > 1:
                     ds_obs.merge("time")
@@ -395,7 +385,6 @@ def gridded_matchup(
                 regridding = "model_to_obs"
 
                 ds_obs.rename({ds_obs.variables[0]: "observation"})
-                ds_model.merge("time")
                 ds_model.rename({ds_model.variables[0]: "model"})
                 ds_model.run()
                 ds_obs.run()

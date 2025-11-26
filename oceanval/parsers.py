@@ -89,6 +89,7 @@ class Validator:
                                vertical = False, 
                                climatology = None, 
                                obs_multiplier = 1,
+                               obs_adder = 0,
                                thredds = False
                                    ): 
         """
@@ -124,6 +125,8 @@ class Validator:
         climatology (bool): Whether to use climatology
 
         obs_multiplier (float): Multiplier for the observation
+
+        obs_adder (float): Adder for the observation
 
         """
 
@@ -172,6 +175,16 @@ class Validator:
             old_binning = getattr(self, name).binning
         except:
             old_binning = None
+        
+        try:
+            old_climatology = getattr(self, name).climatology
+        except:
+            old_climatology = None
+        
+        try:
+            old_obs_adder = getattr(self, name).obs_adder_point
+        except:
+            old_obs_adder = 0
 
         if old_model_variable is not None and old_model_variable != model_variable:
             if old_model_variable != "auto":
@@ -195,6 +208,11 @@ class Validator:
             obs_multiplier  = float(obs_multiplier)
         except:
             raise ValueError("obs_multiplier must be a number")
+
+        try:
+            obs_adder  = float(obs_adder)
+        except:
+            raise ValueError("obs_adder must be a number")
 
         assumed = []
 
@@ -237,6 +255,8 @@ class Validator:
                 if short_title != session_info["short_title"][name]:
                     raise ValueError(f"Short title for {name} already exists as {session_info['short_title'][name]}, cannot change to {short_title}")
         
+        var.obs_adder_gridded = obs_adder
+        var.obs_adder_point = old_obs_adder
         var.thredds = thredds
         var.climatology = climatology
         var.obs_multiplier_point = old_obs_multiplier
@@ -299,6 +319,7 @@ class Validator:
                              end = 3000, 
                              obs_path = None, 
                              obs_multiplier = 1, 
+                             obs_adder = 0,
                              binning = None  ):
         """
 
@@ -372,8 +393,10 @@ class Validator:
             old_climatology = None
         try:
             old_obs_multiplier = getattr(self, name).obs_multiplier_gridded
+            old_obs_adder = getattr(self, name).obs_adder_gridded
         except:
             old_obs_multiplier = 1
+            old_obs_adder = 0
         try:
             vertical_gridded = getattr(self, name).vertical_gridded
         except:
@@ -382,7 +405,6 @@ class Validator:
             thredds = getattr(self, name).thredds
         except:
             thredds = False
-
 
         if old_model_variable is not None and old_model_variable != model_variable:
             if old_model_variable != "auto":
@@ -396,6 +418,10 @@ class Validator:
             obs_multiplier= float(obs_multiplier)
         except:
             raise ValueError("obs_multiplier must be a number")
+        try:
+            obs_adder = float(obs_adder)
+        except:
+            raise ValueError("obs_adder must be a number")
         # vertical must be a boolean
         if not isinstance(vertical, bool):
             raise ValueError("vertical must be a boolean value")
@@ -465,7 +491,14 @@ class Validator:
                     float(res)
                 except:
                     raise ValueError("Each element of binning must be a number")
+        try:
+            old_climatology = getattr(self, name).climatology
+        except:
+            old_climatology = None
         
+        # adders
+        var.obs_adder_gridded = old_obs_adder
+        var.obs_adder_point = obs_adder
 
         var.climatology = old_climatology
         var.n_levels = 1

@@ -37,6 +37,7 @@ The following optional parameters can also be specified:
 - `start`: The first year of observations to use. If not specified, all years in the data will be used. 
 - `end`: The last year of observations to use. If not specified, all years in the data will be used.
 - `obs_multiplier`: A multiplier to apply to the observational data (e.g. to convert units). This defaults to 1.0 (no change). 
+- `obs_adder`: An adder to apply to the observational data (e.g. to convert units). This defaults to 0.0 (no change). For example, set to 273.15 to convert from Kelvin to Celsius.
 - `binning`: Specify if you want data to be spatially binned to a specific lon/lat resolution. This is of the format [lon_bin_size, lat_bin_size] in degrees. If not specified, no binning will be applied.
 
 An example is shown below:
@@ -77,6 +78,7 @@ The following optional parameters can also be specified:
 - `start`: The first year of observations to use for validation.
 - `end`: The last year of observations to use for validation.
 - `obs_multiplier`: A multiplier to apply to the observational data (e.g. to convert units). This defaults to 1.0 (no change).
+- `obs_adder`: An adder to apply to the observational data (e.g. to convert units). This defaults to 0.0 (no change). For example, set to 273.15 to convert from Kelvin to Celsius.
 
 An example is shown below:
 
