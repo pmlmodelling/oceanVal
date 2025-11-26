@@ -288,9 +288,14 @@ def get_time_res(x, folder=None):
 
     ds = nc.open_data(path, checks=False)
     ds_times = ds.times
-    months = [x.month for x in ds_times]
-    days = [x.day for x in ds_times]
-    years = [x.year for x in ds_times]
+    try:
+        months = [x.month for x in ds_times]
+        days = [x.day for x in ds_times]
+        years = [x.year for x in ds_times]
+    except:
+        years = [int(str(x).split("T")[0].split("-")[0]) for x in ds.times]
+        months = [int(str(x).split("T")[0].split("-")[1]) for x in ds.times]
+        days = [int(str(x).split("T")[0].split("-")[2]) for x in ds.times]
     df_times = pd.DataFrame({"month": months, "day": days, "year": years})
 
     n1 = len(
@@ -400,7 +405,8 @@ def extract_variable_mapping(folder, exclude=[], n_check=None):
             new_dict = dict()
             for key in ds_dict:
                 if ds_dict[key] is not None:
-                    new_dict[ds_dict[key]] = [key]
+                    #new_dict[ds_dict[key]] = [key]
+                    new_dict[key] = [ds_dict[key]]
             # new_name. Replace numbers between _ with **
 
             # replace integers with 4 or more digits with **
@@ -411,11 +417,14 @@ def extract_variable_mapping(folder, exclude=[], n_check=None):
             all_df.append(
                 pd.DataFrame.from_dict(new_dict).melt().assign(pattern=new_name)
             )
+    
 
     try: 
         all_df = pd.concat(all_df).reset_index(drop=True)
     except:
         raise ValueError("No netCDF files found with any of the model variables.")
+    #  rename variable-value, and value-variable
+    all_df = all_df.rename(columns={"variable": "value", "value": "variable"}) 
 
     patterns = set(all_df.pattern)
     resolution_dict = dict()
@@ -539,6 +548,7 @@ def matchup(
         point["surface"] = []
     # loop through definition keys
 
+
     if len(definitions.keys) == 0:
         raise ValueError("You do not appear to have asked for any variables to be validated!")
     for key in definitions.keys:
@@ -563,7 +573,7 @@ def matchup(
                     gridded.append(key)
         except:
             pass
-
+    
     if isinstance(point, dict):
         # check keys are valid
         for key in point.keys():
