@@ -7,6 +7,8 @@ Validating simulations using oceanVal involves three steps:
     2. Matchup the model simulation output with the observational datasets
     3. Calculate validation statistics, generate plots and create an html summary of the performance of the simulation
 
+**You should always create a new directory prior to running oceanVal for a new simulation, and then run all oceanVal commands from within that directory.**
+
 Step 1: Register observational datasets
 ------------------------------------
 
