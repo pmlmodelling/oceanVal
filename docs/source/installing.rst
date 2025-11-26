@@ -16,6 +16,8 @@ A short example
 
 If you want to quickly understand what oceanVal can do, you can run the following example in a Python script or Jupyter notebook. It should take a couple of minutes to run. 
 
+Note: you should run this from an empty directory.
+
 
 .. code:: ipython3
 
