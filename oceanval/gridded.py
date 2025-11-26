@@ -392,52 +392,7 @@ def gridded_matchup(
                 lat_min_model = lats[0]
                 lat_max_model = lats[1]
 
-                # now do the same for the obs
-                extent = get_extent(ds_obs[0])
-
-                lon_max = extent[1]
-                lon_min = extent[0]
-                lat_max = extent[3]
-                lat_min = extent[2]
-
-                extent = get_extent(ds_model[0])
-                lon_max_model = extent[1]
-                lon_min_model = extent[0]
-                lat_max_model = extent[3]
-                lat_min_model = extent[2]   
-
-                lon_min = max(lon_min, lon_min_model)
-                lon_max = min(lon_max, lon_max_model)
-                lat_min = max(lat_min, lat_min_model)
-                lat_max = min(lat_max, lat_max_model)
-
-                if lon_min < -180:
-                    lon_min = -180
-                if lon_max > 180:
-                    lon_max = 180
-                if lat_min < -90:
-                    lat_min = -90
-                if lat_max > 90:
-                    lat_max = 90
-                # coerce to floats
-                lon_min = float(lon_min)
-                lon_max = float(lon_max)
-                lat_min = float(lat_min)
-                lat_max = float(lat_max)
-
-                lons = [lon_min, lon_max]
-                lats = [lat_min, lat_max]
-
-
-                n1 = ds_obs.contents.npoints[0]
-                n2 = ds_model.contents.npoints[0]
-
-                if n1 >= n2:
-                    regridding = "obs_to_model"
-                    # ds_obs.regrid(ds_model, method="bil")
-                else:
-                    regridding = "model_to_obs"
-                    # ds_model.regrid(ds_obs, method="bil")
+                regridding = "model_to_obs"
 
                 ds_obs.rename({ds_obs.variables[0]: "observation"})
                 ds_model.merge("time")
@@ -485,16 +440,24 @@ def gridded_matchup(
                 if len(ds_model.times) > 12:
                     # at this point, we need to identify the years that are common to both
                     ds_times = ds_model.times
-                    ds_years = [x.year for x in ds_times]
-                    ds_months = [x.month for x in ds_times]
+                    try:
+                        ds_years = [x.year for x in ds_times]
+                        ds_months = [x.month for x in ds_times]
+                    except:
+                        ds_years = [int(str(x).split("T")[0].split("-")[0]) for x in ds_times ]
+                        ds_months = [int(str(x).split("T")[0].split("-")[1]) for x in ds_times]
 
                     df_surface = pd.DataFrame(
                         {"year": ds_years, "month": ds_months}
                     )
 
                     ds_times = ds_obs.times
-                    ds_years = [x.year for x in ds_times]
-                    ds_months = [x.month for x in ds_times]
+                    try:
+                        ds_years = [x.year for x in ds_times]
+                        ds_months = [x.month for x in ds_times]
+                    except:
+                        ds_years = [int(str(x).split("T")[0].split("-")[0]) for x in ds_times ]
+                        ds_months = [int(str(x).split("T")[0].split("-")[1]) for x in ds_times]
                     df_obs = pd.DataFrame(
                         {"year": ds_years, "month": ds_months}
                     )
@@ -507,6 +470,7 @@ def gridded_matchup(
                         .reset_index()
                         .year.values
                     )
+                    print(sel_years)
                     ds_model.subset(years=sel_years)
                     if n_years > 1: 
                         ds_obs.subset(years=sel_years)
@@ -600,6 +564,21 @@ def gridded_matchup(
                     pickle.dump(the_dict, f)
 
                 ds_model_surface.subset(lon=lons, lat=lats)
+                ds_model_surface.run()
+
+                lon_name = [x for x in ds_model_surface.to_xarray().coords if "lon" in x][0 ]
+                lat_name = [x for x in ds_model_surface.to_xarray().coords if "lat" in x][0 ]
+                ds_test = ds_model_surface.copy()
+                ds_test.subset(variable = "observation")
+                ds_test.tmean()
+                ds_test.run()
+                df_test = ds_test.to_dataframe().reset_index().dropna()
+                lon_max = df_test[lon_name].max()
+                lon_min = df_test[lon_name].min()
+                lat_max = df_test[lat_name].max()
+                lat_min = df_test[lat_name].min()
+                ds_model_surface.subset(lon=[lon_min, lon_max], lat=[lat_min, lat_max])
+
                 ds_model_surface.to_nc(out_file, zip=True, overwrite=True)
                 out_file = out_file.replace(".nc", "_definitions.pkl")
                 # save definitions
@@ -617,9 +596,9 @@ def gridded_matchup(
                             ds_model.vertical_interp(levels , fixed = True)
 
                     if regridding == "obs_to_model":
-                        ds_obs.regrid(ds_model, method="bil")
+                        ds_obs.regrid(ds_model, method="con")
                     else:
-                        ds_model.regrid(ds_obs, method="bil")
+                        ds_model.regrid(ds_obs, method="con")
                     ds_obs.append(ds_model)
 
                     if len(ds_model.times) > 12:
@@ -682,7 +661,16 @@ def gridded_matchup(
                     with open(out1, "wb") as f:
                         pickle.dump(the_dict, f)
 
-                    ds_model.subset(lon=lons, lat=lats) 
+                    ds_test = ds_model.copy()
+                    ds_test.subset(variable = "observation")
+                    ds_test.tmean()
+                    ds_test.run()
+                    df_test = ds_test.to_dataframe().reset_index().dropna()
+                    lon_max = df_test[lon_name].max()
+                    lon_min = df_test[lon_name].min()
+                    lat_max = df_test[lat_name].max()
+                    lat_min = df_test[lat_name].min()
+                    ds_model.subset(lon=[lon_min, lon_max], lat=[lat_min, lat_max])
                     ds_model.to_nc(out_file_vertical, zip=True, overwrite=True)
                 out_file = out_file.replace(".nc", "_definitions.pkl")
                 # save definitions
