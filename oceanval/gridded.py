@@ -596,9 +596,9 @@ def gridded_matchup(
                             ds_model.vertical_interp(levels , fixed = True)
 
                     if regridding == "obs_to_model":
-                        ds_obs.regrid(ds_model, method="con")
+                        ds_obs.regrid(ds_model, method="bil")
                     else:
-                        ds_model.regrid(ds_obs, method="con")
+                        ds_model.regrid(ds_obs, method="bil")
                     ds_obs.append(ds_model)
 
                     if len(ds_model.times) > 12:
