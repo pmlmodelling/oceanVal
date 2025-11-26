@@ -25,6 +25,8 @@ To register an in-situ observational dataset, you will need to specify the follo
 - `model_variable`: A string specifying the name of the model variable to compare against the observations. 
 - `obs_path`: The path to the directory containing the observational data files.
 
+Note: when specifying a directory as `obs_path` ensure that the directory only contains files relevant to the observational variable being registered, as oceanVal will recursively identify and use all netCDF files in the directory.
+
 The following optional parameters can also be specified:
 
 - `source_info`: Additional information about the source of the data (e.g. publication details)
