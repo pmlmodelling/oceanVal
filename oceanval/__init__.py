@@ -56,18 +56,9 @@ def fix_toc(concise = True):
 
     vv_dict = dict()
     for vv in variables:
-        if vv != "ph":
-            vv_paths = [os.path.basename(x) for x in paths if vv in x]
-            if len(vv_paths) > 0:
-                vv_dict[vv] = vv_paths
-        else:
-            vv_paths = [
-                os.path.basename(x)
-                for x in paths
-                if vv in x and "phos" not in x and "chlo" not in x and "occci" not in x
-            ]
-            if len(vv_paths) > 0:
-                vv_dict[vv] = vv_paths
+        vv_paths = [os.path.basename(x) for x in paths if f"_{vv}.ip" in x]
+        if len(vv_paths) > 0:
+            vv_dict[vv] = vv_paths
     # get summary docs
     ss_paths = [os.path.basename(x) for x in paths if "summary" in x]
 
@@ -149,6 +140,7 @@ def fix_toc(concise = True):
                 with open(f"oceanval_report/notebooks/{ff}", "w") as file:
                     file.write(filedata)
                 i_chapter += 1
+
 
 
 # def fix_toc_comparison():
@@ -642,9 +634,9 @@ def validate(
     out_ff = f"oceanval_report/_build/html/index.html"
 
     # create a symlink to the html file
-    if os.path.exists("validation_report.html"):
-        os.remove("validation_report.html")
-    os.symlink(f"oceanval_report/_build/html/index.html", "validation_report.html")
+    if os.path.exists("oceanval_report.html"):
+        os.remove("oceanval_report.html")
+    os.symlink(f"oceanval_report/_build/html/index.html", "oceanval_report.html")
     webbrowser.open(
         "file://" + os.path.abspath(f"oceanval_report/_build/html/index.html")
     )

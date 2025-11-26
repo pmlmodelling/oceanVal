@@ -140,7 +140,14 @@ for vv in the_contents.variable:
         long_name = long_name.replace("Observed", "").strip().replace("surface", "Surface")
     ds_both.set_longnames({vv: new_name})
 
-ds_both.pub_plot(variable  = "model", limits = [z_min, z_max], title = "Model", fig = fig, gs = gs[0,0], trans = transformation)
+try:
+    ds_both.pub_plot(variable  = "model", limits = [z_min, z_max], title = "Model", fig = fig, gs = gs[0,0], trans = transformation)
+except:
+    lon_res = (lon_max - lon_min) / 100
+    lat_res = (lat_max - lat_min) / 100
+    ds_both.to_latlon(lon = [lon_min , lon_max], lat = [lat_min, lat_max], res = [lon_res, lat_res])
+    md("The model grid was regridded to a regular lon-lat grid for plotting purposes.")
+    ds_both.pub_plot(variable  = "model", limits = [z_min, z_max], title = "Model", fig = fig, gs = gs[0,0], trans = transformation)
 
 
 
