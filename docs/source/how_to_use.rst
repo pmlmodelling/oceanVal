@@ -23,7 +23,7 @@ To register an in-situ observational dataset, you will need to specify the follo
 - `name`: A name for the dataset, e.g. "temperature". This is so that oceanVal can keep track of things.
 - `source`: The source of the observational data (e.g. "NOAA"). 
 - `model_variable`: A string specifying the name of the model variable to compare against the observations. 
-- `obs_dir`: The path to the directory containing the observational data files.
+- `obs_path`: The path to the directory containing the observational data files.
 
 The following optional parameters can also be specified:
 
@@ -47,7 +47,7 @@ An example is shown below:
         source_info = "In-situ observations from the International Council for the Exploration of the Sea"
         short_name = "nitrate concentration"
         model_variable="temp",
-        obs_dir="/path/to/obs_data/",
+        obs_path="/path/to/obs_data/",
     )
 
 
@@ -59,7 +59,7 @@ To register a gridded observational dataset, you will need to specify the follow
 - `name`: A name for the dataset, e.g. "temperature". This is so that oceanVal can keep track of things.
 - `source`: The source of the observational data (e.g. "CMEMS"). 
 - `model_variable`: A string specifying the name of the model variable to compare against the observations.
-- `obs_dir`: The path to the directory containing the observational data files.
+- `obs_path`: The path to the directory containing the observational data files.
 - `obs_variable`: A string specifying the name of the variable in the observational data files.
 - `climatology`: A boolean indicating whether the observational data is a climatology. 
 
@@ -87,7 +87,7 @@ An example is shown below:
         short_name = "oxygen concentration"
         model_variable="oxygen",
         obs_variable="O2_concentration",
-        obs_dir="/path/to/obs_data/",
+        obs_path="/path/to/obs_data/",
         climatology=False,
     )
 
