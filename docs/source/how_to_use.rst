@@ -145,6 +145,11 @@ An example is shown below:
 **Note**: If you are validating a simulation with only monthly resolution, then you probably want to set the `point_time_res` parameter to `["year", "month"]` when matching up in-situ observations.
 This will result in day of year being ignored when matching up observations with the simulation output. If you use the default for `point_time_res`, then very few matchups will be found, as the day of year in the observations will almost never match that in the simulation output. 
 
+**Summing up simulation output**
+
+Sometimes observational data needs to be compared with the sum of multiple model variable.
+You can do this by setting something like "var1+var2+var3" as the `model_variable` when registering the observational dataset.
+
 Step 3: Calculate validation statistics and generate html summary
 --------------------------------------
 
