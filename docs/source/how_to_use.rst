@@ -169,9 +169,9 @@ This must be run in the same directory where the matchup files were created.
 The following options are available:
 
 - `variables`: A list of variable names to validate. This must match those supplied as `name`. If not specified, all registered variables will be validated. 
-- `title`: A title for the html summary page. 
 - `lon_lim`: The longitude limits for the validation region (e.g. [-180, 180]).
 - `lat_lim`: The latitude limits for the validation region (e.g. [-90, 90]).
 - `region`: A string specifying the region being validated. Only "global" and "nwes" (northwest European Shelf are currently available).
+- `concise`: A boolean indicating whether to generate a concise html summary page. This defaults to True.
 
 This will then generate and open an html page that can be viewed in a web browser.
