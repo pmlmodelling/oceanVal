@@ -42,6 +42,18 @@ class Validator:
         self.rules[field] = rule
 
     keys = session_info["keys"]
+    # add a deleter that removes from keys list
+    def __delattr__(self, name):
+        if name != "keys" and "rules" not in name:
+            if name in self.keys:
+                self.keys.remove(name)
+        super().__delattr__(name)
+    # add remove method
+    def remove(self, name):
+        if name != "keys" and "rules" not in name:
+            if name in self.keys:
+                self.keys.remove(name)
+        super().__delattr__(name)
 
 
     # ensure self.x = y, adds x to the keys list
@@ -117,30 +129,49 @@ class Validator:
 
         try:
             point_dir = getattr(self, name).point_dir
+        except:
+            point_dir = None
+        try:
             point = getattr(self, name).point
+        except:
+            point = None
+        try:    
             point_source = getattr(self, name).point_source
+        except:
+            point_source = None
+        try:
             orig_sources = getattr(self, name).sources
-            # get point start
-            point_start = getattr(self, name).point_start
-            point_end = getattr(self, name).point_end
-            depths = getattr(self, name).depths
-            vertical_point = getattr(self, name).vertical_point
-            old_model_variable = getattr(self, name).model_variable
-            old_obs_multiplier = getattr(self, name).obs_multiplier_point
-            old_binning = getattr(self, name).binning
         except:
             orig_sources = dict()
-            point = None,
-            point_source = None
-            point_dir = None
+            # get point start
+        try:
+            point_start = getattr(self, name).point_start
+        except:
             point_start = -1000
+        try:
+            point_end = getattr(self, name).point_end
+        except:
             point_end = 3000
+        try:
+            depths = getattr(self, name).depths
+        except:
             depths = None
+        try:
+            vertical_point = getattr(self, name).vertical_point
+        except:
             vertical_point = None
+        try:
+            old_model_variable = getattr(self, name).model_variable
+        except:
             old_model_variable = None
+        try:
+            old_obs_multiplier = getattr(self, name).obs_multiplier_point
+        except:
             old_obs_multiplier = 1
-            old_binning = dict()
-            pass
+        try:
+            old_binning = getattr(self, name).binning
+        except:
+            old_binning = None
 
         if old_model_variable is not None and old_model_variable != model_variable:
             if old_model_variable != "auto":
@@ -304,33 +335,54 @@ class Validator:
         """
 
         try:
-            gridded_dir = getattr(self, name).gridded_dir   
-            obs_variable = getattr(self, name).obs_variable
-            gridded = getattr(self, name).gridded
-            gridded_source = getattr(self, name).gridded_source
-            orig_sources = getattr(self, name).sources
-            gridded_start = getattr(self, name).gridded_start
-            gridded_end = getattr(self, name).gridded_end
-            old_model_variable = getattr(self, name).model_variable 
-            # old climatology
-            old_climatology = getattr(self, name).climatology
-            old_obs_multiplier = getattr(self, name).obs_multiplier_gridded
-            vertical_gridded = getattr(self, name).vertical_gridded
-            thredds = getattr(self, name).thredds
+            gridded_dir = getattr(self, name).gridded_dir
         except:
             gridded_dir = "auto"
+        try:
+            obs_variable = getattr(self, name).obs_variable
+        except:
             obs_variable = "auto"
-            gridded_source = "auto"
+        try:
+            gridded = getattr(self, name).gridded
+        except:
             gridded = False
+        try:
+            gridded_source = getattr(self, name).gridded_source
+        except:
+            gridded_source = "auto"
+        try:
+            orig_sources = getattr(self, name).sources
+        except:
             orig_sources = dict()
+        try:
+            gridded_start = getattr(self, name).gridded_start
+        except:
             gridded_start = -1000
+        try:
+            gridded_end = getattr(self, name).gridded_end
+        except:
             gridded_end = 3000
+        try:
+            old_model_variable = getattr(self, name).model_variable 
+        except:
             old_model_variable = None
+        try:
+            old_climatology = getattr(self, name).climatology
+        except:
             old_climatology = None
+        try:
+            old_obs_multiplier = getattr(self, name).obs_multiplier_gridded
+        except:
             old_obs_multiplier = 1
+        try:
+            vertical_gridded = getattr(self, name).vertical_gridded
+        except:
             vertical_gridded = False
+        try:
+            thredds = getattr(self, name).thredds
+        except:
             thredds = False
-            pass
+
 
         if old_model_variable is not None and old_model_variable != model_variable:
             if old_model_variable != "auto":
@@ -354,7 +406,6 @@ class Validator:
             end = int(end)
         except:
             raise ValueError("start and end must be integers")
-
 
         assumed = []
         if source_info is None:
@@ -396,7 +447,7 @@ class Validator:
             if len(bad_cols) > 0:
                 raise ValueError(f"Invalid columns {bad_cols} found in point data file {vv}")
             if "depth" in df.columns:
-                vertical = vertical_option
+                vertical_option = True
             # lon/lat/observation *must* be in df
             for req_col in ["lon", "lat", "observation"]:
                 if req_col not in df.columns:
@@ -452,8 +503,6 @@ class Validator:
         var.point_dir = obs_path
         # find csv files in point_dir
         var.thredds = thredds
-
-        var.vertical = vertical
 
         var.obs_variable = obs_variable
         # check this exists
