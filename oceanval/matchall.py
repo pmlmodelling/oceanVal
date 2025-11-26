@@ -538,6 +538,9 @@ def matchup(
         point["all"] = point_new
         point["surface"] = []
     # loop through definition keys
+
+    if len(definitions.keys) == 0:
+        raise ValueError("You do not appear to have asked for any variables to be validated!")
     for key in definitions.keys:
         try:
             if definitions[key].vertical_point is False:
