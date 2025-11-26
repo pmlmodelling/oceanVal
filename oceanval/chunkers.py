@@ -24,8 +24,8 @@ def add_chunks( dir=None):
     if len(glob.glob("matched/gridded/nws/**/*.nc")) > 0:
         nws = True
 
-    paths = glob.glob(f"book/notebooks/*.py")
-    paths += glob.glob("book/compare/notebooks/*.py")
+    paths = glob.glob(f"oceanval_report/notebooks/*.py")
+    paths += glob.glob("oceanval_report/compare/notebooks/*.py")
     if dir is not None:
         paths += glob.glob(f"{dir}/*.py")
 
