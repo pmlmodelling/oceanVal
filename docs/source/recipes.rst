@@ -29,13 +29,13 @@ The recipe dictionary must contain exactly one key-value pair, where:
 
 The table below summarizes the available recipes.
 
-+--------+-------------+
-| Region | Variable    |
-+--------+-------------+
-| Global | Temperature |
-+--------+-------------+
-| Global | Nitrate     |
-+--------+-------------+
++------------+--------------+--------------------------+-------------------------------+
+| **Region** | **Variable** | **Recipe**               | **Data source**               |
++------------+--------------+--------------------------+-------------------------------+
+| Global     | Temperature  | {"temperature": "cobe2"} | COBE2 Sea Surface Temperature |
++------------+--------------+--------------------------+-------------------------------+
+| Global     | Nitrate      | {"nitrate": "woa23"}     | World Ocean Atlas 2023        |
++------------+--------------+--------------------------+-------------------------------+
 
 
 
