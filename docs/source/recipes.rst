@@ -11,7 +11,6 @@ Overview
 
 This is carried out using the ``recipe`` parameter in the ``add_gridded_comparison`` function, as follows:
 
-Function Usag
 
 .. code-block:: python
 
@@ -23,7 +22,7 @@ Function Usag
        recipe={"temperature": "cobe2"}
    )
 
-This is a minimalist example, where you have said you want to matchup temperature from the COBE2 sea surface temperature dataset with the model temperature, with variable name "votemper".
+This is a minimalist example, where you have said you want to matchup temperature from the [COBE2](https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc) sea surface temperature dataset with the model temperature, with variable name "votemper".
 
 The recipe dictionary must contain exactly one key-value pair, where:
 
@@ -62,20 +61,60 @@ WOA23 - World Ocean Atlas 2023
 
 **Source**: NOAA World Ocean Atlas 2023
 
-**Variables**: nitrate, phosphate, oxygen
+**Variables**: nitrate, phosphate, oxygen, silicate, temperature, salinity
 
-**Recipes**: {"nitrate": "woa23"}, {"phosphate": "woa23"}, {"oxygen": "woa23"}
+**Recipes**: {"nitrate": "woa23"}, {"phosphate": "woa23"}, {"oxygen": "woa23"}, {"silicate": "woa23"}, {"temperature": "woa23"}, {"salinity
 .. Units
 
 Data is stored in the following units:
 
-    **Nitrate**: micromoles per liter (µmol/L)
+    **Nitrate**: micromoles per kg (µmol/kg)
 
-    **Phosphate**: micromoles per liter (µmol/L)
+    **Phosphate**: micromoles per kg (µmol/kg)
 
     **Oxygen**: micromoles per kilogram (µmol/kg)
 
+    **Silicate**: micromoles per kg (µmol/kg)
+
+    **Temperature**: degrees Celsius (°C)
+
+    **Salinity**: practical salinity units (PSU)
+
 **URL**: https://www.ncei.noaa.gov/products/world-ocean-atlas 
+
+**Note**: temperature and salinity are available for different decadal climatologies. You must therefore specify start and end years when using these recipes to ensure the correct data is downloaded. 
+
+The climatological periods available are:
+
+* 1955-1964
+
+* 1965-1974
+
+* 1975-1984
+
+* 1985-1994
+
+* 1995-2004
+
+* 2005-2014
+
+* 2015-2022
+
+The start and end provided must fall within one of these periods. 
+For example, if you want to validate against the 1995-2004 climatology, you would set start = 1995 and end = 2004 when calling the ``add_gridded_comparison`` function, as follows:
+
+.. code-block:: python
+
+   definitions.add_gridded_comparison(
+       model_variable="temp",
+       recipe={"temperature": "woa23"},
+       start = 1995,
+       end = 2004
+   )
+
+
+
+
 
 
 **Usage Example**:
