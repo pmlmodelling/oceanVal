@@ -102,6 +102,23 @@ If you are registering the same variable separate for point and gridded data, ma
 You will get an error if you are inconsistent.
 
 
+.. directive-name:: How does oceanVal handle gridded data?
+
+    oceanVal works on the basis that gridded data can be converted to one of the following:
+
+    1. A time series of monthly averages for each grid cell
+    2. A climatological monthly average for each grid cell 
+    3. A climatological annual average for each grid cell
+
+    If you provide multi-year observational data, oceanVal will calculate a mult-year observational average, which is compared with the model in a like-for-like manner.    
+
+    If you provide single-year observational data with monthly resolution, oceanVal will generate a comparable climatological monthly average from the model simulation output for comparison.
+    This will be based on the year range you have specified.
+
+    If you have provided a single-year observational dataset with only one time step, oceanVal will assume this is a climatological annual average.
+    A model climatological annual average will be generated from the simulation output for comparison.
+
+
 
 Step 2: Matchup model output with observations
 --------------------------------------
