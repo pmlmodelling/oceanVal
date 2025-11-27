@@ -84,6 +84,8 @@ COBE2 - Sea Surface Temperature
 
 **Source**: COBE-SST 2 (NOAA Physical Sciences Laboratory)
 
+**Vertical information**: Surface only
+
 **URL**: https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc
 
 **Usage Example**:
@@ -107,9 +109,9 @@ WOA23 - World Ocean Atlas 2023
 
 **Variables**: nitrate, phosphate, oxygen, silicate, temperature, salinity
 
+**Vertical information**: Vertically resolved to 800m depth
+
 **Recipes**: {"nitrate": "woa23"}, {"phosphate": "woa23"}, {"oxygen": "woa23"}, {"silicate": "woa23"}, {"temperature": "woa23"}, {"salinity": "woa23"}
-
-
 
 Data is stored in the following units:
 
@@ -185,6 +187,8 @@ Ocean Colour CCI - Chlorophyll and KD490
 
 **Variables**: chlorophyll, KD490
 
+**Vertical information**: Surface only
+
 **Recipe**: {"chlorophyll": "occci"}, {"kd490": "occci"}
 
 **URL**: https://esa-oceancolour-cci.org/
@@ -213,6 +217,8 @@ GLODAPv2.2016b
 **Source**: Global Ocean Data Analysis Project version 2 (GLODAPv2.2016b)
 
 **Variables**: pH, alkalinity
+
+**Vertical information**: Surface only
 
 **Recipes**: {"pH": "glodap"}, {"alkalinity": "glodap"}
 
@@ -250,6 +256,8 @@ NSBC - North Sea Biogeochemical Climatology
 **Source**: North Sea Biogeochemical Climatology (University of Hamburg)
 
 **Variables**: ammonium, nitrate, phosphate, silicate, chlorophyll, oxygen, temperature, salinity
+
+**Vertical information**: Vertically resolved climatologies 
 
 **URL**: https://www.hereon.de/en/institute/coastal-research/projects/north-sea-biogeochemical-climatology-nsbc.php
 
