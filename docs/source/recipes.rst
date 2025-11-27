@@ -15,20 +15,23 @@ This is carried out using the ``recipe`` parameter in the ``add_gridded_comparis
 .. code-block:: python
 
    from oceanval.parsers import definitions
-   
-   # Using a recipe in add_gridded_comparison
    definitions.add_gridded_comparison(
        model_variable="foobar",
        recipe={"temperature": "cobe2"}
    )
 
-This is a minimalist example, where you have said you want to matchup temperature from the (COBE2)[https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc] sea surface temperature dataset with the model temperature, with variable name "votemper".
+This is a minimalist example, where you have said you want to matchup temperature from the (COBE2)[https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc] sea surface temperature dataset with the model temperature, with variable name "foobar".
 
 The recipe dictionary must contain exactly one key-value pair, where:
 
 * **Key**: Variable name (e.g., "temperature", "nitrate")
 * **Value**: Data source identifier (e.g., "cobe2", "woa23", "nsbc")
 
+The table below summarizes the available recipes.
+
+| Variable          | Region | Recipe | Data Source | URL | 
+|-------------------|--------|--------|-------------|-----|
+| Temperature       | Global | {"temperature": "cobe2"} | COBE2 Sea Surface Temperature | https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc | 
 
 Available recipes for global gridded data
 -----------------
@@ -161,6 +164,7 @@ Ocean Colour CCI - Chlorophyll and KD490
 This data is stored in the following units:
 
     **Chlorophyll**: milligrams per cubic meter (mg/m³)
+
     **KD490**: inverse meters (m⁻¹)
 
 GLODAPv2.2016b

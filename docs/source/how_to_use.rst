@@ -106,7 +106,7 @@ You will get an error if you are inconsistent.
 
     oceanVal works on the basis that gridded data can be converted to one of the following:
 
-    1. A time series of monthly averages for each grid cell
+    1. A time series of multi-year monthly averages for each grid cell
     2. A climatological monthly average for each grid cell 
     3. A climatological annual average for each grid cell
 
