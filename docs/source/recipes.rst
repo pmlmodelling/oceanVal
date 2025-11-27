@@ -3,6 +3,8 @@ Data Recipes
 
 To make life easier, oceanVal provides a number of built in recipes, which will allow you to easily validate common oceanic varibles from data that is downloadable.
 
+**Note**: recipes are only available for gridded data at present.
+
 
 Overview
 --------
@@ -28,6 +30,7 @@ The recipe dictionary must contain exactly one key-value pair, where:
 * **Key**: Variable name (e.g., "temperature", "nitrate")
 * **Value**: Data source identifier (e.g., "cobe2", "woa23", "nsbc")
 
+
 Available recipes for global gridded data
 -----------------
 
@@ -49,13 +52,27 @@ COBE2 - Sea Surface Temperature
        recipe={"temperature": "cobe2"}
    )
 
+COBE2 data is stored in the following units:
+
+    temperature: degrees Celsius (°C)
+
 
 WOA23 - World Ocean Atlas 2023
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Source**: NOAA World Ocean Atlas 2023
 
-**Variables**: nitrate
+**Variables**: nitrate, phosphate, oxygen
+
+**Recipes**: {"nitrate": "woa23"}, {"phosphate": "woa23"}, {"oxygen": "woa23"}
+.. Units
+
+Data is stored in the following units:
+
+    nitrate: micromoles per liter (µmol/L)
+    phosphate: micromoles per liter (µmol/L)
+    oxygen: micromoles per kilogram (µmol/kg)
+
 
 
 **URL**: https://www.ncei.noaa.gov/products/world-ocean-atlas 
@@ -69,6 +86,17 @@ WOA23 - World Ocean Atlas 2023
        model_variable="no3",
        recipe={"nitrate": "woa23"}
    )
+
+This data is vertically resolved, so if you want vertically resolved validation you will need to modify things as follows:
+
+.. code-block:: python
+
+   definitions.add_gridded_comparison(
+       model_variable="no3",
+       recipe={"nitrate": "woa23"},
+       vertical = True
+   )
+
 
 Available recipes for the northwest European shelf
 -----------------
@@ -87,7 +115,6 @@ NSBC - North Sea Biogeochemical Climatology
 
 .. code-block:: python
 
-   # Any of the 8 supported variables
    definitions.add_gridded_comparison(
        model_variable="chl",
        recipe={"chlorophyll": "nsbc"}
@@ -108,3 +135,14 @@ This data is vertically resolved, so if you want vertically resolved validation 
        vertical = True
    )
 
+
+NSBC data is stored in the following units:
+
+    phosphate: millimoles per liter (mmol/L)
+    nitrate: millimoles per liter (mmol/L)
+    ammonium: millimoles per liter (mmol/L)
+    silicate: millimoles per liter (mmol/L)
+    chlorophyll: milligrams per cubic meter (mg/m³)
+    oxygen: milliliters per liter (ml/L)
+    temperature: degrees Celsius (°C)
+    salinity: practical salinity units (PSU)
