@@ -29,12 +29,13 @@ The recipe dictionary must contain exactly one key-value pair, where:
 
 The table below summarizes the available recipes.
 
-+------------------------+------------------------+
-Region                      Variable
-+------------------------+------------------------+
-Global                      Temperature 
-+------------------------+------------------------+
-Global                      Nitrate
++--------+-------------+
+| Region | Variable    |
++--------+-------------+
+| Global | Temperature |
++--------+-------------+
+| Global | Nitrate     |
++--------+-------------+
 
 
 
