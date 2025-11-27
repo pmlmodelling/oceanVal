@@ -8,6 +8,101 @@ from oceanval.session import session_info
 
 session_info["keys"] = []
 
+def find_recipe(x):
+    output = dict()
+    # check if there is only one key and one value
+    if len(x.keys()) != 1:
+        raise ValueError("Recipe dictionary must have exactly one key") 
+    if len(x.values()) != 1:
+        raise ValueError("Recipe dictionary must have exactly one value") 
+    
+    valid_recipes = dict()
+    valid_recipes["nitrate"] = "nsbc"
+
+    name = x.keys()
+    # first key
+    name = list(name)[0]
+    value = x[name]
+    # add a suitable short name
+    if name == "chlorophyll":
+        output["short_name"] = "chlorophyll concentration"
+    if name == "oxygen":
+        output["short_name"] = "dissolved oxygen"
+    if name == "temperature":
+        output["short_name"] = "sea temperature"
+    if name == "salinity":
+        output["short_name"] = "salinity"
+    if name == "nitrate":
+        output["short_name"] = "nitrate concentration"
+    if name == "ammonium":
+        output["short_name"] = "ammonium concentration"
+    if name == "phosphate":
+        output["short_name"] = "phosphate concentration"
+    if name == "silicate":
+        output["short_name"] = "silicate concentration"
+    # add a long name
+    if name == "chlorophyll":
+        output["long_name"] = "chlorophyll a concentration"
+    if name == "oxygen":
+        output["long_name"] = "dissolved oxygen concentration"
+    if name == "temperature":
+        output["long_name"] = "sea water temperature"
+    if name == "salinity":
+        output["long_name"] = "sea water salinity"
+    if name == "nitrate":
+        output["long_name"] = "nitrate concentration"
+    if name == "ammonium":
+        output["long_name"] = "ammonium concentration"
+    if name == "phosphate":
+        output["long_name"] = "phosphate concentration"
+    if name == "silicate":
+        output["long_name"] = "silicate concentration"
+    # add title
+    if name == "chlorophyll":
+        output["short_title"] = "Chlorophyll"
+    if name == "oxygen":
+        output["short_title"] = "Oxygen"
+    if name == "temperature":
+        output["short_title"] = "Temperature"
+    if name == "salinity":
+        output["short_title"] = "Salinity"
+    if name == "nitrate":
+        output["short_title"] = "Nitrate"
+    if name == "ammonium":
+        output["short_title"] = "Ammonium"
+    if name == "phosphate":
+        output["short_title"] = "Phosphate"
+    if name == "silicate":
+        output["short_title"] = "Silicate"
+
+
+    
+    if value.lower() == "nsbc":
+        if name.lower() in ["ammonium", "nitrate", "phosphate", "silicate", "chlorophyll", "oxygen", "temperature", "salinity"]:
+            url = f"https://icdc.cen.uni-hamburg.de/thredds/dodsC/ftpthredds/nsbc/level_3/climatological_monthly_mean/NSBC_Level3_{name}__UHAM_ICDC__v1.1__0.25x0.25deg__OAN_1960_2014.nc"
+            output["obs_path"] = url
+            output["source"] = "NSBC"
+            output["source_info"] = "Hinrichs, Iris; Gouretski, Viktor; Paetsch, Johannes; Emeis, Kay; Stammer, Detlef (2017). North Sea Biogeochemical Climatology (Version 1.1)."
+            output["name"] = name
+            output["thredds"] = True
+            output["climatology"] = True
+
+
+
+
+
+
+
+            return output
+
+    raise ValueError(f"Recipe value {value} is not valid for recipe name {name}")
+
+
+
+
+
+
+    return x
 
 def get_name(obj):
     namespace = globals()
@@ -75,7 +170,7 @@ class Validator:
     # add a method that let's user create a new Variable and add it to the definitions
     # 
     def add_gridded_comparison(self, 
-                               name, 
+                               name = None, 
                                long_name = None, 
                                short_name = None, 
                                short_title = None, 
@@ -90,7 +185,8 @@ class Validator:
                                climatology = None, 
                                obs_multiplier = 1,
                                obs_adder = 0,
-                               thredds = False
+                               thredds = False,
+                               recipe = None
                                    ): 
         """
 
@@ -129,6 +225,17 @@ class Validator:
         obs_adder (float): Adder for the observation
 
         """
+        if recipe is not None:
+            recipe_info = find_recipe(recipe)
+            obs_path = recipe_info["obs_path"]
+            source = recipe_info["source"]
+            source_info = recipe_info["source_info"]
+            thredds = recipe_info["thredds"]
+            climatology = recipe_info["climatology"]
+            name = recipe_info["name"]
+            short_name = recipe_info["short_name"]
+            long_name = recipe_info["long_name"]
+            short_title = recipe_info["short_title"]
 
         try:
             point_dir = getattr(self, name).point_dir
