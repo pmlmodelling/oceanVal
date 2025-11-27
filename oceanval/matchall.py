@@ -684,6 +684,7 @@ def matchup(
                 f"Setting cores to {cores} as this is the number of cores available on your system"
             )
     nc.options(cores=cores)
+    session_info["cores"] = cores
 
     # check lon_lim and lat_lim are lists
 
