@@ -69,11 +69,11 @@ WOA23 - World Ocean Atlas 2023
 
 Data is stored in the following units:
 
-    **nitrate**: micromoles per liter (µmol/L)
+    **Nitrate**: micromoles per liter (µmol/L)
 
-    **phosphate**: micromoles per liter (µmol/L)
+    **Phosphate**: micromoles per liter (µmol/L)
 
-    **oxygen**: micromoles per kilogram (µmol/kg)
+    **Oxygen**: micromoles per kilogram (µmol/kg)
 
 **URL**: https://www.ncei.noaa.gov/products/world-ocean-atlas 
 
@@ -138,18 +138,18 @@ This data is vertically resolved, so if you want vertically resolved validation 
 
 NSBC data is stored in the following units:
 
-    **phosphate**: millimoles per liter (mmol/L)
+    **Phosphate**: millimoles per liter (mmol/L)
 
-    **nitrate**: millimoles per liter (mmol/L)
+    **Nitrate**: millimoles per liter (mmol/L)
 
-    **ammonium**: millimoles per liter (mmol/L)
+    **Ammonium**: millimoles per liter (mmol/L)
 
-    **silicate**: millimoles per liter (mmol/L)
+    **Silicate**: millimoles per liter (mmol/L)
 
-    **chlorophyll**: milligrams per cubic meter (mg/m³)
+    **Chlorophyll**: milligrams per cubic meter (mg/m³)
 
-    **oxygen**: milliliters per liter (ml/L)
+    **Oxygen**: milliliters per liter (ml/L)
 
-    **temperature**: degrees Celsius (°C)
+    **Temperature**: degrees Celsius (°C)
 
-    **salinity**: practical salinity units (PSU)
+    **Salinity**: practical salinity units (PSU)
