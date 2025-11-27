@@ -19,6 +19,8 @@ def find_recipe(x):
     valid_recipes = dict()
     valid_recipes["nitrate"] = "nsbc"
 
+    output["vertical"] = None
+
     name = x.keys()
     # first key
     name = list(name)[0]
@@ -75,6 +77,21 @@ def find_recipe(x):
     if name == "silicate":
         output["short_title"] = "Silicate"
 
+    # COBE2 temperature options
+    
+    if value.lower() == "cobe2":
+        if name.lower() == "temperature": 
+            url = f"https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc"
+            output["obs_path"] = url
+            output["source"] = "COBE2"
+            output["source_info"] = "COBE-SST 2 and Sea Ice data provided by the NOAA PSL, Boulder, Colorado, USA, from their website at https://psl.noaa.gov/data/gridded/data.cobe2.html."
+            output["name"] = name
+            output["thredds"] = True
+            output["climatology"] = False
+            output["vertical"] = False
+
+            return output 
+
 
     
     if value.lower() == "nsbc":
@@ -88,18 +105,9 @@ def find_recipe(x):
             output["climatology"] = True
 
 
-
-
-
-
-
             return output
 
     raise ValueError(f"Recipe value {value} is not valid for recipe name {name}")
-
-
-
-
 
 
     return x
@@ -117,6 +125,15 @@ class Variable:
     def __init__(self):
         self.long_name = None
         self.gridded = None 
+    def __str__(self):
+    # add a print method for each atrribute
+        attrs = vars(self)
+        return '\n'.join("%s: %s" % item for item in attrs.items())  
+    # add a repr method
+    def __repr__(self):
+        attrs = vars(self)
+        return '\n'.join("%s: %s" % item for item in attrs.items()) 
+
 
 
 
@@ -166,6 +183,8 @@ class Validator:
         # if key == "chlorophyll":
         #     return  
         return getattr(self, key, None)
+    
+
     
     # add a method that let's user create a new Variable and add it to the definitions
     # 
@@ -236,15 +255,14 @@ class Validator:
             short_name = recipe_info["short_name"]
             long_name = recipe_info["long_name"]
             short_title = recipe_info["short_title"]
+            # vertical is not None
+            if recipe_info["vertical"] is not None:
+                vertical = recipe_info["vertical"]
 
         try:
             point_dir = getattr(self, name).point_dir
         except:
             point_dir = None
-        try:
-            point = getattr(self, name).point
-        except:
-            point = None
         try:    
             point_source = getattr(self, name).point_source
         except:
@@ -262,10 +280,6 @@ class Validator:
             point_end = getattr(self, name).point_end
         except:
             point_end = 3000
-        try:
-            depths = getattr(self, name).depths
-        except:
-            depths = None
         try:
             vertical_point = getattr(self, name).vertical_point
         except:
@@ -371,12 +385,11 @@ class Validator:
         var.n_levels = 1
         var.vertical_gridded = vertical
         var.vertical_point = vertical_point
-        var.depths = depths
         var.gridded_start = start
         var.gridded_end = end
         var.point_start = point_start
         var.point_end = point_end
-        var.point = point
+        # var.point = point
         var.point_source = point_source
         var.gridded = True
         var.long_name = long_name
@@ -613,7 +626,7 @@ class Validator:
         var.gridded_end = gridded_end
         var.obs_multiplier_gridded= old_obs_multiplier
         var.obs_multiplier_point= obs_multiplier
-        var.point = True
+        # var.point = True
         var.gridded = gridded
         var.long_name = long_name
         if var.long_name is None:
@@ -691,7 +704,6 @@ def generate_mapping(ds):
         ds_contents["long_name"] = [str(x) for x in ds_contents["long_name"]]
 
         ds_contents_top = ds_contents.query("nlevels == 1").reset_index(drop=True)
-        #ds_contents = ds_contents.query("nlevels > 1").reset_index(drop=True)
         n_levels = int(ds_contents.nlevels.max())
         if n_levels > session_info["n_levels"]:
             session_info["n_levels"] = n_levels
