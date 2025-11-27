@@ -102,7 +102,7 @@ If you are registering the same variable separate for point and gridded data, ma
 You will get an error if you are inconsistent.
 
 
-.. directive-name:: How does oceanVal handle gridded data?
+.. admonition:: How does oceanVal handle gridded data?
 
     oceanVal works on the basis that gridded data can be converted to one of the following:
 
