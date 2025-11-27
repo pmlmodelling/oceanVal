@@ -18,11 +18,11 @@ This is carried out using the ``recipe`` parameter in the ``add_gridded_comparis
    
    # Using a recipe in add_gridded_comparison
    definitions.add_gridded_comparison(
-       model_variable="votemper",
+       model_variable="foobar",
        recipe={"temperature": "cobe2"}
    )
 
-This is a minimalist example, where you have said you want to matchup temperature from the [COBE2](https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc) sea surface temperature dataset with the model temperature, with variable name "votemper".
+This is a minimalist example, where you have said you want to matchup temperature from the (COBE2)[https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc] sea surface temperature dataset with the model temperature, with variable name "votemper".
 
 The recipe dictionary must contain exactly one key-value pair, where:
 
@@ -47,7 +47,7 @@ COBE2 - Sea Surface Temperature
 .. code-block:: python
 
    definitions.add_gridded_comparison(
-       model_variable="temp",
+       model_varianble ="foobar",
        recipe={"temperature": "cobe2"}
    )
 
@@ -63,7 +63,7 @@ WOA23 - World Ocean Atlas 2023
 
 **Variables**: nitrate, phosphate, oxygen, silicate, temperature, salinity
 
-**Recipes**: {"nitrate": "woa23"}, {"phosphate": "woa23"}, {"oxygen": "woa23"}, {"silicate": "woa23"}, {"temperature": "woa23"}, {"salinity
+**Recipes**: {"nitrate": "woa23"}, {"phosphate": "woa23"}, {"oxygen": "woa23"}, {"silicate": "woa23"}, {"temperature": "woa23"}, {"salinity": "woa23"}
 
 
 
@@ -82,6 +82,16 @@ Data is stored in the following units:
     **Salinity**: practical salinity units (PSU)
 
 **URL**: https://www.ncei.noaa.gov/products/world-ocean-atlas 
+
+
+**Usage Example**:
+
+.. code-block:: python
+
+   definitions.add_gridded_comparison(
+       model_variable="foobar",
+       recipe={"nitrate": "woa23"}
+   )
 
 **Note**: temperature and salinity are available for different decadal climatologies. You must therefore specify start and end years when using these recipes to ensure the correct data is downloaded. 
 
@@ -107,24 +117,10 @@ For example, if you want to validate against the 1995-2004 climatology, you woul
 .. code-block:: python
 
    definitions.add_gridded_comparison(
-       model_variable="temp",
+       model_variable="foobar",
        recipe={"temperature": "woa23"},
        start = 1995,
        end = 2004
-   )
-
-
-
-
-
-
-**Usage Example**:
-
-.. code-block:: python
-
-   definitions.add_gridded_comparison(
-       model_variable="no3",
-       recipe={"nitrate": "woa23"}
    )
 
 This data is vertically resolved, so if you want vertically resolved validation you will need to modify things as follows:
@@ -132,20 +128,20 @@ This data is vertically resolved, so if you want vertically resolved validation 
 .. code-block:: python
 
    definitions.add_gridded_comparison(
-       model_variable="no3",
+       model_variable="foobar" ,
        recipe={"nitrate": "woa23"},
        vertical = True
    )
 
-Ocean Colour CCI chlorophyll
+Ocean Colour CCI - Chlorophyll and KD490
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-**Source**: ESA Ocean Colour Climate Change Initiative (OC-CCI)
+**Source**: ESA Ocean Colour Climate Change Initiative (OC-CCI) v6.0
 
-**Variables**: chlorophyll
+**Variables**: chlorophyll, KD490
 
-**Recipe**: {"chlorophyll": "occci"}
+**Recipe**: {"chlorophyll": "occci"}, {"kd490": "occci"}
 
 **URL**: https://esa-oceancolour-cci.org/
 
@@ -153,15 +149,50 @@ Ocean Colour CCI chlorophyll
 .. code-block:: python
 
    definitions.add_gridded_comparison(
-       model_variable="chl",
-       recipe={"chlorophyll": "occci"}
+       model_variable="foobar",
+       recipe={"chlorophyll": "occci"   }
    )
+    definitions.add_gridded_comparison(
+         model_variable="foobar",
+         recipe={"kd490": "occci"}
 
 **Years available": monthly averages for 1998-2024
 
 This data is stored in the following units:
 
     **Chlorophyll**: milligrams per cubic meter (mg/m³)
+    **KD490**: inverse meters (m⁻¹)
+
+GLODAPv2.2016b
+-----------------
+**Source**: Global Ocean Data Analysis Project version 2 (GLODAPv2.2016b)
+
+**Variables**: pH, alkalinity
+
+**Recipes**: {"pH": "glodap"}, {"alkalinity": "glodap"}
+
+**URL**: https://www.glodap.info/
+
+**Usage Example**:
+
+.. code-block:: python
+
+   definitions.add_gridded_comparison(
+       model_variable="foobar",
+       recipe={"pH": "glodap"}
+   )
+    definitions.add_gridded_comparison(
+         model_variable="foobar",
+         recipe={"alkalinity": "glodap"}
+    )
+This data is stored in the following units:
+
+    **pH**: total scale
+
+    **Alkalinity**: micromoles per kilogram (µmol/kg)
+
+**Note**: These are annual climatologies covering the years 1972-2013. Please read this reference before deciding a suitable simulation to use for comparison: https://essd.copernicus.org/articles/8/325/2016/.
+
 
 
 
@@ -183,12 +214,12 @@ NSBC - North Sea Biogeochemical Climatology
 .. code-block:: python
 
    definitions.add_gridded_comparison(
-       model_variable="chl",
+       model_variable="foobar",
        recipe={"chlorophyll": "nsbc"}
    )
    
    definitions.add_gridded_comparison(
-       model_variable="no3",
+        model_variable="foobar",
        recipe={"nitrate": "nsbc"}
    )
 
@@ -197,7 +228,7 @@ This data is vertically resolved, so if you want vertically resolved validation 
 .. code-block:: python
 
    definitions.add_gridded_comparison(
-       model_variable="no3",
+            model_variable="foobar",
        recipe={"nitrate": "nsbc"},
        vertical = True
    )

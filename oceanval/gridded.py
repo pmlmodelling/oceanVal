@@ -237,15 +237,6 @@ def gridded_matchup(
             with warnings.catch_warnings(record=True) as w:
 
                 new_paths = copy.deepcopy(paths)
-                if vv_source == "glodap":
-                    for ff in paths:
-                        ff_years = times_dict[ff].year
-                        if (
-                            len([x for x in ff_years if x in range(1971, 2015)])
-                            == 0
-                        ):
-                            new_paths.remove(ff)
-                    paths = new_paths
 
                 ds_model = nc.open_data(paths, checks=False)
                 ds_model.subset(years=sim_years)
@@ -323,6 +314,16 @@ def gridded_matchup(
                                     new_files.append(ff)
                         vv_file = new_files
                         occci = True
+                if recipe:
+                    if vv_source == "GLODAPv2.2016b":
+                        ds_obs = nc.open_url(vv_file)
+                        variable = definitions[vv].obs_variable
+                        ds_obs.subset(variables=variable)
+                        ds_obs.run()
+                        # we need to set the time, because it does not exists
+                        ds_obs.cdo_command(f"setreftime,1800-01-01,00:00:00,days -settaxis,2000-01-01,00:00:00,1month")
+                        ds_obs.run()
+                        thredds = False
 
                 if thredds:
                     ds_obs = nc.open_thredds(vv_file, checks=False)
@@ -516,7 +517,6 @@ def gridded_matchup(
                         .reset_index()
                         .year.values
                     )
-                    print(sel_years)
                     ds_model.subset(years=sel_years)
                     if n_years > 1: 
                         ds_obs.subset(years=sel_years)
@@ -543,11 +543,17 @@ def gridded_matchup(
                 else:
                     ds_model_surface.regrid(ds_obs_surface, method="bil")
 
+                n_obs_times = len(ds_obs_surface.times)
+                if n_obs_times <= 1:
+                    ds_model_surface.tmean()
                 ds_obs_surface.append(ds_model_surface)
 
                 if len(ds_model_surface.times) > 12:
                     ds_obs_surface.merge("variable", match=["year", "month"])
                 else:
+                    # run both
+                    ds_obs_surface.run()
+                    ds_model_surface.run()
                     ds_obs_surface.merge("variable", match="month")
 
                 ds_obs_surface.set_fill(-9999)
@@ -589,16 +595,6 @@ def gridded_matchup(
                 ):
                     ds_model_surface.set_longnames({"model": f"Model {vv_name}"})
 
-                regrid_later = False
-                #if is_latlon(ds_model_surface[0]) is False:
-                #    lons = session_info["lon_lim"]
-                #    lats = session_info["lat_lim"]
-                #    resolution = get_resolution(ds_model_surface[0])
-                #    lon_res = resolution[0]
-                #    lat_res = resolution[1]
-                #    ds_model_surface.to_latlon(
-                #        lon=lons, lat=lats, res=[lon_res, lat_res], method="bil"
-                #    )
 
                 # unit may need some fiddling
                 out1 = out_file.replace(
@@ -619,8 +615,11 @@ def gridded_matchup(
                 ds_test.tmean()
                 ds_test.run()
                 df_test = ds_test.to_dataframe().reset_index().dropna()
-                lon_max = df_test[lon_name].max()
-                lon_min = df_test[lon_name].min()
+                lons = df_test[lon_name].values
+                # handle lon > 180 properly
+                lons = ((lons + 180) % 360) - 180
+                lon_max = lons.max() 
+                lon_min = lons.min()
                 lat_max = df_test[lat_name].max()
                 lat_min = df_test[lat_name].min()
                 ds_model_surface.subset(lon=[lon_min, lon_max], lat=[lat_min, lat_max])
@@ -645,13 +644,18 @@ def gridded_matchup(
                         ds_obs.regrid(ds_model, method="bil")
                     else:
                         ds_model.regrid(ds_obs, method="bil")
+                    n_obs_times = len(ds_obs.times)
+                    if n_obs_times <= 1:
+                        ds_model.tmean()
                     ds_obs.append(ds_model)
 
-                    if len(ds_model.times) > 12:
-                        ds_obs.merge("variable", match=["year", "month"])
+                    if n_obs_times <= 1:
+                            ds_obs.merge("variable")
                     else:
-                        ds_obs.merge("variable", match="month")
-
+                        if len(ds_model.times) > 12:
+                            ds_obs.merge("variable", match=["year", "month"])
+                        else:
+                            ds_obs.merge("variable", match="month")
                     ds_obs.set_fill(-9999)
                     ds_mask = ds_obs.copy()
                     ds_mask.assign( mask_these=lambda x: -1e30 * ((isnan(x.observation) + isnan(x.model)) > 0), drop=True,)
@@ -712,8 +716,10 @@ def gridded_matchup(
                     ds_test.tmean()
                     ds_test.run()
                     df_test = ds_test.to_dataframe().reset_index().dropna()
-                    lon_max = df_test[lon_name].max()
-                    lon_min = df_test[lon_name].min()
+                    lons = df_test[lon_name].values
+                    lons = ((lons + 180) % 360) - 180
+                    lon_max = lons.max()
+                    lon_min = lons.min()
                     lat_max = df_test[lat_name].max()
                     lat_min = df_test[lat_name].min()
                     ds_model.subset(lon=[lon_min, lon_max], lat=[lat_min, lat_max])

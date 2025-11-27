@@ -77,7 +77,45 @@ def find_recipe(x, start = None, end = None):
     if name == "silicate":
         output["short_title"] = "Silicate"
 
+    if name == "kd490":
+        output["short_name"] = "KD490"
+        output["short_title"] = "KD490"
+        output["long_name"] = "diffuse attenuation coefficient at 490 nm"
     # COBE2 temperature options
+
+    if name.lower() == "ph":
+        output["short_name"] = "pH"
+        output["long_name"] = "sea water pH"
+        output["short_title"] = "pH"
+    if name.lower() == "alkalinity":
+        output["short_name"] = "total alkalinity"
+        output["long_name"] = "sea water total alkalinity"
+        output["short_title"] = "Total Alkalinity"
+    
+    if value.lower() == "glodap":
+        if name.lower() == "ph":
+            output["obs_path"]=  "https://www.ncei.noaa.gov/data/oceans/archive/arc0221/0286118/1.1/data/0-data/GLODAPv2.2016b_MappedClimatologies/GLODAPv2.2016b.pHtsinsitutp.nc"
+            output["source"] = "GLODAPv2.2016b"
+            output["source_info"] = "Lauvset, S. K., Key, R. M., Olsen, A., van Heuven, S., Velo, A., Lin, X., Schirnick, C., Kozyr, A., Tanhua, T., Hoppema, M., Jutterström, S., Steinfeldt, R., Jeansson, E., Ishii, M., Perez, F. F., Suzuki, T., and Watelet, S.: A new global interior ocean mapped climatology: the 1° ×  1° GLODAP version 2, Earth Syst. Sci. Data, 8, 325–340, https://doi.org/10.5194/essd-8-325-2016, 2016."
+            output["name"] = name
+            output["thredds"] = False
+            output["climatology"] = True
+            output["thredds"] = True
+            output["obs_variable"] = 'pHtsinsitutp'
+            return output
+        if name.lower() == "alkalinity":
+            output["obs_path"]=  "https://www.ncei.noaa.gov/data/oceans/archive/arc0221/0286118/1.1/data/0-data/GLODAPv2.2016b_MappedClimatologies/GLODAPv2.2016b.TAlk.nc"
+            output["source"] = "GLODAPv2.2016b"
+            output["source_info"] = "Lauvset, S. K., Key, R. M., Olsen, A., van Heuven, S., Velo, A., Lin, X., Schirnick, C., Kozyr, A., Tanhua, T., Hoppema, M., Jutterström, S., Steinfeldt, R., Jeansson, E., Ishii, M., Perez, F. F., Suzuki, T., and Watelet, S.: A new global interior ocean mapped climatology: the 1° ×  1° GLODAP version 2, Earth Syst. Sci. Data, 8, 325–340, https://doi.org/10.5194/essd-8-325-2016, 2016."
+            output["name"] = name
+            output["thredds"] = False
+            output["climatology"] = True
+            output["thredds"] = True
+            output["obs_variable"] = 'TAlk'
+            return output
+
+
+
     
     if value.lower() == "cobe2":
         if name.lower() == "temperature": 
@@ -207,14 +245,34 @@ def find_recipe(x, start = None, end = None):
                     month_str = f"{month:02d}"
                     url = f"https://www.oceancolour.org/thredds/dodsC/cci/v6.0-release/geographic/monthly/chlor_a/{yy}/ESACCI-OC-L3S-CHLOR_A-MERGED-1M_MONTHLY_4km_GEO_PML_OCx-{yy}{month_str}-fv6.0.nc"
                     urls.append(url)
+            output["obs_path"] = urls
+            output["source"] = "OCCCI"
+            output["source_info"] = "Sathyendranath, S, Brewin, RJW, Brockmann, C, Brotas, V, Calton, B, Chuprin, A, Cipollini, P, Couto, AB, Dingle, J, Doerffer, R, Donlon, C, Dowell, M, Farman, A, Grant, M, Groom, S, Horseman, A, Jackson, T, Krasemann, H, Lavender, S, Martinez-Vicente, V, Mazeran, C, Mélin, F, Moore, TS, Müller, D, Regner, P, Roy, S, Steele, CJ, Steinmetz, F, Swinton, J, Taberner, M, Thompson, A, Valente, A, Zühlke, M, Brando, VE, Feng, H, Feldman, G, Franz, BA, Frouin, R, Gould, Jr., RW, Hooker, SB, Kahru, M, Kratzer, S, Mitchell, BG, Muller-Karger, F, Sosik, HM, Voss, KJ, Werdell, J, and Platt, T (2019) An ocean-colour time series for use in climate studies: the experience of the Ocean-Colour Climate Change Initiative (OC-CCI). Sensors: 19, 4285. doi:10.3390/s19194285."
+            # short name
+            output["short_name"] = "chlorophyll concentration"
+            output["name"] = name
+            output["obs_variable"] = "chlor_a"
+            output["thredds"] = True
+            output["climatology"] = False
+            return output
+
+    # kd490
+    if name == "kd490":
+        for yy in range(1998, 2025):
+            for month in range(1, 13):
+                month_str = f"{month:02d}"
+                #https://www.oceancolour.org/thredds/dodsC/cci/v6.0-release/geographic/monthly/kd/1997/ESACCI-OC-L3S-K_490-MERGED-1M_MONTHLY_4km_GEO_PML_KD490_Lee-199709-fv6.0.nc.html
+                url = f"https://www.oceancolour.org/thredds/dodsC/cci/v6.0-release/geographic/monthly/kd/{yy}/ESACCI-OC-L3S-K_490-MERGED-1M_MONTHLY_4km_GEO_PML_KD490_Lee-{yy}{month_str}-fv6.0.nc"
+                urls.append(url)
         output["obs_path"] = urls
         output["source"] = "OCCCI"
         output["source_info"] = "Sathyendranath, S, Brewin, RJW, Brockmann, C, Brotas, V, Calton, B, Chuprin, A, Cipollini, P, Couto, AB, Dingle, J, Doerffer, R, Donlon, C, Dowell, M, Farman, A, Grant, M, Groom, S, Horseman, A, Jackson, T, Krasemann, H, Lavender, S, Martinez-Vicente, V, Mazeran, C, Mélin, F, Moore, TS, Müller, D, Regner, P, Roy, S, Steele, CJ, Steinmetz, F, Swinton, J, Taberner, M, Thompson, A, Valente, A, Zühlke, M, Brando, VE, Feng, H, Feldman, G, Franz, BA, Frouin, R, Gould, Jr., RW, Hooker, SB, Kahru, M, Kratzer, S, Mitchell, BG, Muller-Karger, F, Sosik, HM, Voss, KJ, Werdell, J, and Platt, T (2019) An ocean-colour time series for use in climate studies: the experience of the Ocean-Colour Climate Change Initiative (OC-CCI). Sensors: 19, 4285. doi:10.3390/s19194285."
         output["name"] = name
-        output["obs_variable"] = "chlor_a"
+        output["obs_variable"] = "kd_490"
         output["thredds"] = True
         output["climatology"] = False
         return output
+
 
 
 
@@ -377,6 +435,10 @@ class Validator:
         obs_adder (float): Adder for the observation
 
         """
+
+        # maybe include an averaging option: daily, monthly, annual etc.
+
+
         if recipe is not None:
             recipe_info = find_recipe(recipe, start = start, end = end)
             obs_path = recipe_info["obs_path"]
