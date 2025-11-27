@@ -29,10 +29,10 @@ The recipe dictionary must contain exactly one key-value pair, where:
 
 The table below summarizes the available recipes.
 
-| Variable          | Recipe ID | Description                                    | Data Source URL                                      |
-|-------------------|-----------|------------------------------------------------|------------------------------------------------------|
-| temperature       | cobe2     | Sea Surface Temperature                         | https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc |
-
++-----+-----+-----------------------+-------------------------------+----------------------------------------------+
+| Region | Variable | Recipe | Source | URL |
++=====+=====+=======================+===============================+==============================================+
+| Global | temperature | cobe2 | COBE-SST 2 (NOAA Physical Sciences Laboratory) | https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc |
 
 Available recipes for global gridded data
 -----------------
