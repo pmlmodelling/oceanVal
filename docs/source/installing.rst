@@ -1,6 +1,8 @@
 Installation and a quick example
 ============
 
+**System requirements** You will need to run this on Linux or macOS.
+
 You will need to use Conda to use oceanVal. The first step is to create a new environment::
 
    $ conda env create --name oceanval -f https://raw.githubusercontent.com/pmlmodelling/oceanval/main/oceanval.yml
