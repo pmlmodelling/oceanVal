@@ -28,6 +28,7 @@ For example, files could be named YYYY/MM/model_output_YYYYMMDD.nc. oceanVal wil
 
 
 
+
 Gridded observational data
 ---------------------------
 
@@ -38,6 +39,11 @@ Observations can either be contained in a single NetCDF file or multiple files. 
 oceanVal requires files to be CF-compliant. However, gridded observational products almost always are, so there should be no compatiability issues.
 
 Vertically-resolved files can be supplied. These should be files with depth as a dimension, and the vertical grid should be consistent, which will almost always be the case with gridded data products.
+
+**Time requirements**: ideally, the observational data files will contain time information. If not, you may get an error as the lack of time information can make it impossible to figure out what to do with observational data. 
+
+
+**Key oceanVal assumption**: if you supply a gridded file with only one step, oceanVal will assume it represents climatological annual averages.
 
 In-situ observational data
 -----------------------
