@@ -29,12 +29,12 @@ The recipe dictionary must contain exactly one key-value pair, where:
 
 The table below summarizes the available recipes.
 
-======================== 
-Region
-======================== 
-Global
-------------------------
-Northwest European Shelf
++------------------------+------------------------+
+Region                      Variable
++------------------------+------------------------+
+Global                      Temperature 
++------------------------+------------------------+
+Global                      Nitrate
 
 
 
