@@ -29,10 +29,14 @@ The recipe dictionary must contain exactly one key-value pair, where:
 
 The table below summarizes the available recipes.
 
-+-----+-----+-----------------------+-------------------------------+----------------------------------------------+
-| Region | Variable | Recipe | Source | URL |
-+=====+=====+=======================+===============================+==============================================+
-| Global | temperature | cobe2 | COBE-SST 2 (NOAA Physical Sciences Laboratory) | https://psl.noaa.gov/thredds/dodsC/Datasets/COBE2/sst.mon.mean.nc |
+======================== 
+Region
+======================== 
+Global
+------------------------
+Northwest European Shelf
+
+
 
 Available recipes for global gridded data
 -----------------
