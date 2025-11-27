@@ -29,13 +29,48 @@ The recipe dictionary must contain exactly one key-value pair, where:
 
 The table below summarizes the available recipes.
 
-+------------+--------------+--------------------------+-------------------------------+
-| **Region** | **Variable** | **Recipe**               | **Data source**               |
-+------------+--------------+--------------------------+-------------------------------+
-| Global     | Temperature  | {"temperature": "cobe2"} | COBE2 Sea Surface Temperature |
-+------------+--------------+--------------------------+-------------------------------+
-| Global     | Nitrate      | {"nitrate": "woa23"}     | World Ocean Atlas 2023        |
-+------------+--------------+--------------------------+-------------------------------+
++-------------------+--------------+--------------------------+---------------------------------------+
+| **Region**        | **Variable** | **Recipe**               | **Data source**                       |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | Temperature  | {"temperature": "cobe2"} | COBE2 Sea Surface Temperature         |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | Nitrate      | {"nitrate": "woa23"}     | World Ocean Atlas 2023                |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | Phosphate    | {"phosphate": "woa23"}   | World Ocean Atlas 2023                |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | Oxygen       | {"oxygen": "woa23"}      | World Ocean Atlas 2023                |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | Silicate     | {"silicate": "woa23"}    | World Ocean Atlas 2023                |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | Temperature  | {"temperature": "woa23"} | World Ocean Atlas 2023                |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | Salinity     | {"salinity": "woa23"}    | World Ocean Atlas 2023                |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | Chlorophyll  | {"chlorophyll": "occci"} | Ocean Colour CCI                      |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | KD490        | {"kd490": "occci"}       | Ocean Colour CCI                      |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | pH           | {"pH": "glodap"}         | Global Ocean Data Analysis Project v2 |
++-------------------+--------------+--------------------------+---------------------------------------+
+| Global            | Alkalinity   | {"alkalinity": "glodap"} | Global Ocean Data Analysis Project v2 |
++-------------------+--------------+--------------------------+---------------------------------------+
+| NW European Shelf | Chlorophyll  | {"chlorophyll": "nsbc"}  | North Sea Biogeochemical Climatology  |
++-------------------+--------------+--------------------------+---------------------------------------+
+| NW European Shelf | Nitrate      | {"nitrate": "nsbc"}      | North Sea Biogeochemical Climatology  |
++-------------------+--------------+--------------------------+---------------------------------------+
+| NW European Shelf | Phosphate    | {"phosphate": "nsbc"}    | North Sea Biogeochemical Climatology  |
++-------------------+--------------+--------------------------+---------------------------------------+
+| NW European Shelf | Silicate     | {"silicate": "nsbc"}     | North Sea Biogeochemical Climatology  |
++-------------------+--------------+--------------------------+---------------------------------------+
+| NW European Shelf | Oxygen       | {"oxygen": "nsbc"}       | North Sea Biogeochemical Climatology  |
++-------------------+--------------+--------------------------+---------------------------------------+
+| NW European Shelf | Temperature  | {"temperature": "nsbc"}  | North Sea Biogeochemical Climatology  |
++-------------------+--------------+--------------------------+---------------------------------------+
+| NW European Shelf | Salinity     | {"salinity": "nsbc"}     | North Sea Biogeochemical Climatology  |
++-------------------+--------------+--------------------------+---------------------------------------+
+
+
+
 
 
 
@@ -232,6 +267,29 @@ NSBC - North Sea Biogeochemical Climatology
         model_variable="foobar",
        recipe={"nitrate": "nsbc"}
    )
+
+   definitions.add_gridded_comparison(
+        model_variable="foobar",
+       recipe={"phosphate": "nsbc"}
+   )
+
+   definitions.add_gridded_comparison(
+        model_variable="foobar",
+       recipe={"silicate": "nsbc"}
+   )
+    definitions.add_gridded_comparison(
+          model_variable="foobar",
+         recipe={"oxygen": "nsbc"}
+    )
+    definitions.add_gridded_comparison(
+          model_variable="foobar",
+         recipe={"temperature": "nsbc"}
+    )
+    definitions.add_gridded_comparison(
+            model_variable="foobar",
+         recipe={"salinity": "nsbc"}
+    )
+
 
 This data is vertically resolved, so if you want vertically resolved validation you will need to modify things as follows:
 
