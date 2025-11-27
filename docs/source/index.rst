@@ -13,6 +13,7 @@ Documentation
 
    installing.rst 
    how_to_use.rst 
+   recipes.rst
 
 
 .. toctree::
