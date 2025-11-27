@@ -1,7 +1,7 @@
 Data Recipes
 =============
 
-To make life easier, oceanVal provides a number of built in recipes, which will allow you to easily validate common oceanic varibles from data that is downloadable.
+To make life easier, oceanVal provides a number of built in recipes, which will allow you to easily validate common oceanic variables from data that is downloadable.
 
 **Note**: recipes are only available for gridded data at present.
 
@@ -36,7 +36,7 @@ Available recipes for global gridded data
 COBE2 - Sea Surface Temperature
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Recipe**: ["temperature": "cobe2"] 
+**Recipe**: {"temperature": "cobe2"} 
 
 **Source**: COBE-SST 2 (NOAA Physical Sciences Laboratory)
 
@@ -64,7 +64,8 @@ WOA23 - World Ocean Atlas 2023
 **Variables**: nitrate, phosphate, oxygen, silicate, temperature, salinity
 
 **Recipes**: {"nitrate": "woa23"}, {"phosphate": "woa23"}, {"oxygen": "woa23"}, {"silicate": "woa23"}, {"temperature": "woa23"}, {"salinity
-.. Units
+
+
 
 Data is stored in the following units:
 
@@ -135,6 +136,33 @@ This data is vertically resolved, so if you want vertically resolved validation 
        recipe={"nitrate": "woa23"},
        vertical = True
    )
+
+Ocean Colour CCI chlorophyll
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+**Source**: ESA Ocean Colour Climate Change Initiative (OC-CCI)
+
+**Variables**: chlorophyll
+
+**Recipe**: {"chlorophyll": "occci"}
+
+**URL**: https://esa-oceancolour-cci.org/
+
+**Usage Example**:
+.. code-block:: python
+
+   definitions.add_gridded_comparison(
+       model_variable="chl",
+       recipe={"chlorophyll": "occci"}
+   )
+
+**Years available": monthly averages for 1998-2024
+
+This data is stored in the following units:
+
+    **Chlorophyll**: milligrams per cubic meter (mg/m³)
+
 
 
 Available recipes for the northwest European shelf
