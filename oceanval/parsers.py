@@ -8,7 +8,7 @@ from oceanval.session import session_info
 
 session_info["keys"] = []
 
-def find_recipe(x):
+def find_recipe(x, start = None, end = None):
     output = dict()
     # check if there is only one key and one value
     if len(x.keys()) != 1:
@@ -91,6 +91,139 @@ def find_recipe(x):
             output["vertical"] = False
 
             return output 
+
+    if value.lower() == "woa23":
+        output["source"] = "WOA23"
+        output["source_info"] = " Garcia, H.E., C. Bouchard, S.L. Cross, C.R. Paver, Z. Wang, J.R. Reagan, T.P. Boyer, R.A. Locarnini, A.V. Mishonov, O. Baranova, D. Seidov, and D. Dukhovskoy. World Ocean Atlas 2023, Volume 4: Dissolved Inorganic Nutrients (phosphate, nitrate, silicate). A. Mishonov, Tech. Ed. NOAA Atlas NESDIS 92, doi.org/10.25923/39qw-7j08"
+        output["climatology"] = True
+        output["name"] = name
+        output["thredds"] = True
+
+        if name.lower() == "nitrate":
+            url = []
+            for month in range(1,13):
+                # format month to two digits
+                month_str = f"{month:02d}"
+                url.append(f"https://www.ncei.noaa.gov/thredds-ocean/dodsC/woa23/DATA/nitrate/netcdf/all/1.00/woa23_all_n{month_str}_01.nc")
+            output["obs_path"] = url
+            output["obs_variable"] = "n_an"
+            return output
+
+        # now do oxygen
+
+        if name.lower() == "oxygen":
+            url = []
+            for month in range(1,13):
+                # format month to two digits
+                month_str = f"{month:02d}"
+                #https://www.ncei.noaa.gov/thredds-ocean/dodsC/woa23/DATA/oxygen/netcdf/all/1.00/woa23_all_o01_01.nc.html
+                url.append(f"https://www.ncei.noaa.gov/thredds-ocean/dodsC/woa23/DATA/oxygen/netcdf/all/1.00/woa23_all_o{month_str}_01.nc")
+            output["obs_path"] = url
+            output["name"] = name
+            output["obs_variable"] = "o_an"
+            return output
+        # phosphate
+        if name.lower() == "phosphate":
+            output["obs_variable"] = "p_an"
+            url = []
+            for month in range(1,13):
+                # format month to two digits
+                month_str = f"{month:02d}"
+                url.append(f"https://www.ncei.noaa.gov/thredds-ocean/dodsC/woa23/DATA/phosphate/netcdf/all/1.00/woa23_all_p{month_str}_01.nc")
+            output["obs_path"] = url
+            return output
+        
+        # silicate
+        if name.lower() == "silicate":
+            output["obs_variable"] = "i_an"
+            url = []
+            for month in range(1,13):
+                # format month to two digits
+                month_str = f"{month:02d}"
+                url.append(f"https://www.ncei.noaa.gov/thredds-ocean/dodsC/woa23/DATA/silicate/netcdf/all/1.00/woa23_all_i{month_str}_01.nc")
+            output["obs_path"] = url
+            return output
+        # todo
+        # salinity
+        # temperature
+        if name.lower() in ["salinity", "temperature"]:
+            # check if start and end are provided
+            if start is None or end is None:
+
+                valid_periods = [""]
+                raise ValueError("Start and end depth must be provided for salinity and temperature WOA23 recipes")
+            # valid time period are
+            # 1955-1964
+            # 1965-1974
+            # 1975-1984
+            # 1985-1994
+            # 1995-2004
+            # 2005-2014
+            # 2015-2022
+            # start and end must fall into one of these time periods
+            # first check if they are more than 9 years apart
+            if end - start > 9:
+                raise ValueError("Start and end depth must fall within a single WOA23 climatological period (10 year periods)")
+            # identify the period it is in based on start year
+            if start >= 1955 and end <= 1964:
+                period = "5564"
+            elif start >= 1965 and end <= 1974:
+                period = "6574"
+            elif start >= 1975 and end <= 1984:
+                period = "7584"
+            elif start >= 1985 and end <= 1994:
+                period = "8594"
+            elif start >= 1995 and end <= 2004:
+                period = "95A4"
+            elif start >= 2005 and end <= 2014:
+                period = "A5B4"
+            elif start >= 2015 and end <= 2022:
+                period = "B5C2"
+            if end > 2022:
+                raise ValueError("End year cannot be greater than 2022 for WOA23 recipes")
+
+                #https://www.ncei.noaa.gov/thredds-ocean/dodsC/woa23/DATA/temperature/netcdf/5564/1.00/woa23_5564_t00_01.nc.html
+            #url = f"https://www.ncei.noaa.gov/thredds-ocean/dodsC/woa23/DATA/{name.lower()}/netcdf/{period.replace('-', '')}/1.00/woa23_{period.replace('-', '')}_{name[0].lower()}00_01.nc"
+            urls = []
+            for month in range(1,13):
+                month_str = f"{month:02d}"
+                #https://www.ncei.noaa.gov/thredds-ocean/dodsC/woa23/DATA/temperature/netcdf/5564/1.00/woa23_5564_t00_01.nc.html
+                urls.append(f"https://www.ncei.noaa.gov/thredds-ocean/dodsC/woa23/DATA/{name.lower()}/netcdf/{period}/1.00/woa23_{period}_{name[0].lower()}{month_str}_01.nc")
+                #urls.append(url)
+
+            output["obs_path"] = urls
+            output["name"] = name
+            if name.lower() == "salinity":
+                output["obs_variable"] = "s_an"
+            if name.lower() == "temperature":
+                output["obs_variable"] = "t_an"
+            return output
+
+    if value == "occci":
+        urls = []
+        if name == "chlorophyll":
+            for yy in range(1998, 2025):
+                for month in range(1, 13):
+                    month_str = f"{month:02d}"
+                    url = f"https://www.oceancolour.org/thredds/dodsC/cci/v6.0-release/geographic/monthly/chlor_a/{yy}/ESACCI-OC-L3S-CHLOR_A-MERGED-1M_MONTHLY_4km_GEO_PML_OCx-{yy}{month_str}-fv6.0.nc"
+                    urls.append(url)
+        output["obs_path"] = urls
+        output["source"] = "OCCCI"
+        output["source_info"] = "Sathyendranath, S, Brewin, RJW, Brockmann, C, Brotas, V, Calton, B, Chuprin, A, Cipollini, P, Couto, AB, Dingle, J, Doerffer, R, Donlon, C, Dowell, M, Farman, A, Grant, M, Groom, S, Horseman, A, Jackson, T, Krasemann, H, Lavender, S, Martinez-Vicente, V, Mazeran, C, Mélin, F, Moore, TS, Müller, D, Regner, P, Roy, S, Steele, CJ, Steinmetz, F, Swinton, J, Taberner, M, Thompson, A, Valente, A, Zühlke, M, Brando, VE, Feng, H, Feldman, G, Franz, BA, Frouin, R, Gould, Jr., RW, Hooker, SB, Kahru, M, Kratzer, S, Mitchell, BG, Muller-Karger, F, Sosik, HM, Voss, KJ, Werdell, J, and Platt, T (2019) An ocean-colour time series for use in climate studies: the experience of the Ocean-Colour Climate Change Initiative (OC-CCI). Sensors: 19, 4285. doi:10.3390/s19194285."
+        output["name"] = name
+        output["obs_variable"] = "chlor_a"
+        output["thredds"] = True
+        output["climatology"] = False
+        return output
+
+
+
+        
+
+
+
+
+
 
 
     
@@ -245,7 +378,7 @@ class Validator:
 
         """
         if recipe is not None:
-            recipe_info = find_recipe(recipe)
+            recipe_info = find_recipe(recipe, start = start, end = end)
             obs_path = recipe_info["obs_path"]
             source = recipe_info["source"]
             source_info = recipe_info["source_info"]
@@ -258,6 +391,13 @@ class Validator:
             # vertical is not None
             if recipe_info["vertical"] is not None:
                 vertical = recipe_info["vertical"]
+            try:
+                obs_variable = recipe_info["obs_variable"]
+            except:
+                pass
+            recipe = True
+        else:
+            recipe = False
 
         try:
             point_dir = getattr(self, name).point_dir
@@ -416,6 +556,7 @@ class Validator:
         # check this exists
         gridded_dir = obs_path
         var.gridded_dir = gridded_dir
+        var.recipe = recipe
 
         # ensure nothing is None
         for attr in [var.long_name, var.short_name, var.short_title, var.sources, var.model_variable, var.obs_variable, var.gridded_source]:
@@ -525,6 +666,10 @@ class Validator:
             thredds = getattr(self, name).thredds
         except:
             thredds = False
+        try:
+            recipe = getattr(self, name).recipe
+        except:
+            recipe = False
 
         if old_model_variable is not None and old_model_variable != model_variable:
             if old_model_variable != "auto":
@@ -635,6 +780,7 @@ class Validator:
 
         var.vertical_point = vertical
         var.vertical_gridded = vertical_gridded 
+        var.recipe = recipe
 
         var.short_name = short_name
         if var.short_name is None:

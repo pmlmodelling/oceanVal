@@ -55,6 +55,8 @@ def gridded_matchup(
 
     """
 
+    start_cores = session_info["cores"]
+
 
     all_df = df_mapping
     # if model_variable is None remove from all_df
@@ -172,6 +174,13 @@ def gridded_matchup(
             sim_years = [x for x in all_years if x in sim_years]
             min_year = min(all_years)
             max_year = max(all_years)
+
+            start = definitions[vv].gridded_start
+            end = definitions[vv].gridded_end
+            if start is not None:
+                sim_years = [x for x in sim_years if x >= start]
+            if end is not None:
+                sim_years = [x for x in sim_years if x <= end]
 
             if len(sim_years) == 0:
                 # specific error for glodap
@@ -293,12 +302,28 @@ def gridded_matchup(
                 end_year = max(ds_model.years)
 
                 # Read in the monthly observational data
-                if dir_var.endswith(".nc"):
-                    vv_file = dir_var
-                else:
-                    vv_file = nc.create_ensemble(dir_var)
-
                 thredds = definitions[vv].thredds
+                if thredds == False:
+                    if dir_var.endswith(".nc"):
+                        vv_file = dir_var
+                    else:
+                        vv_file = nc.create_ensemble(dir_var)
+                else:
+                    vv_file = dir_var  # thredds URL
+                recipe = definitions[vv].recipe
+                
+                # some special handling for occci files
+                occci = False
+                if recipe:
+                    if vv_source.lower() == "occci":
+                        new_files = []
+                        for yy in sim_years:
+                            for ff in vv_file:
+                                if f"/{yy}/" in ff:
+                                    new_files.append(ff)
+                        vv_file = new_files
+                        occci = True
+
                 if thredds:
                     ds_obs = nc.open_thredds(vv_file, checks=False)
                 else:
@@ -307,6 +332,30 @@ def gridded_matchup(
                         checks=False,
                     )
                 bad_clim = False
+
+                # use ncks to spatially subset to lon_lim and lat_lim
+                if occci:
+                    variable = definitions[vv].obs_variable
+                    ds_obs.subset(variables=variable)
+                    ds_obs.crop(lon=lon_lim, lat=lat_lim)
+                    # ds_obs.nco_command(f"ncks -d lon,{lon_lim[0]},{lon_lim[1]} -d lat,{lat_lim[0]},{lat_lim[1]}")   
+
+                if vertical_gridded is False:
+                    if thredds:
+                        ds_zz = nc.open_thredds(ds_obs[0], checks = False)
+                    else:
+                        ds_zz = nc.open_data(vv_file, checks =False)
+                    variable = definitions[vv].obs_variable
+                    if variable == "auto":
+                        variable = ds_zz.variables[0]
+                    if ds_zz.contents.query("variable == @variable").nlevels.values[0] > 1:
+                        if recipe:
+                            ds_obs.top()
+                        else:
+                            ds_obs.cdo_command("topvalue")
+
+                if definitions[vv].obs_variable != "auto":
+                    ds_obs.subset(variables=definitions[vv].obs_variable)
 
                 try:
                     min_obs_year = min(ds_obs.years)
@@ -356,17 +405,22 @@ def gridded_matchup(
                 
                 if definitions[vv].obs_variable != "auto":
                     ds_obs.subset(variables=definitions[vv].obs_variable)
-                    ds_obs.run()
 
-                obs_years = ds_obs.years
-                min_obs_year = min(obs_years)
-                max_obs_year = max(obs_years)
+                if climatology is False:
+                    obs_years = ds_obs.years
+                    min_obs_year = min(obs_years)
+                    max_obs_year = max(obs_years)
 
             tidy_warnings(w)
 
             with warnings.catch_warnings(record=True) as w:
-                if len(obs_years) == 1:
+                if climatology is True:
                     ds_model.tmean("month", align="left")
+                try:
+                    if len(obs_years) == 1:
+                        ds_obs.tmean("month", align="left")
+                except:
+                    pass
 
                 if len(ds_obs) > 1:
                     ds_obs.merge("time")
@@ -410,7 +464,10 @@ def gridded_matchup(
                     contents = ds_model.contents
                     nlevels = contents.nlevels[0]
                     if nlevels > 1:
-                        ds_obs.cdo_command("topvalue")
+                        if recipe:
+                            ds_obs.top()
+                        else:
+                            ds_obs.cdo_command("topvalue")
                 try:
                     n_times = len(ds_obs.times)
                 except:
@@ -677,5 +734,8 @@ def gridded_matchup(
             var_dict["clim_years"] = [min(sim_years), max(sim_years)]
             with open(out, "wb") as f:
                 pickle.dump(var_dict, f)
+        
+        session_info["cores"] = start_cores
+        nc.options(cores = start_cores)
 
         return None
