@@ -18,6 +18,10 @@ import importlib
 
 from oceanval.parsers import Validator, definitions
 
+
+notebook_dict = dict()
+
+
 add_point_comparison = definitions.add_point_comparison
 add_gridded_comparison = definitions.add_gridded_comparison
 
@@ -72,21 +76,9 @@ def fix_toc(concise = True):
         x = f.write("parts:\n")
         x = f.write(f"- caption: Introduction\n")
         x = f.write("  chapters:\n")
-        x = f.write(f"  - file: notebooks/000_info.ipynb\n")
         x = f.write(f"  - file: notebooks/001_methods.ipynb\n")
 
         # open notebook and replace book_chapter with i_chapter
-        if True:
-            with open(f"oceanval_report/notebooks/000_info.ipynb", "r") as file:
-                filedata = file.read()
-
-            # Replace the target string
-            filedata = filedata.replace("book_chapter", str(i_chapter))
-
-            # Write the file out again
-            with open(f"oceanval_report/notebooks/000_info.ipynb", "w") as file:
-                file.write(filedata)
-            i_chapter += 1
 
         # open notebook and replace book_chapter with i_chapter
         with open(f"oceanval_report/notebooks/001_methods.ipynb", "r") as file:
@@ -265,9 +257,6 @@ def validate(
         if not os.path.exists("oceanval_report/notebooks"):
             os.mkdir("oceanval_report/notebooks")
 
-        data_path = importlib.resources.files(__name__).joinpath("data/000_info.ipynb")
-        if not os.path.exists(f"oceanval_report/notebooks/000_info.ipynb"):
-            copyfile(data_path, f"oceanval_report/notebooks/000_info.ipynb")
         data_path = importlib.resources.files(__name__).joinpath("data/001_methods.ipynb")
         if not os.path.exists(f"oceanval_report/notebooks/001_methods.ipynb"):
             copyfile(data_path, f"oceanval_report/notebooks/001_methods.ipynb")
