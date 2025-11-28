@@ -182,8 +182,9 @@ You can do this by setting something like "var1+var2+var3" as the `model_variabl
     - day
     - depth
 
-    If depth is not provided, oceanVal will assume this represents a surface observation. 
-    If you do do provide depth, oceanVal will interpolate to all available depth-resolved data if you have specified `vertical=True` in `add_point_comparison`, otherwise it will only use the top 5m of data. 
+    If depth is not provided, oceanVal will assume this represents a surface observational dataset. 
+    If you do provide depth, oceanVal will interpolate to all available depth-resolved data if you have specified `vertical=True` in `add_point_comparison`, otherwise it will only use the top 5m of data.
+    By default it only looks at the surface. 
 
     If you provide year, month and day, oceanVal will look for model output at the exact date of the observation.
 
@@ -191,11 +192,10 @@ You can do this by setting something like "var1+var2+var3" as the `model_variabl
 
     If you only provide year, oceanVal will look for model output for the whole year of the observation, and use the annual average from the simulation.
 
-    If you no time information is provided, oceanVal will use the multi-year average from the simulation output for comparison with the observation.
-
+    If no time information is provided, oceanVal will use the multi-year average from the simulation output for comparison with the observation.
 
     In some cases, you may want to ignore the year information in the observational data.
-    For example, you may have only a 1-year simulation and you want to validate based on all available years of observations, only using month day.
+    For example, you may have only a 1-year simulation and you want to validate based on all available years of observations, only using month and day information in the observational data.
     In this case, you can set the `point_time_res` parameter in the `oceanval.matchup` function to specify which time information to use when matching up in-situ observations with the simulation output.
     Set this to `["month", "day"]` to ignore year information when matching up observations with the simulation output.
 
