@@ -7,7 +7,7 @@ import nctoolkit as nc
 import copy
 from oceanval.matchall import matchup
 import dill
-from oceanval.fixers import tidy_name
+#from oceanval.fixers import tidy_name
 from oceanval.session import session_info
 import webbrowser
 from oceanval.chunkers import add_chunks
