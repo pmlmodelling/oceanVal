@@ -173,6 +173,34 @@ This will result in day of year being ignored when matching up observations with
 Sometimes observational data needs to be compared with the sum of multiple model variable.
 You can do this by setting something like "var1+var2+var3" as the `model_variable` when registering the observational dataset.
 
+.. admonition:: How does oceanVal handle in-situ data?
+
+    oceanVal will handle in-situ data observational data depending on which of the following are provided:
+
+    - year 
+    - month
+    - day
+    - depth
+
+    If depth is not provided, oceanVal will assume this represents a surface observation. 
+    If you do do provide depth, oceanVal will interpolate to all available depth-resolved data if you have specified `vertical=True` in `add_point_comparison`, otherwise it will only use the top 5m of data. 
+
+    If you provide year, month and day, oceanVal will look for model output at the exact date of the observation.
+
+    If you provide year and month, but not day, oceanVal will look for model output for the whole month of the observation, and use the monthly average from the simulation.
+
+    If you only provide year, oceanVal will look for model output for the whole year of the observation, and use the annual average from the simulation.
+
+    If you no time information is provided, oceanVal will use the multi-year average from the simulation output for comparison with the observation.
+
+
+    In some cases, you may want to ignore the year information in the observational data.
+    For example, you may have only a 1-year simulation and you want to validate based on all available years of observations, only using month day.
+    In this case, you can set the `point_time_res` parameter in the `oceanval.matchup` function to specify which time information to use when matching up in-situ observations with the simulation output.
+    Set this to `["month", "day"]` to ignore year information when matching up observations with the simulation output.
+
+
+
 Step 3: Calculate validation statistics and generate html summary
 --------------------------------------
 
