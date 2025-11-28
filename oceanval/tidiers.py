@@ -7,15 +7,6 @@ from oceanval.parsers import Validator
 definitions = Validator()
 tidy_info = {}
 
-def fix_basename(x):
-    #annualmean_nitrate_nsbc.nc
-    # 3 part names like above need the final part removed
-    x_fixed = x.split('_')
-    if len(x_fixed) == 3:
-        x_fixed = x_fixed[:-1] 
-        return '_'.join(x_fixed) + "." + x.split('.')[1] 
-    else:
-        return x
 
 def fix_unit(x):
     x = x.replace("/m^3", "m<sup>-3</sup>") 
