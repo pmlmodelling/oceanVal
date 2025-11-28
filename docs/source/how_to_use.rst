@@ -3,9 +3,9 @@ How to use oceanVal
 
 Validating simulations using oceanVal involves three steps:
 
-    1. Register the observational datasets you want to use for validation
-    2. Matchup the model simulation output with the observational datasets
-    3. Calculate validation statistics, generate plots and create an html summary of the performance of the simulation
+    **1**. Register the observational datasets you want to use for validation
+    **2**. Matchup the model simulation output with the observational datasets
+    **3**. Calculate validation statistics, generate plots and create an html summary of the performance of the simulation
 
 **You should always create a new directory prior to running oceanVal for a new simulation, and then run all oceanVal commands from within that directory.**
 
@@ -23,7 +23,7 @@ To register an in-situ observational dataset, you will need to specify the follo
 - `name`: A name for the dataset, e.g. "temperature". This is so that oceanVal can keep track of things.
 - `source`: The source of the observational data (e.g. "NOAA"). 
 - `model_variable`: A string specifying the name of the model variable to compare against the observations. 
-- `obs_path`: The path to the directory containing the observational data files.
+- `obs_path`: The path to a file or directory containing the observational data files.
 
 Note: when specifying a directory as `obs_path` ensure that the directory only contains files relevant to the observational variable being registered, as oceanVal will recursively identify and use all netCDF files in the directory.
 
@@ -117,6 +117,8 @@ You will get an error if you are inconsistent.
 
     If you have provided a single-year observational dataset with only one time step, oceanVal will assume this is a climatological annual average.
     A model climatological annual average will be generated from the simulation output for comparison.
+
+    **The simulation output will always be regridded to the observational grid.**
 
 
 
