@@ -10,6 +10,7 @@ tidy_info = {}
 
 def fix_unit(x):
     x = x.replace("/m^3", "m<sup>-3</sup>") 
+    x = x.replace("/m**3", "m<sup>-3</sup>") 
     x = x.replace("/m3", "m<sup>-3</sup>")
     x = x.replace("m-3", "m<sup>-3</sup>")
     x = x.replace("m-1", "m<sup>-1</sup>")
