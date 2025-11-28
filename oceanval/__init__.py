@@ -48,10 +48,9 @@ for key in session_info["keys"]:
 
 
 def fix_toc(concise = True):
-    short_titles = dill.load(open("matched/short_titles.pkl", "rb")) 
+    short_titles = dill.load(open("oceanval_matchups/short_titles.pkl", "rb")) 
     paths = glob.glob(f"oceanval_report/notebooks/*.ipynb")
-    #variables = list(pd.read_csv("matched/mapping.csv").variable)
-    variables = dill.load(open("matched/variables_matched.pkl", "rb"))
+    variables = dill.load(open("oceanval_matchups/variables_matched.pkl", "rb"))
     variables.sort()
 
     vv_dict = dict()
@@ -143,25 +142,25 @@ def fix_toc(concise = True):
 
 
 
-# def fix_toc_comparison():
-#     book_dir = "oceanval_book"
+def fix_toc_comparison():
+    book_dir = "oceanval_comparison"
 
-#     out = f"{book_dir}/compare/_toc.yml"
-#     # write line by line to out
-#     with open(out, "w") as f:
-#         # "format: jb-book"
-#         x = f.write("format: jb-book\n")
-#         x = f.write("root: intro\n")
-#         x = f.write("parts:\n")
-#         x = f.write(f"- caption: Comparisons with gridded surface observations\n")
-#         x = f.write("  chapters:\n")
-#         x = f.write(f"  - file: notebooks/comparison_bias.ipynb\n")
-#         x = f.write(f"  - file: notebooks/comparison_spatial.ipynb\n")
-#         x = f.write(f"  - file: notebooks/comparison_seasonal.ipynb\n")
-#         x = f.write(f"  - file: notebooks/comparison_regional.ipynb\n")
-#         x = f.write(f"- caption: Comparisons with point observations\n")
-#         x = f.write("  chapters:\n")
-#         x = f.write(f"  - file: notebooks/comparison_point_surface.ipynb\n")
+    out = f"{book_dir}/compare/_toc.yml"
+    # write line by line to out
+    with open(out, "w") as f:
+        # "format: jb-book"
+        x = f.write("format: jb-book\n")
+        x = f.write("root: intro\n")
+        x = f.write("parts:\n")
+        x = f.write(f"- caption: Comparisons with gridded surface observations\n")
+        x = f.write("  chapters:\n")
+        x = f.write(f"  - file: notebooks/comparison_bias.ipynb\n")
+        x = f.write(f"  - file: notebooks/comparison_spatial.ipynb\n")
+        x = f.write(f"  - file: notebooks/comparison_seasonal.ipynb\n")
+        x = f.write(f"  - file: notebooks/comparison_regional.ipynb\n")
+        x = f.write(f"- caption: Comparisons with point observations\n")
+        x = f.write("  chapters:\n")
+        x = f.write(f"  - file: notebooks/comparison_point_surface.ipynb\n")
 
 
 
@@ -248,9 +247,9 @@ def validate(
                     break
 
     # remove the results directory
-    x_path = "results"
+    x_path = "oceanval_results"
     if os.path.exists(x_path):
-        if x_path == "results":
+        if x_path == "oceanval_results":
             shutil.rmtree(x_path)
     import os
 
@@ -307,7 +306,7 @@ def validate(
 
         # loop through the point matchups and generate notebooks
 
-        point_paths = glob.glob("matched/point/**/**/**/**.csv")
+        point_paths = glob.glob("oceanval_matchups/point/**/**/**/**.csv")
         point_paths = [x for x in point_paths if "paths.csv" not in x]
         point_paths = [x for x in point_paths if "unit" not in os.path.basename(x)]
         # loop through the paths
@@ -395,7 +394,7 @@ def validate(
 
         # Loop through the gridded matchups and generate notebooks
         # identify gridded variables in matched data
-        gridded_paths = glob.glob("matched/gridded/**/**.nc")
+        gridded_paths = glob.glob("oceanval_matchups/gridded/**/**.nc")
 
         if len(gridded_paths) > 0:
             for vv in [
@@ -404,7 +403,7 @@ def validate(
             ]:
                 for source in [
                     os.path.basename(x).split("_")[0]
-                    for x in glob.glob(f"matched/gridded/**/**_{vv}_**.nc")
+                    for x in glob.glob(f"oceanval_matchups/gridded/**/**_{vv}_**.nc")
                 ]:
 
                     variable = vv
@@ -414,9 +413,16 @@ def validate(
                     if not os.path.exists(
                         f"oceanval_report/notebooks/{source}_{variable}.ipynb"
                     ):
-                        ff_def = glob.glob(f"matched/gridded/{variable}/*definitions*.pkl")[0]
+                        ff_def = glob.glob(f"oceanval_matchups/gridded/{variable}/*definitions*.pkl")[0]
                         definitions = dill.load(open(ff_def, "rb"))
                         Variable = definitions[variable].short_name
+                        ff_nc = glob.glob(f"oceanval_matchups/gridded/{variable}/*surface*.nc")[0]
+                        ds = nc.open_data(ff_nc, checks = False)
+                        try:
+                            n_months = len(ds.months)
+                        except:
+                            n_months = 12
+                        seasonal = n_months >= 12
     
                         file1 = importlib.resources.files(__name__).joinpath("data/gridded_template.ipynb")
                         if (
@@ -441,6 +447,10 @@ def validate(
                             # make every letter a capital
                             source_capital = source.upper()
                             filedata = filedata.replace("source_title", source_capital)
+                            if seasonal is False:
+                                filedata = filedata.replace(
+                                    "chunk_seasonal", ""
+                                )
                             # change sub_regions_value to region
                             if region is not None: 
                                 filedata = filedata.replace(
@@ -674,261 +684,267 @@ except Exception:
     __version__ = "999"
 
 
-# def compare(model_dict=None):
-#     """
-#     Compare pre-validated simulations.
-#     This function will compare the validation output from two simulations.
+def compare(model_dict=None):
+    """
+    Compare pre-validated simulations.
+    This function will compare the validation output from two simulations.
 
-#     Parameters
-#     ----------
-#     model_dict : dict
-#         A dictionary of model names and the paths to the validation output. Default is None.
-#         Example: {"model1": "/path/to/model1", "model2": "/path/to/model2"}
-#         If the models have different grids, put the model with the smallest grid first.
+    Parameters
+    ----------
+    model_dict : dict
+        A dictionary of model names and the paths to the validation output. Default is None.
+        Example: {"model1": "/path/to/model1", "model2": "/path/to/model2"}
+        If the models have different grids, put the model with the smallest grid first.
 
+    """
 
-#     """
-#     if os.path.exists("oceanval_book"):
-#         # get user input to decide if it should be removed
-#         user_input = input(
-#             "oceanval_book directory already exists. This will be emptied and replaced. Do you want to proceed? (y/n): "
-#         )
-#         if user_input.lower() == "y":
-#             while True:
-#                 files = glob.glob("oceanval_book/**/**/**", recursive=True)
-#                 # list all files in oceanval_book, recursively
-#                 for ff in files:
-#                     if ff.startswith("oceanval_book"):
-#                         try:
-#                             os.remove(ff)
-#                         except:
-#                             pass
-#                 files = glob.glob("oceanval_book/**/**/**", recursive=True)
-#                 # only list files
-#                 files = [x for x in files if os.path.isfile(x)]
-#                 if len(files) == 0:
-#                     break
-#         else:
-#             print("Exiting")
-#             return None
+    for key in model_dict.keys():
+        # check that the path exists
+        if not os.path.exists(model_dict[key]):
+            raise ValueError(f"Path {model_dict[key]} does not exist")
+        # convert to an absolute path
+        model_dict[key] = os.path.abspath(model_dict[key])
 
-#     # make a folder called oceanval_book/compare
+    if os.path.exists("oceanval_comparison"):
+        # get user input to decide if it should be removed
+        user_input = input(
+            "oceanval_comparison directory already exists. This will be emptied and replaced. Do you want to proceed? (y/n): "
+        )
+        if user_input.lower() == "y":
+            while True:
+                files = glob.glob("oceanval_comparison/**/**/**", recursive=True)
+                # list all files in oceanval_comparison, recursively
+                for ff in files:
+                    if ff.startswith("oceanval_comparison"):
+                        try:
+                            os.remove(ff)
+                        except:
+                            pass
+                files = glob.glob("oceanval_comparison/**/**/**", recursive=True)
+                # only list files
+                files = [x for x in files if os.path.isfile(x)]
+                if len(files) == 0:
+                    break
+        else:
+            print("Exiting")
+            return None
 
-#     if not os.path.exists("oceanval_book/compare"):
-#         # create directory recursively
-#         os.makedirs("oceanval_book/compare")
 
-#     # copy the pml logo
-#     shutil.copyfile(
-#         importlib.resources.files(__name__).joinpath("data/pml_logo.jpg"),
-#         "oceanval_book/pml_logo.jpg",
-#     )
+    if not os.path.exists("oceanval_comparison/compare"):
+        # create directory recursively
+        os.makedirs("oceanval_comparison/compare")
 
-#     # move toc etc to oceanval_book/compare
+    # copy the pml logo
+    shutil.copyfile(
+        importlib.resources.files(__name__).joinpath("data/pml_logo.jpg"),
+        "oceanval_comparison/pml_logo.jpg",
+    )
 
-#     data_path = importlib.resources.files(__name__).joinpath("data/_toc.yml")
+    # move toc etc to oceanval_comparison/compare
 
-#     out = "oceanval_book/compare/" + os.path.basename(data_path)
-#     shutil.copyfile(data_path, out)
+    data_path = importlib.resources.files(__name__).joinpath("data/_toc.yml")
 
-#     fix_toc_comparison()
+    out = "oceanval_comparison/compare/" + os.path.basename(data_path)
+    shutil.copyfile(data_path, out)
 
-#     data_path = importlib.resources.files(__name__).joinpath("data/requirements.txt")
+    fix_toc_comparison()
 
-#     out = "oceanval_book/compare/" + os.path.basename(data_path)
+    data_path = importlib.resources.files(__name__).joinpath("data/requirements.txt")
 
-#     shutil.copyfile(data_path, out)
+    out = "oceanval_comparison/compare/" + os.path.basename(data_path)
 
-#     data_path = importlib.resources.files(__name__).joinpath("data/intro.md")
+    shutil.copyfile(data_path, out)
 
-#     out = "oceanval_book/compare/" + os.path.basename(data_path)
+    data_path = importlib.resources.files(__name__).joinpath("data/intro.md")
 
-#     shutil.copyfile(data_path, out)
+    out = "oceanval_comparison/compare/" + os.path.basename(data_path)
 
-#     # copy config
+    shutil.copyfile(data_path, out)
 
-#     data_path = importlib.resources.files(__name__).joinpath("data/_config.yml")
+    # copy config
 
-#     out = "oceanval_book/compare/" + os.path.basename(data_path)
+    data_path = importlib.resources.files(__name__).joinpath("data/_config.yml")
 
-#     shutil.copyfile(data_path, out)
+    out = "oceanval_comparison/compare/" + os.path.basename(data_path)
 
-#     # copy the comparison_seasonal notebook
+    shutil.copyfile(data_path, out)
 
-#     # make sure the directory exists
+    # copy the comparison_seasonal notebook
 
-#     if not os.path.exists("oceanval_book/compare/notebooks"):
-#         # create directory recursively
-#         os.makedirs("oceanval_book/compare/notebooks")
+    # make sure the directory exists
 
-#     file1 = importlib.resources.files(__name__).joinpath("data/comparison_seasonal.ipynb")
-#     if len(glob.glob("oceanval_book/compare/notebooks/*comparison_seasonal.ipynb")) == 0:
-#         shutil.copyfile(file1, "oceanval_book/compare/notebooks/comparison_seasonal.ipynb")
+    if not os.path.exists("oceanval_comparison/compare/notebooks"):
+        # create directory recursively
+        os.makedirs("oceanval_comparison/compare/notebooks")
 
-#     # copy comparison_overall notebook
+    file1 = importlib.resources.files(__name__).joinpath("data/comparison_seasonal.ipynb")
+    if len(glob.glob("oceanval_comparison/compare/notebooks/*comparison_seasonal.ipynb")) == 0:
+        shutil.copyfile(file1, "oceanval_comparison/compare/notebooks/comparison_seasonal.ipynb")
 
-#     file1 = importlib.resources.files(__name__).joinpath("data/comparison_overall.ipynb")
+    # copy comparison_overall notebook
 
-#     if len(glob.glob("oceanval_book/compare/notebooks/*comparison_overall.ipynb")) == 0:
-#         shutil.copyfile(file1, "oceanval_book/compare/notebooks/comparison_overall.ipynb")
+    file1 = importlib.resources.files(__name__).joinpath("data/comparison_overall.ipynb")
 
-#     model_dict_str = str(model_dict)
+    if len(glob.glob("oceanval_comparison/compare/notebooks/*comparison_overall.ipynb")) == 0:
+        shutil.copyfile(file1, "oceanval_comparison/compare/notebooks/comparison_overall.ipynb")
 
-#     with open("oceanval_book/compare/notebooks/comparison_seasonal.ipynb", "r") as file:
-#         filedata = file.read()
+    model_dict_str = str(model_dict)
 
-#     # Replace the target string
-#     filedata = filedata.replace("model_dict_str", model_dict_str)
+    with open("oceanval_comparison/compare/notebooks/comparison_seasonal.ipynb", "r") as file:
+        filedata = file.read()
 
-#     # Write the file out again
+    # Replace the target string
+    filedata = filedata.replace("model_dict_str", model_dict_str)
 
-#     with open("oceanval_book/compare/notebooks/comparison_seasonal.ipynb", "w") as file:
-#         file.write(filedata)
+    # Write the file out again
 
-#     # now sort out the comparison_spatial notebook
+    with open("oceanval_comparison/compare/notebooks/comparison_seasonal.ipynb", "w") as file:
+        file.write(filedata)
 
-#     file1 = importlib.resources.files(__name__).joinpath("data/comparison_spatial.ipynb")
-#     if len(glob.glob("oceanval_book/compare/notebooks/*comparison_spatial.ipynb")) == 0:
-#         shutil.copyfile(file1, "oceanval_book/compare/notebooks/comparison_spatial.ipynb")
+    # now sort out the comparison_spatial notebook
 
-#     model_dict_str = str(model_dict)
+    file1 = importlib.resources.files(__name__).joinpath("data/comparison_spatial.ipynb")
+    if len(glob.glob("oceanval_comparison/compare/notebooks/*comparison_spatial.ipynb")) == 0:
+        shutil.copyfile(file1, "oceanval_comparison/compare/notebooks/comparison_spatial.ipynb")
 
-#     with open("oceanval_book/compare/notebooks/comparison_spatial.ipynb", "r") as file:
-#         filedata = file.read()
+    model_dict_str = str(model_dict)
 
-#     # Replace the target string
-#     filedata = filedata.replace("model_dict_str", model_dict_str)
+    with open("oceanval_comparison/compare/notebooks/comparison_spatial.ipynb", "r") as file:
+        filedata = file.read()
 
-#     # Write the file out again
+    # Replace the target string
+    filedata = filedata.replace("model_dict_str", model_dict_str)
 
-#     with open("oceanval_book/compare/notebooks/comparison_spatial.ipynb", "w") as file:
-#         file.write(filedata)
+    # Write the file out again
 
-#     # move the regional book
+    with open("oceanval_comparison/compare/notebooks/comparison_spatial.ipynb", "w") as file:
+        file.write(filedata)
 
-#     file1 = importlib.resources.files(__name__).joinpath("data/comparison_regional.ipynb")
-#     if len(glob.glob("oceanval_book/compare/notebooks/*comparison_regional.ipynb")) == 0:
-#         shutil.copyfile(file1, "oceanval_book/compare/notebooks/comparison_regional.ipynb")
+    # move the regional book
 
-#     model_dict_str = str(model_dict)
+    file1 = importlib.resources.files(__name__).joinpath("data/comparison_regional.ipynb")
+    if len(glob.glob("oceanval_comparison/compare/notebooks/*comparison_regional.ipynb")) == 0:
+        shutil.copyfile(file1, "oceanval_comparison/compare/notebooks/comparison_regional.ipynb")
 
-#     with open("oceanval_book/compare/notebooks/comparison_regional.ipynb", "r") as file:
-#         filedata = file.read()
+    model_dict_str = str(model_dict)
 
-#     # Replace the target string
-#     filedata = filedata.replace("model_dict_str", model_dict_str)
+    with open("oceanval_comparison/compare/notebooks/comparison_regional.ipynb", "r") as file:
+        filedata = file.read()
 
-#     # Write the file out again
+    # Replace the target string
+    filedata = filedata.replace("model_dict_str", model_dict_str)
 
-#     with open("oceanval_book/compare/notebooks/comparison_regional.ipynb", "w") as file:
-#         file.write(filedata)
+    # Write the file out again
 
-#     # now to comparison_bias
+    with open("oceanval_comparison/compare/notebooks/comparison_regional.ipynb", "w") as file:
+        file.write(filedata)
 
-#     file1 = importlib.resources.files(__name__).joinpath("data/comparison_bias.ipynb")
+    # now to comparison_bias
 
-#     if len(glob.glob("oceanval_book/compare/notebooks/*comparison_bias.ipynb")) == 0:
-#         shutil.copyfile(file1, "oceanval_book/compare/notebooks/comparison_bias.ipynb")
+    file1 = importlib.resources.files(__name__).joinpath("data/comparison_bias.ipynb")
 
-#     model_dict_str = str(model_dict)
+    if len(glob.glob("oceanval_comparison/compare/notebooks/*comparison_bias.ipynb")) == 0:
+        shutil.copyfile(file1, "oceanval_comparison/compare/notebooks/comparison_bias.ipynb")
 
-#     with open("oceanval_book/compare/notebooks/comparison_bias.ipynb", "r") as file:
-#         filedata = file.read()
+    model_dict_str = str(model_dict)
 
-#     # Replace the target string
-#     filedata = filedata.replace("model_dict_str", model_dict_str)
+    with open("oceanval_comparison/compare/notebooks/comparison_bias.ipynb", "r") as file:
+        filedata = file.read()
 
-#     # Write the file out again
+    # Replace the target string
+    filedata = filedata.replace("model_dict_str", model_dict_str)
 
-#     with open("oceanval_book/compare/notebooks/comparison_bias.ipynb", "w") as file:
-#         file.write(filedata)
+    # Write the file out again
 
-#     # figure out if both simulations have point data
+    with open("oceanval_comparison/compare/notebooks/comparison_bias.ipynb", "w") as file:
+        file.write(filedata)
 
-#     i = 0
+    # figure out if both simulations have point data
 
-#     if i == 0:
-#         for ss in [ "bottom"]:
-#             file1 = importlib.resources.files(__name__).joinpath("data/comparison_point.ipynb")
+    i = 0
 
-#             if (
-#                 len(glob.glob(f"oceanval_book/compare/notebooks/*comparison_point_{ss}.ipynb"))
-#                 == 0
-#             ):
-#                 shutil.copyfile(
-#                     file1, f"oceanval_book/compare/notebooks/comparison_point_{ss}.ipynb"
-#                 )
+    if i == 0:
+        for ss in [ "surface"]:
+            file1 = importlib.resources.files(__name__).joinpath("data/comparison_point.ipynb")
 
-#             model_dict_str = str(model_dict)
+            if (
+                len(glob.glob(f"oceanval_comparison/compare/notebooks/*comparison_point_{ss}.ipynb"))
+                == 0
+            ):
+                shutil.copyfile(
+                    file1, f"oceanval_comparison/compare/notebooks/comparison_point_{ss}.ipynb"
+                )
 
-#             with open(
-#                 f"oceanval_book/compare/notebooks/comparison_point_{ss}.ipynb", "r"
-#             ) as file:
-#                 filedata = file.read()
+            model_dict_str = str(model_dict)
 
-#             # Replace the target string
-#             filedata = filedata.replace("model_dict_str", model_dict_str)
+            with open(
+                f"oceanval_comparison/compare/notebooks/comparison_point_{ss}.ipynb", "r"
+            ) as file:
+                filedata = file.read()
 
-#             # Write the file out again
+            # Replace the target string
+            filedata = filedata.replace("model_dict_str", model_dict_str)
 
-#             with open(
-#                 f"oceanval_book/compare/notebooks/comparison_point_{ss}.ipynb", "w"
-#             ) as file:
-#                 file.write(filedata)
-#             # replace layer in the notebook with ss
-#             with open(
-#                 f"oceanval_book/compare/notebooks/comparison_point_{ss}.ipynb", "r"
-#             ) as file:
-#                 filedata = file.read()
+            # Write the file out again
 
-#             # Replace the target string
-#             filedata = filedata.replace("layer", ss)
+            with open(
+                f"oceanval_comparison/compare/notebooks/comparison_point_{ss}.ipynb", "w"
+            ) as file:
+                file.write(filedata)
+            # replace layer in the notebook with ss
+            with open(
+                f"oceanval_comparison/compare/notebooks/comparison_point_{ss}.ipynb", "r"
+            ) as file:
+                filedata = file.read()
 
-#             # Write the file out again
+            # Replace the target string
+            filedata = filedata.replace("layer", ss)
 
-#             with open(
-#                 f"oceanval_book/compare/notebooks/comparison_point_{ss}.ipynb", "w"
-#             ) as file:
-#                 file.write(filedata)
+            # Write the file out again
 
+            with open(
+                f"oceanval_comparison/compare/notebooks/comparison_point_{ss}.ipynb", "w"
+            ) as file:
+                file.write(filedata)
 
-#     # sync the notebooks
 
-#     os.system("jupytext --set-formats ipynb,py:percent book/compare/notebooks/*.ipynb")
+    # sync the notebooks
 
-#     add_chunks()
+    os.system("jupytext --set-formats ipynb,py:percent oceanval_comparison/compare/notebooks/*.ipynb")
 
-#     # replace the test status in the notebooks
-#     books = glob.glob("oceanval_book/compare/notebooks/*.py")
-#     for book in books:
-#         with open(book, "r") as file:
-#             filedata = file.read()
+    add_chunks()
 
-#         # Replace the target string
-#         filedata = filedata.replace("the_test_status", "False")
+    # replace the test status in the notebooks
+    books = glob.glob("oceanval_comparison/compare/notebooks/*.py")
+    for book in books:
+        with open(book, "r") as file:
+            filedata = file.read()
 
-#         # Write the file out again
-#         with open(book, "w") as file:
-#             file.write(filedata)
+        # Replace the target string
+        filedata = filedata.replace("the_test_status", "False")
 
-#     # fix the chunks
-#     os.system("jupytext --sync oceanval_book/compare/notebooks/*.ipynb")
+        # Write the file out again
+        with open(book, "w") as file:
+            file.write(filedata)
 
-#     # loop through notebooks and change fast_plot_value to fast_plot
+    # fix the chunks
+    os.system("jupytext --sync oceanval_comparison/compare/notebooks/*.ipynb")
 
-#     for ff in glob.glob("oceanval_book/compare/notebooks/*.ipynb"):
-#         with open(ff, "r") as file:
-#             filedata = file.read()
+    # loop through notebooks and change fast_plot_value to fast_plot
 
-#         # Replace the target string
-#         filedata = filedata.replace("fast_plot_value", "False")
+    for ff in glob.glob("oceanval_comparison/compare/notebooks/*.ipynb"):
+        with open(ff, "r") as file:
+            filedata = file.read()
 
-#         # Write the file out again
-#         with open(ff, "w") as file:
-#             file.write(filedata)
+        # Replace the target string
+        filedata = filedata.replace("fast_plot_value", "False")
 
-#     os.system("jupyter-book build oceanval_book/compare/")
-#     import webbrowser
+        # Write the file out again
+        with open(ff, "w") as file:
+            file.write(filedata)
 
+    os.system("jupyter-book build oceanval_comparison/compare/")
+    import webbrowser
 
-#     webbrowser.open("file://" + os.path.abspath("oceanval_book/compare/_build/html/index.html"))
+
+    webbrowser.open("file://" + os.path.abspath("oceanval_comparison/compare/_build/html/index.html"))

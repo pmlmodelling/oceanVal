@@ -5,10 +5,8 @@ import warnings
 import calendar
 import copy
 import oceanval
-ff  = "../../matched/definitions.pkl"
+ff  = "../../oceanval_matchups/definitions.pkl"
 import pickle
-with open(ff, "rb") as f:
-    definitions = pickle.load(f)
 
 import glob
 import geopandas as gpd
@@ -75,9 +73,3 @@ except:
     vv_name = "summary"
     variable = "summary"
 Variable = variable.title()
-if vv_name in ["benbio"]:
-    compact = True
-try:
-    vv_name = definitions[variable].long_name 
-except:
-    pass

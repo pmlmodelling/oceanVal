@@ -15,10 +15,13 @@ ds_cor.run()
 
 # output to nc
 
-out = f"../../results/temporals/{variable}_cor_{source}.nc"
+out = f"../../oceanval_results/temporals/{variable}_cor_{source}.nc"
 if not os.path.exists(os.path.dirname(out)):
     os.makedirs(os.path.dirname(out))
 ds_cor.to_nc(out, zip = True, overwrite = True)
+out_def = f"../../oceanval_results/temporals/{variable}_cor_{source}.pkl"
+with open(out_def, "wb") as f:
+    pickle.dump(definitions, f)
 
 # output to csv
 
@@ -74,7 +77,7 @@ if sub_regions in ["nwes", "global"]:
     regions_contents = ds_regions.contents
     
     # figure out if you can sensibly do a regional analysis for nws
-    grid = pd.read_csv("../../matched/model_grid.csv")
+    grid = pd.read_csv("../../oceanval_matchups/model_grid.csv")
     lon = grid.loc[:,[x for x in grid.columns if "lon" in x]].values
     lon = np.unique(lon)
     lon.sort()
