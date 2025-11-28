@@ -87,13 +87,13 @@ def gridded_matchup(
             var_dict = {}
             out_dir = session_info["out_dir"]
             out = glob.glob(
-                out_dir + f"matched/gridded/{vv}/*_{vv}_surface.nc"
+                out_dir + f"oceanval_matchups/gridded/{vv}/*_{vv}_surface.nc"
             )
             if len(out) > 0:
                 if session_info["overwrite"] is False:
                     continue
             out_vertical = glob.glob(
-                out_dir + f"matched/gridded/{vv}/*_{vv}_vertical.nc"
+                out_dir + f"oceanval_matchups/gridded/{vv}/*_{vv}_vertical.nc"
             )
             if len(out_vertical) > 0:
                 if session_info["overwrite"] is False:
@@ -144,7 +144,7 @@ def gridded_matchup(
             # set up model_grid if it doesn't exist
 
             if not os.path.exists(
-                session_info["out_dir"] + "matched/model_grid.csv"
+                session_info["out_dir"] + "oceanval_matchups/model_grid.csv"
             ):
                 ds_grid = nc.open_data(paths[0], checks=False)
                 ds_grid.subset(variables=selection[0], time=0)
@@ -156,10 +156,10 @@ def gridded_matchup(
                     x for x in df_grid.columns if "lon" in x or "lat" in x
                 ]
                 df_grid = df_grid.loc[:, columns].drop_duplicates()
-                if not os.path.exists(session_info["out_dir"] + "matched"):
-                    os.makedirs("matched")
+                if not os.path.exists(session_info["out_dir"] + "oceanval_matchups"):
+                    os.makedirs("oceanval_matchups")
                 df_grid.to_csv(
-                    session_info["out_dir"] + "matched/model_grid.csv",
+                    session_info["out_dir"] + "oceanval_matchups/model_grid.csv",
                     index=False,
                 )
 
@@ -314,9 +314,12 @@ def gridded_matchup(
                                     new_files.append(ff)
                         vv_file = new_files
                         occci = True
+                extracted = False
                 if recipe:
                     if vv_source == "GLODAPv2.2016b":
+                        print("Downloading GLODAPv2.2016b data")
                         ds_obs = nc.open_url(vv_file)
+                        print("Download complete")
                         variable = definitions[vv].obs_variable
                         ds_obs.subset(variables=variable)
                         ds_obs.run()
@@ -324,14 +327,16 @@ def gridded_matchup(
                         ds_obs.cdo_command(f"setreftime,1800-01-01,00:00:00,days -settaxis,2000-01-01,00:00:00,1month")
                         ds_obs.run()
                         thredds = False
+                        extracted = True
 
-                if thredds:
-                    ds_obs = nc.open_thredds(vv_file, checks=False)
-                else:
-                    ds_obs = nc.open_data(
-                        vv_file,
-                        checks=False,
-                    )
+                if not extracted:
+                    if thredds:
+                        ds_obs = nc.open_thredds(vv_file, checks=False)
+                    else:
+                        ds_obs = nc.open_data(
+                            vv_file,
+                            checks=False,
+                        )
                 bad_clim = False
 
                 # use ncks to spatially subset to lon_lim and lat_lim
@@ -339,7 +344,6 @@ def gridded_matchup(
                     variable = definitions[vv].obs_variable
                     ds_obs.subset(variables=variable)
                     ds_obs.crop(lon=lon_lim, lat=lat_lim)
-                    # ds_obs.nco_command(f"ncks -d lon,{lon_lim[0]},{lon_lim[1]} -d lat,{lat_lim[0]},{lat_lim[1]}")   
 
                 if vertical_gridded is False:
                     if thredds:
@@ -565,11 +569,11 @@ def gridded_matchup(
 
                 out_file = (
                     session_info["out_dir"]
-                    + f"matched/gridded/{vv}/{vv_source}_{vv}_surface.nc"
+                    + f"oceanval_matchups/gridded/{vv}/{vv_source}_{vv}_surface.nc"
                 )
                 out_file_vertical = (
                     session_info["out_dir"]
-                    + f"matched/gridded/{vv}/{vv_source}_{vv}_vertical.nc"
+                    + f"oceanval_matchups/gridded/{vv}/{vv_source}_{vv}_vertical.nc"
                 )
 
                 # check directory exists for out_file
@@ -665,7 +669,7 @@ def gridded_matchup(
 
                     out_file = (
                         session_info["out_dir"]
-                        + f"matched/gridded/{vv}/{vv_source}_{vv}_surface.nc"
+                        + f"oceanval_matchups/gridded/{vv}/{vv_source}_{vv}_surface.nc"
                     )
 
                     # check directory exists for out_file
@@ -733,7 +737,7 @@ def gridded_matchup(
 
             out = (
                 session_info["out_dir"]
-                + f"matched/gridded/{vv}/{vv}_summary.pkl"
+                + f"oceanval_matchups/gridded/{vv}/{vv}_summary.pkl"
             )
             if not os.path.exists(os.path.dirname(out)):
                 os.makedirs(os.path.dirname(out))

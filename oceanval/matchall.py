@@ -735,7 +735,7 @@ def matchup(
     else:
         session_info["out_dir"] = ""
 
-    ff = session_info["out_dir"] + "matched/short_titles.pkl"
+    ff = session_info["out_dir"] + "oceanval_matchups/short_titles.pkl"
     if os.path.exists(ff):
         with open(ff, "rb") as f:
             short_titles = pickle.load(f)
@@ -870,13 +870,13 @@ def matchup(
     var_chosen = gridded + point["all"] + point["surface"]
     var_chosen = list(set(var_chosen))
 
-    # create matched directory
-    if not os.path.exists("matched"):
+    # create oceanval_matchups directory
+    if not os.path.exists("oceanval_matchups"):
         if session_info["out_dir"] != "":
             # recusively create the directory
-            os.makedirs(session_info["out_dir"] + "/matched", exist_ok=True)
+            os.makedirs(session_info["out_dir"] + "/oceanval_matchups", exist_ok=True)
         else:
-            os.mkdir("matched")
+            os.mkdir("oceanval_matchups")
 
     invert_thickness = False
     point_all = point["all"] + point["surface"]
@@ -978,7 +978,7 @@ def matchup(
             #####
             # now output the bathymetry if it does not exists
 
-            ff_bath = session_info["out_dir"] + "matched/model_bathymetry.nc"
+            ff_bath = session_info["out_dir"] + "oceanval_matchups/model_bathymetry.nc"
             if not os.path.exists(ff_bath):
                 ds_bath = ds_thickness.copy()
                 ds_bath.vertical_sum()
@@ -1090,9 +1090,9 @@ def matchup(
         return None
 
     if session_info["out_dir"] != "":
-        out = session_info["out_dir"] + "/matched/mapping.csv"
+        out = session_info["out_dir"] + "/oceanval_matchups/mapping.csv"
     else:
-        out = "matched/mapping.csv"
+        out = "oceanval_matchups/mapping.csv"
     # check directory exists for out
     out_folder = os.path.dirname(out)
     if not os.path.exists(out_folder):
@@ -1141,7 +1141,7 @@ def matchup(
             ff1 = path
             ds_depths.cdo_command(f"setgrid,{ff1}")
 
-    ff = session_info["out_dir"] + "matched/times_dict.pkl"
+    ff = session_info["out_dir"] + "oceanval_matchups/times_dict.pkl"
     # read this in
     try:
         with open(ff, "rb") as f:
@@ -1193,7 +1193,7 @@ def matchup(
             times_dict[ff] = df_ff
 
     # save this as a pickle
-    with open(session_info["out_dir"] + "matched/times_dict.pkl", "wb") as f:
+    with open(session_info["out_dir"] + "oceanval_matchups/times_dict.pkl", "wb") as f:
         pickle.dump(times_dict, f)
 
     # figure out the lon/lat extent in the model
@@ -1463,34 +1463,34 @@ def matchup(
                                             :, columns
                                         ].drop_duplicates()
                                         if not os.path.exists(
-                                            session_info["out_dir"] + "matched"
+                                            session_info["out_dir"] + "oceanval_matchups"
                                         ):
                                             os.makedirs(
-                                                session_info["out_dir"] + "matched"
+                                                session_info["out_dir"] + "oceanval_matchups"
                                             )
                                         df_grid.to_csv(
                                             session_info["out_dir"]
-                                            + "matched/model_grid.csv",
+                                            + "oceanval_matchups/model_grid.csv",
                                             index=False,
                                         )
                                         # save ds_grid
                                         if not os.path.exists(
-                                            session_info["out_dir"] + "matched"
+                                            session_info["out_dir"] + "oceanval_matchups"
                                         ):
                                             os.makedirs(
-                                                session_info["out_dir"] + "matched"
+                                                session_info["out_dir"] + "oceanval_matchups"
                                             )
                                         if os.path.exists(
                                             session_info["out_dir"]
-                                            + "matched/model_grid.nc"
+                                            + "oceanval_matchups/model_grid.nc"
                                         ):
                                             os.remove(
                                                 session_info["out_dir"]
-                                                + "matched/model_grid.nc"
+                                                + "oceanval_matchups/model_grid.nc"
                                             )
                                         ds_grid.to_nc(
                                             session_info["out_dir"]
-                                            + "matched/model_grid.nc",
+                                            + "oceanval_matchups/model_grid.nc",
                                             zip=True,
                                             overwrite=True,
                                         )
@@ -1573,9 +1573,9 @@ def matchup(
                             df_all = df_all.groupby(grouping).mean().reset_index()
 
                             if session_info["out_dir"] != "":
-                                out = f"{session_info['out_dir']}/matched/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
+                                out = f"{session_info['out_dir']}/oceanval_matchups/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
                             else:
-                                out = f"matched/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
+                                out = f"oceanval_matchups/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
 
                             # create directory for out if it does not exists
                             if not os.path.exists(os.path.dirname(out)):
@@ -1649,9 +1649,9 @@ def matchup(
                                     pickle.dump(the_dict, f)
 
                                 if session_info["out_dir"] != "":
-                                    out_unit = f"{session_info['out_dir']}/matched/point/{layer}/{variable}/{source}{source}_{layer}_{variable}_unit.csv"
+                                    out_unit = f"{session_info['out_dir']}/oceanval_matchups/point/{layer}/{variable}/{source}{source}_{layer}_{variable}_unit.csv"
                                 else:
-                                    out_unit = f"matched/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}_unit.csv"
+                                    out_unit = f"oceanval_matchups/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}_unit.csv"
                                 ds = nc.open_data(paths[0], checks=False)
                                 ds_contents = ds.contents
                                 model_variable = model_variable.split("+")[0]
@@ -1671,12 +1671,11 @@ def matchup(
                         out = glob.glob(
                             session_info["out_dir"]
                             + "/"
-                            + f"matched/point/all/{vv}/**_all_{vv}.csv"
+                            + f"oceanval_matchups/point/all/{vv}/**_all_{vv}.csv"
                         )
 
                     else:
-                        out = glob.glob(f"matched/point/all/{vv}/**_all_{vv}.csv")
-
+                        out = glob.glob(f"oceanval_matchups/point/all/{vv}/**_all_{vv}.csv")
                     if len(out) > 0:
                         if session_info["overwrite"] is False:
                             continue
@@ -1745,7 +1744,7 @@ def matchup(
         print("########################################")
 
     # store definitions as a pickle
-    ff = session_info["out_dir"] + "matched/definitions.pkl"
+    ff = session_info["out_dir"] + "oceanval_matchups/definitions.pkl"
     if os.path.exists(ff):
         os.remove(ff)
     import dill
@@ -1753,13 +1752,13 @@ def matchup(
     dill.dump(definitions, file=open(ff, "wb"))
 
     # output short titles
-    ff = session_info["out_dir"] + "matched/short_titles.pkl"
+    ff = session_info["out_dir"] + "oceanval_matchups/short_titles.pkl"
     short_titles = session_info["short_title"]
     with open(ff, "wb") as f:
         pickle.dump(short_titles, f)
     
     # now add to the list of variables matched up
-    ff = session_info["out_dir"] + "matched/variables_matched.pkl"
+    ff = session_info["out_dir"] + "oceanval_matchups/variables_matched.pkl"
     if os.path.exists(ff):
         with open(ff, "rb") as f:
             variables_matched = pickle.load(f)
