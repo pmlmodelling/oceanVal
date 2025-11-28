@@ -56,7 +56,7 @@ def tidy_name_1(x, lower=False):
     A function to create a better name for tables etc.
 
     """
-    ff  = "../../matched/definitions.pkl"
+    ff  = "../../oceanval_matchups/definitions.pkl"
     import pickle
     with open(ff, "rb") as f:
         definitions = pickle.load(f)
