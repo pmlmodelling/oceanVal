@@ -51,56 +51,6 @@ def ignore_warning(x):
     return False
 
 
-def tidy_name_1(x, lower=False):
-    """
-    A function to create a better name for tables etc.
-
-    """
-    ff  = "../../oceanval_matchups/definitions.pkl"
-    import pickle
-    with open(ff, "rb") as f:
-        definitions = pickle.load(f)
-        return definitions[x].short_title
-
-    if "flux" in x.lower():
-        if lower:
-            return "air-sea CO2 flux"
-        else:
-            return "Air-sea CO2 flux"
-
-    if "pco2" in x.lower():
-        return "pCO2"
-    if "sst" in x.lower():
-        return "SST"
-    if "nitrate" in x.lower():
-        if lower:
-            return "nitrate"
-        else:
-            return "Nitrate"
-    if "poc" in x.lower():
-        return "POC"
-    if x.lower() == "doc":
-        return "DOC"
-    if x.lower() == "ph":
-        return "pH"
-    if lower:
-        return x.lower()
-    else:
-        return x.title()
-
-
-# vectorize the function
-
-
-def tidy_name(x, lower=False):
-    if isinstance(x, str):
-        x = [x]
-    out = [tidy_name_1(xx, lower=lower) for xx in x]
-    # sort
-    out = sorted(out)
-    out = list_to_string(out)
-    return out
-
 
 def tidy_warnings(w):
     # A function to tidy up the warnings
