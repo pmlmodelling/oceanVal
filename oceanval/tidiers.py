@@ -70,13 +70,10 @@ def df_display(df):
     if "variable" in df.columns:
         df = df.rename(columns={"variable": "Variable"})
         # fix variable names
-        df["Variable"] = df["Variable"].apply(fix_variable_name)
         # capitalize variable
         df["Variable"] = df["Variable"].str.capitalize()
         # ensure "Poc " is "POC "
-        df["Variable"] = df["Variable"].str.replace("Poc ", "POC ")
         # ensure "Doc" is "DOC"
-        df["Variable"] = df["Variable"].str.replace("Doc", "DOC")
     if "Variable" in df.columns:
         df["Variable"] = df["Variable"].str.replace("pCO2", "pCO<sub>2</sub>")
         df["Variable"] = df["Variable"].str.replace("CO2", "CO<sub>2</sub>")
@@ -116,7 +113,6 @@ from IPython.display import Markdown as md_markdown
 def md_basic(x):
     x = x.replace(" 5 m ", " 5m ")
     x = x.replace(" 5 m.", " 5m.")
-    x = x.replace(" Suspension feed", " suspension feed")
 
     x = x.replace("  ", " ")
     # use regex to ensure any numbers have commas
@@ -137,22 +133,14 @@ def md_basic(x):
 
     # ensure there are spaces after commas, using regex
     x = re.sub(r",(\w)", r", \1", x)
-    x = x.replace("CO", "CO<sub>2</sub>")
+    x = x.replace("CO2", "CO<sub>2</sub>")
 
     return md_markdown(x)
 
 def md(x, number = False):
-    valid_vars = [
-        "temperature", "salinity", "oxygen", "phosphate",
-        "silicate", "nitrate", "ammonium", "alkalinity",
-        "ph", "chlorophyll", "co2flux", "pco2",
-        "doc", "poc", "carbon", "benbio",
-        "benthic_carbon_flux", "mesozoo", "oxycons" ]
     x = x.replace("(degC)", "(°C)")
     x = x.replace("(degrees C)", "(°C)")
 
-    x = x.replace(" Air-sea", " air-sea")
-    x = x.replace(" Suspension feed", " suspension feed")
     #model - observation
     x = x.replace("model - observation", "model-observation")
     #98th, handle this kind of thing appropriately with superscripts
@@ -165,70 +153,6 @@ def md(x, number = False):
     x = x.replace(" 5 m.", " 5m.")
     if x.lower() == "temperature":
         return "temperature"
-    if "DOC conc" not in x:
-        x = x.replace(" doc ", " DOC concentration ")
-    if "DOC conc" not in x:
-        x = x.replace(" doc.", " DOC concentration.")
-    if "POC conc" not in x:
-        x = x.replace(" poc ", " POC concentration ")
-    if "POC conc" not in x:
-        x = x.replace(" poc.", " POC concentration.")
-    if "oxygen conc" not in x and "enthic" not in x:
-        x = x.replace(" oxygen ", " oxygen concentration ")
-    if "oxygen conc" not in x and "enthic" not in x:
-        x = x.replace(" oxygen.", " oxygen concentration.")
-    if "phosphate conc" not in x:
-        x = x.replace(" phosphate ", " phosphate concentration ")
-    if "phosphate conc" not in x:
-        x = x.replace(" phosphate.", " phosphate concentration.")
-    if "silicate conc" not in x:
-        x = x.replace(" silicate ", " silicate concentration ")
-    if "silicate conc" not in x:
-        x = x.replace(" silicate.", " silicate concentration.")
-    if "nitrate conc" not in x:
-        x = x.replace(" nitrate ", " nitrate concentration ")
-    if "nitrate conc" not in x:
-        x = x.replace(" nitrate.", " nitrate concentration.")
-    if "ammonium conc" not in x:
-        x = x.replace(" ammonium ", " ammonium concentration ")
-    if "ammonium conc" not in x:
-        x = x.replace(" ammonium.", " ammonium concentration.")
-    if "ph conc" not in x:
-        x = x.replace(" ph ", " pH ")
-    if "ph conc" not in x:
-        x = x.replace(" ph.", " pH.")
-    if "chlorophyll conc" not in x:
-        x = x.replace(" chlorophyll ", " chlorophyll concentration ")
-    if "chlorophyll conc" not in x:
-        x = x.replace(" chlorophyll.", " chlorophyll concentration.")
-    if "co2flux" not in x:
-        x = x.replace(" co2flux ", " air-sea carbon dioxide flux ")
-    if "co2flux" not in x:
-        x = x.replace(" co2flux.", " air-sea carbon dioxide flux.")
-    if "carbon" not in x:
-        x = x.replace(" carbon ", " carbon concentration in sediments ")
-    if "carbon" not in x:
-        x = x.replace(" carbon.", " carbon concentration in sediments.")
-    if "benbio" not in x:
-        x = x.replace(" benbio ", " macrobenthos biomass concentration ")
-    if "benbio" not in x:
-        x = x.replace(" benbio.", " macrobenthos biomass concentration.")
-    if "benthic_carbon_flux" not in x:
-        x = x.replace(" benthic_carbon_flux ", " carbon flux in sediments ")
-    if "benthic_carbon_flux" not in x:
-        x = x.replace(" benthic_carbon_flux.", " carbon flux in sediments.")
-    if "mesozoo" not in x:
-        x = x.replace(" mesozoo ", " mesozooplankton concentration ")
-    if "mesozoo" not in x:
-        x = x.replace(" mesozoo.", " mesozooplankton concentration.")
-    if "oxycons" not in x:
-        x = x.replace(" oxycons ", " benthic oxygen consumption ")
-    if "oxycons" not in x:
-        x = x.replace(" oxycons.", " benthic oxygen consumption.")
-    if "color" in x:
-        x = x.replace(" color", " colour")
-    if "pco2" in x:
-        x = x.replace("pco2", "pCO<sub>2</sub>")
     # make CO2 subscript
     x = x.replace("CO2", "CO<sub>2</sub>")
     # fix O_2
@@ -271,11 +195,6 @@ def md(x, number = False):
     x = x.replace("/yr", "year<sup>-1</sup>")
     # fix /day
     x = x.replace("/day", "day<sup>-1</sup>")
-    if "air-sea" in x:
-        # no need for surface, it's redundant
-        x = x.replace("surface", "")
-        # ensure no double spaces
-        x = x.replace("  ", " ")
 
     if number:
         if "year" not in x.lower():
@@ -292,18 +211,5 @@ def md(x, number = False):
     return md_markdown(x)
 
 
-
-def tidy_summary_paths(paths):
-    """
-    Function to tidy up the paths for the summary stats
-    Right now this just ignores occci files if chlo and nsbc files are present
-    """
-    paths_new = paths
-    paths_nsbc = [x for x in paths if "nsbc" in x]
-    for ff in paths_nsbc:
-        for ff_bad in glob.glob(ff.replace("nsbc", "**")):
-            if "nsbc" not in os.path.basename(ff_bad):
-                paths_new.remove(ff_bad)
-    return paths_new
 
 
