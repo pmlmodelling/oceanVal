@@ -1,6 +1,5 @@
 Comparing simulation performance
-
-=============
+================================
 
 If you have validated two simulations, you can compare them using the `oceanval.compare` function.
 
