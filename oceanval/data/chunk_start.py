@@ -43,7 +43,7 @@ except:
     concise = False
 
 # in one line
-from oceanval.tidiers import fix_basename, fix_unit, df_display, tidy_summary_paths, md, md_basic
+from oceanval.tidiers import fix_basename, fix_unit, df_display, md, md_basic
 
 warnings.filterwarnings('ignore')
 
