@@ -678,6 +678,9 @@ class Validator:
 
         """
 
+        if source is None:
+            raise ValueError("Source must be supplied")
+
         try:
             gridded_dir = getattr(self, name).gridded_dir
         except:
