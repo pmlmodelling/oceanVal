@@ -62,7 +62,6 @@ if not os.path.exists(".trackers"):
 # save out as empty file
 with open(out, 'w') as f:
     f.write("")
-nws = False
 
 def bin_value(x, bin_res):
     return np.floor((x + bin_res / 2) / bin_res + 0.5) * bin_res - bin_res / 2

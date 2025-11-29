@@ -76,7 +76,7 @@ if sub_regions in ["nwes", "global"]:
     ds_regions.regrid(ds_model, method = "nn")
     regions_contents = ds_regions.contents
     
-    # figure out if you can sensibly do a regional analysis for nws
+    # figure out if you can sensibly do a regional analysis for northwest European shelf
     grid = pd.read_csv("../../oceanval_matchups/model_grid.csv")
     lon = grid.loc[:,[x for x in grid.columns if "lon" in x]].values
     lon = np.unique(lon)
@@ -716,7 +716,7 @@ if(abs(raw_extent[1] - raw_extent[2]) > 350){
 
 }
 
-# appropriate plotting for nws 
+# appropriate plotting for northwest European Shelf
 if((raw_extent[1] > -30) & (raw_extent[2] < 20)){
     gg1 <- gg1 + 
     scale_x_continuous(breaks = c(-20, -10, 0, 10), labels = c("20°W", "10°W", "0°", "10°E"))+
