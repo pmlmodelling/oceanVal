@@ -1224,11 +1224,26 @@ def matchup(
             var_choice = [x for x in var_choice if x in the_vars]
             point_vars = value
             depths = copy.deepcopy(key)
+            layer = depths
 
             # sort the list
             point_vars.sort()
 
             for vv in point_vars:
+
+
+                # try finding source in definitions
+                variable = vv
+                source = definitions[variable].point_source
+
+                if session_info["out_dir"] != "":
+                    out = f"{session_info['out_dir']}/oceanval_matchups/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
+                else:
+                    out = f"oceanval_matchups/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
+
+                if os.path.exists(out) and not overwrite:
+                    continue
+
                 all_df = df_mapping
                 all_df = all_df.query("model_variable in @good_model_vars").reset_index(
                     drop=True
@@ -1295,6 +1310,11 @@ def matchup(
                             # try finding source in definitions
                             source = definitions[variable].point_source
 
+                            if session_info["out_dir"] != "":
+                                out = f"{session_info['out_dir']}/oceanval_matchups/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
+                            else:
+                                out = f"oceanval_matchups/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
+
                             for exc in exclude:
                                 paths = [
                                     x
@@ -1317,8 +1337,6 @@ def matchup(
                                         )
                                         # drop depth
                                 return df
-
-
 
                             df = pd.concat([read_csv_simyears(x, layer) for x in paths])
                             if "year" in df.columns:
@@ -1388,31 +1406,6 @@ def matchup(
 
                             df_times_new = copy.deepcopy(df_times)
 
-                            #with warnings.catch_warnings(record=True) as w:
-                            #    ds_grid = nc.open_data(paths[0], checks=False)
-                            #    ds_grid.subset(variables=ds_grid.variables[0])
-                            #    ds_grid.top()
-                            #    ds_grid.subset(time=0)
-                            #    ds_xr = ds_grid.to_xarray()
-                            #    for ww in w:
-                            #        if str(ww.message) not in session_warnings:
-                            #            session_warnings.append(str(ww.message))
-                            #    lon_name = [
-                            #        x for x in list(ds_xr.coords) if "lon" in x
-                            #    ][0]
-                            #    lon_min = ds_xr[lon_name].values.min()
-                            #    lon_max = ds_xr[lon_name].values.max()
-                            #    lat_name = [
-                            #        x for x in list(ds_xr.coords) if "lat" in x
-                            #    ][0]
-                            #    lat_min = ds_xr[lat_name].values.min()
-                            #    lat_max = ds_xr[lat_name].values.max()
-                            #    df = df.query(
-                            #        "lon >= @lon_min and lon <= @lon_max and lat >= @lat_min and lat <= @lat_max"
-                            #    ).reset_index(drop=True)
-                            #    # for ww in w:
-                            #    #     if str(ww.message) not in session_warnings:
-                            #    #         session_warnings.append(str(ww.message))
 
                             valid_cols = [
                                 "lon",
@@ -1587,10 +1580,6 @@ def matchup(
                             df_all = df_all.dropna().reset_index(drop=True)
                             df_all = df_all.groupby(grouping).mean().reset_index()
 
-                            if session_info["out_dir"] != "":
-                                out = f"{session_info['out_dir']}/oceanval_matchups/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
-                            else:
-                                out = f"oceanval_matchups/point/{layer}/{variable}/{source}/{source}_{layer}_{variable}.csv"
 
                             # create directory for out if it does not exists
                             if not os.path.exists(os.path.dirname(out)):
