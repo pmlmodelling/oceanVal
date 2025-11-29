@@ -88,12 +88,11 @@ def mm_match(ff, model_variable, df, df_times, ds_depths, variable, df_all, laye
     df: pd.DataFrame
         Dataframe of observational data
     df_times: pd.DataFrame
-        Dataframe of observational data with /erie_0001.nctime information
+        Dataframe of observational data 
     ds_depths: list
         Depths to match
 
     """
-
 
     if session_info["cache"]:
         try:
@@ -179,10 +178,14 @@ def mm_match(ff, model_variable, df, df_times, ds_depths, variable, df_all, laye
 
             if len(df_locs) > 0:
                 ds.run()
-
-                df_ff = ds.match_points(
-                    df_locs, depths=ds_depths, quiet=True, max_extrap=0
-                )
+                if ds_depths is not None:
+                    df_ff = ds.match_points(
+                        df_locs, depths=ds_depths, quiet=True, max_extrap=0
+                    )
+                else:
+                    df_ff = ds.match_points(
+                        df_locs, quiet=True, max_extrap=0
+                    )
                 if df_ff is not None:
                     df_ff = df_ff.dropna().reset_index(drop=True)
 
@@ -890,7 +893,7 @@ def matchup(
                 thick_check = True
         except:
             pass
-    if len(point_all) > 0:
+    if len(point["all"]) > 0:
         thick_check = True
 
     if session_info["z_level"]:
@@ -1192,6 +1195,7 @@ def matchup(
             )
             times_dict[ff] = df_ff
 
+
     # save this as a pickle
     with open(session_info["out_dir"] + "oceanval_matchups/times_dict.pkl", "wb") as f:
         pickle.dump(times_dict, f)
@@ -1259,9 +1263,9 @@ def matchup(
 
                     # figure out if it is monthly or daily data
 
-                    df_times = df_times.query(
-                        "year >= @sim_start and year <= @sim_end"
-                    ).reset_index(drop=True)
+                    #'df_times = df_times.query(
+                    #'    "year >= @sim_start and year <= @sim_end"
+                    #').reset_index(drop=True)
 
                     sim_paths = list(set(df_times.path))
                     sim_paths.sort()
@@ -1297,8 +1301,26 @@ def matchup(
                                     for x in paths
                                     if f"{exc}" not in os.path.basename(x)
                                 ]
+                            
+                            def read_csv_simyears(ff, layer = None):
+                                df = pd.read_csv(ff)
+                                min_year = session_info["min_year"]
+                                max_year = session_info["max_year"]
+                                if "year" in df.columns:
+                                    df = df.query(
+                                        "year >= @min_year and year <= @max_year"
+                                    ).reset_index(drop=True)
+                                if layer == "surface":
+                                    if "depth" in df.columns:
+                                        df = df.query("depth <= 5").reset_index(
+                                            drop=True
+                                        )
+                                        # drop depth
+                                return df
 
-                            df = pd.concat([pd.read_csv(x) for x in paths])
+
+
+                            df = pd.concat([read_csv_simyears(x, layer) for x in paths])
                             if "year" in df.columns:
                                 # find point_start
                                 point_start = definitions[variable].point_start
@@ -1337,14 +1359,6 @@ def matchup(
                             ]:
                                 if x in df.columns:
                                     df = df.drop(columns=x)
-                            # restrict the lon_lat
-                            lon_min = lons[0]
-                            lon_max = lons[1]
-                            lat_min = lats[0]
-                            lat_max = lats[1]
-                            df = df.query(
-                                "lon >= @lon_min and lon <= @lon_max and lat >= @lat_min and lat <= @lat_max"
-                            ).reset_index(drop=True)
 
                             sel_these = point_time_res
                             sel_these = [x for x in df.columns if x in sel_these]
@@ -1374,31 +1388,31 @@ def matchup(
 
                             df_times_new = copy.deepcopy(df_times)
 
-                            with warnings.catch_warnings(record=True) as w:
-                                ds_grid = nc.open_data(paths[0], checks=False)
-                                ds_grid.subset(variables=ds_grid.variables[0])
-                                ds_grid.top()
-                                ds_grid.subset(time=0)
-                                ds_xr = ds_grid.to_xarray()
-                                for ww in w:
-                                    if str(ww.message) not in session_warnings:
-                                        session_warnings.append(str(ww.message))
-                                lon_name = [
-                                    x for x in list(ds_xr.coords) if "lon" in x
-                                ][0]
-                                lon_min = ds_xr[lon_name].values.min()
-                                lon_max = ds_xr[lon_name].values.max()
-                                lat_name = [
-                                    x for x in list(ds_xr.coords) if "lat" in x
-                                ][0]
-                                lat_min = ds_xr[lat_name].values.min()
-                                lat_max = ds_xr[lat_name].values.max()
-                                df = df.query(
-                                    "lon >= @lon_min and lon <= @lon_max and lat >= @lat_min and lat <= @lat_max"
-                                ).reset_index(drop=True)
-                                # for ww in w:
-                                #     if str(ww.message) not in session_warnings:
-                                #         session_warnings.append(str(ww.message))
+                            #with warnings.catch_warnings(record=True) as w:
+                            #    ds_grid = nc.open_data(paths[0], checks=False)
+                            #    ds_grid.subset(variables=ds_grid.variables[0])
+                            #    ds_grid.top()
+                            #    ds_grid.subset(time=0)
+                            #    ds_xr = ds_grid.to_xarray()
+                            #    for ww in w:
+                            #        if str(ww.message) not in session_warnings:
+                            #            session_warnings.append(str(ww.message))
+                            #    lon_name = [
+                            #        x for x in list(ds_xr.coords) if "lon" in x
+                            #    ][0]
+                            #    lon_min = ds_xr[lon_name].values.min()
+                            #    lon_max = ds_xr[lon_name].values.max()
+                            #    lat_name = [
+                            #        x for x in list(ds_xr.coords) if "lat" in x
+                            #    ][0]
+                            #    lat_min = ds_xr[lat_name].values.min()
+                            #    lat_max = ds_xr[lat_name].values.max()
+                            #    df = df.query(
+                            #        "lon >= @lon_min and lon <= @lon_max and lat >= @lat_min and lat <= @lat_max"
+                            #    ).reset_index(drop=True)
+                            #    # for ww in w:
+                            #    #     if str(ww.message) not in session_warnings:
+                            #    #         session_warnings.append(str(ww.message))
 
                             valid_cols = [
                                 "lon",
@@ -1446,6 +1460,7 @@ def matchup(
                                         ds_grid = nc.open_data(ff, checks=False)
                                         var = ds_grid.variables[0]
                                         ds_grid.subset(variables=var)
+                                        ds_grid.subset(time = 0)
                                         ds_grid.top()
 
                                         if session_info["as_missing"] is not None:
