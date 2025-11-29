@@ -3,7 +3,7 @@ Comparing simulation performance
 
 If you have validated two simulations, you can compare them using the `oceanval.compare` function.
 
-This is a simple function that just requires a dicationary with names of the simulations and the directories containing their validation output.
+This is a simple function that just requires a dictionary with names of the simulations and the directories containing their validation output.
 
 You would set this up as follows:
 
