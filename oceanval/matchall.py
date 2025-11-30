@@ -1394,7 +1394,6 @@ def matchup(
 
                             if len(paths) == 0:
                                 print(f"No matching times for {variable}")
-                                raise ValueError("here")
 
                             manager = Manager()
                             # time to subset the df to the lon/lat ranges
